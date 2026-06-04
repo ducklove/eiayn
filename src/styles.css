@@ -41,6 +41,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
   color: var(--text);
   background: var(--bg);
 }
@@ -1108,6 +1109,7 @@ a {
 }
 
 .bottom-panel {
+  min-width: 0;
   min-height: 238px;
   padding: 14px;
   border: 1px solid var(--line-strong);
@@ -1124,15 +1126,17 @@ a {
 
 .tabs {
   margin-top: 12px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   border: 1px solid var(--line);
   border-radius: 7px;
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .tabs button {
+  flex: 0 0 auto;
+  min-width: 64px;
   height: 32px;
+  padding: 0 12px;
   border: 0;
   border-right: 1px solid var(--line);
   background: var(--surface-soft);
@@ -1465,6 +1469,24 @@ a {
 
   .comparison-grid {
     grid-template-columns: 142px minmax(0, 1fr);
+  }
+
+  .compare-columns {
+    grid-template-columns: minmax(0, 1fr);
+    overflow: visible;
+  }
+
+  .compare-column {
+    display: none;
+    min-width: 0;
+  }
+
+  .compare-column.active {
+    display: block;
+  }
+
+  .compare-columns .add-slot {
+    display: none;
   }
 
   .header-cell,

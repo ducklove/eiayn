@@ -2,6 +2,9 @@
 
 ## 2026-06-04
 
+- Expanded the production ETF snapshot from a 10-ETF focused universe to all active Korean ETFs, Yahoo Finance high-volume US ETFs, and representative Hong Kong/Germany/France/Japan/Australia/Vietnam ETFs.
+- Added source adapters for K-ETF, Yahoo Finance, StockAnalysis, and regional universe configuration.
+- Updated data validation to enforce market coverage, source attribution, numeric prices, and full Korean ETF coverage.
 - Replaced production UI hardcoded ETF data with a build-time JSON snapshot.
 - Added public data pipeline for Yahoo Finance chart and StockAnalysis.
 - Added data validation, deterministic AIYN scoring, return/risk calculations, and unit tests.

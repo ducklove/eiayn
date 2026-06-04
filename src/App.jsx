@@ -272,7 +272,7 @@ function App() {
         </main>
         <footer className="site-footer">
           <span>마지막 업데이트: {formatDateTime(data.generatedAt)} KST</span>
-          <span>데이터 출처: Yahoo Finance chart, StockAnalysis</span>
+          <span>데이터 출처: K-ETF, Yahoo Finance, StockAnalysis</span>
           <a href="#risk">투자 유의 고지</a>
         </footer>
       </div>
@@ -355,7 +355,7 @@ function Sidebar({ selectedIds, favorites, recentEtfs, generatedAt }) {
       </section>
 
       <div className="data-note">
-        <span>출처: Yahoo Finance, StockAnalysis</span>
+        <span>출처: K-ETF, Yahoo Finance, StockAnalysis</span>
         <span>마지막 업데이트: {formatDateTime(generatedAt)} KST</span>
       </div>
     </aside>
@@ -687,6 +687,14 @@ function UniverseStrip({ filteredEtfs, selectedIds, setSelectedIds, setActiveId 
 
 function RankingPanel({ filteredEtfs }) {
   const [tab, setTab] = useState('전체');
+  const marketTabs = useMemo(() => (
+    ['전체', ...Array.from(new Set(filteredEtfs.map((item) => item.market).filter(Boolean)))]
+  ), [filteredEtfs]);
+
+  useEffect(() => {
+    if (!marketTabs.includes(tab)) setTab('전체');
+  }, [marketTabs, tab]);
+
   const ranked = useMemo(() => (
     filteredEtfs
       .filter((item) => tab === '전체' || item.market === tab)
@@ -702,7 +710,7 @@ function RankingPanel({ filteredEtfs }) {
         <select aria-label="랭킹 기준" disabled title="현재는 TOP 5만 제공합니다."><option>TOP 5</option></select>
       </div>
       <div className="tabs" role="tablist" aria-label="시장 탭">
-        {['전체', '국내', '미국'].map((item) => (
+        {marketTabs.map((item) => (
           <button className={tab === item ? 'active' : ''} type="button" key={item} onClick={() => setTab(item)}>{item}</button>
         ))}
       </div>

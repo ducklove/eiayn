@@ -1,34 +1,27 @@
 # ETF is All You Need (EIAYN)
 
-EIAYN is a static GitHub Pages React app for comparing a focused ETF universe with build-time public data snapshots.
+EIAYN is a static GitHub Pages React app for comparing ETFs with build-time public data snapshots.
 
 Live page: https://ducklove.github.io/eiayn/
 
 ## What It Does
 
 - Loads `/data/etfs.json`, generated during build, instead of bundling production ETF data in React source.
-- Compares 10 supported ETFs across price, returns, expense ratio, AUM, dividend yield, holdings, and risk metrics.
-- Supports integrated search across ETF metadata and top holdings.
+- Covers all active Korean ETFs from K-ETF, high-volume US ETFs from Yahoo Finance, and representative ETFs from Hong Kong, Germany, France, Japan, Australia, and Vietnam.
+- Supports integrated search across ETF metadata and top holdings where holdings are available.
 - Supports market/theme/provider/risk filters, comparison basket, ranking, detail panel, favorites, recent views, CSV export, and shareable URLs.
 - Stores favorites and recent views in browser `localStorage`.
+- Shows data update time, data sources, missing-field notes, and investment risk notice.
 
-## Supported Universe
+## Current Universe
 
-Domestic ETFs:
+The generated snapshot currently targets:
 
-- `360750` TIGER 미국S&P500
-- `379800` KODEX 미국S&P500TR
-- `458730` TIGER 미국배당다우존스
-- `069500` KODEX 200
-- `091160` KODEX 반도체
+- Korea: all active ETFs published by K-ETF.
+- US: Yahoo Finance `MOST_ACTIVES_ETFS` top list plus core ETF supplements such as `SPY`, `QQQ`, `VTI`, `SCHD`, `SOXX`, and `ARKK`.
+- Regional representatives: Hong Kong, Germany, France, Japan, Australia, and Vietnam ETFs with Yahoo Finance chart coverage.
 
-US ETFs:
-
-- `QQQ`
-- `VTI`
-- `SOXX`
-- `SCHD`
-- `ARKK`
+Exact counts are recorded in `public/data/etfs.json` under `coverage`.
 
 ## Commands
 

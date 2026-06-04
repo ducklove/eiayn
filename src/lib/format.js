@@ -1,7 +1,9 @@
 export function formatPrice(value, currency) {
   if (!isNumber(value)) return '-';
-  return new Intl.NumberFormat(currency === 'KRW' ? 'ko-KR' : 'en-US', {
-    maximumFractionDigits: currency === 'KRW' ? 0 : 2,
+  return new Intl.NumberFormat(localeForCurrency(currency), {
+    style: 'currency',
+    currency: currency ?? 'USD',
+    maximumFractionDigits: zeroDecimalCurrency(currency) ? 0 : 2,
   }).format(value);
 }
 
@@ -22,23 +24,20 @@ export function formatNumber(value, digits = 2) {
 
 export function formatAum(value, currency) {
   if (!isNumber(value)) return '-';
-  const unit = currency === 'KRW'
-    ? [
-        [1_000_000_000_000, '조'],
-        [100_000_000, '억'],
-      ]
-    : [
-        [1_000_000_000_000, 'T'],
-        [1_000_000_000, 'B'],
-        [1_000_000, 'M'],
-      ];
+  const unit = [
+    [1_000_000_000_000, 'T'],
+    [1_000_000_000, 'B'],
+    [1_000_000, 'M'],
+  ];
 
   const [divisor, suffix] = unit.find(([candidate]) => value >= candidate) ?? [1, ''];
-  const formatted = new Intl.NumberFormat(currency === 'KRW' ? 'ko-KR' : 'en-US', {
-    maximumFractionDigits: divisor === 1 ? 0 : 2,
+  const formatted = new Intl.NumberFormat(localeForCurrency(currency), {
+    style: 'currency',
+    currency: currency ?? 'USD',
+    maximumFractionDigits: divisor === 1 || zeroDecimalCurrency(currency) ? 0 : 2,
   }).format(value / divisor);
 
-  return currency === 'KRW' ? `₩${formatted}${suffix}` : `$${formatted}${suffix}`;
+  return `${formatted}${suffix}`;
 }
 
 export function formatDateTime(value) {
@@ -66,4 +65,20 @@ export function scoreLabel(score) {
 
 function isNumber(value) {
   return typeof value === 'number' && Number.isFinite(value);
+}
+
+function localeForCurrency(currency) {
+  return ({
+    KRW: 'ko-KR',
+    USD: 'en-US',
+    HKD: 'en-HK',
+    EUR: 'de-DE',
+    JPY: 'ja-JP',
+    AUD: 'en-AU',
+    VND: 'vi-VN',
+  })[currency] ?? 'en-US';
+}
+
+function zeroDecimalCurrency(currency) {
+  return ['KRW', 'JPY', 'VND'].includes(currency);
 }
