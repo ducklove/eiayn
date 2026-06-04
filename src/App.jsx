@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useEtfData } from './hooks/useEtfData.js';
 import { usePersistentState } from './hooks/usePersistentState.js';
+import { resolveInitialSelection } from './lib/deepLink.js';
 import {
   formatAum,
   formatDateTime,
@@ -75,17 +76,10 @@ function App() {
   useEffect(() => {
     if (!etfs.length || initialized) return;
     const params = new URLSearchParams(window.location.search);
-    const idsFromUrl = (params.get('compare') ?? '')
-      .split(',')
-      .map((id) => id.trim())
-      .filter((id) => etfs.some((etf) => etf.id === id))
-      .slice(0, 4);
-    const defaultIds = etfs.slice(0, 3).map((etf) => etf.id);
-    const nextSelected = idsFromUrl.length ? idsFromUrl : defaultIds;
-    const activeFromUrl = params.get('active');
+    const initialSelection = resolveInitialSelection(etfs, params);
 
-    setSelectedIds(nextSelected);
-    setActiveId(nextSelected.includes(activeFromUrl) ? activeFromUrl : nextSelected[0]);
+    setSelectedIds(initialSelection.selectedIds);
+    setActiveId(initialSelection.activeId);
     setQuery(params.get('q') ?? '');
     setFilters({
       market: params.get('market') ?? DEFAULT_FILTERS.market,
@@ -93,6 +87,9 @@ function App() {
       provider: params.get('provider') ?? DEFAULT_FILTERS.provider,
       risk: params.get('risk') ?? DEFAULT_FILTERS.risk,
     });
+    if (initialSelection.requestedCode && !initialSelection.matchedCodeId) {
+      setActionNote(`${initialSelection.requestedCode} 코드를 찾지 못해 기본 ETF를 표시합니다.`);
+    }
     setInitialized(true);
   }, [etfs, initialized]);
 
@@ -184,7 +181,10 @@ function App() {
   const shareState = async () => {
     const params = new URLSearchParams();
     params.set('compare', selectedIds.join(','));
-    if (activeId) params.set('active', activeId);
+    if (activeId) {
+      params.set('code', activeId);
+      params.set('active', activeId);
+    }
     if (query) params.set('q', query);
     for (const [key, value] of Object.entries(filters)) {
       if (value && value !== DEFAULT_FILTERS[key]) params.set(key, value);
