@@ -1,0 +1,1697 @@
+{
+  "generatedAt": "2026-06-04T06:36:45.943Z",
+  "timezone": "Asia/Seoul",
+  "universe": [
+    "360750",
+    "379800",
+    "458730",
+    "069500",
+    "091160",
+    "QQQ",
+    "VTI",
+    "SOXX",
+    "SCHD",
+    "ARKK"
+  ],
+  "sources": [
+    {
+      "name": "Yahoo Finance chart",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/",
+      "fields": [
+        "price",
+        "changePercent",
+        "historical adjusted close",
+        "dividends",
+        "USD/KRW"
+      ]
+    },
+    {
+      "name": "StockAnalysis",
+      "url": "https://stockanalysis.com/",
+      "fields": [
+        "expenseRatio",
+        "aum",
+        "dividendYield",
+        "inceptionDate",
+        "holdings"
+      ]
+    },
+    {
+      "name": "EIAYN universe metadata",
+      "url": "https://github.com/ducklove/eiayn",
+      "fields": [
+        "provider",
+        "market",
+        "assetClass",
+        "theme",
+        "category",
+        "benchmarkIndex"
+      ]
+    }
+  ],
+  "exchangeRates": {
+    "usdKrw": {
+      "pair": "USD/KRW",
+      "value": 1529.71,
+      "changePercent": 0.86,
+      "asOf": "2026-06-04T06:36:51.000Z",
+      "source": {
+        "name": "Yahoo Finance chart",
+        "url": "https://query1.finance.yahoo.com/v8/finance/chart/USDKRW%3DX?range=5d&interval=1d&events=div%7Csplit&includeAdjustedClose=true"
+      }
+    }
+  },
+  "etfs": [
+    {
+      "id": "360750",
+      "ticker": "360750",
+      "yahooSymbol": "360750.KS",
+      "name": "TIGER 미국S&P500",
+      "shortName": "TIGER S&P500",
+      "provider": "미래에셋",
+      "market": "국내",
+      "assetClass": "주식",
+      "theme": "대표지수",
+      "category": "미국 대형주",
+      "benchmarkIndex": "S&P 500",
+      "currency": "KRW",
+      "price": 28590,
+      "changePercent": 0.25,
+      "expenseRatio": 0.07,
+      "aum": 18770000000000,
+      "dividendYield": 0.86,
+      "inceptionDate": "2020-08-05",
+      "nav": null,
+      "returns": {
+        "m3": 15.49,
+        "y1": 42.16,
+        "y3Annualized": 28.26,
+        "y5Annualized": 20.69
+      },
+      "risk": {
+        "volatility3yAnnualized": 15.38,
+        "maxDrawdown3y": -19.15,
+        "sharpe3y": 1.8,
+        "trackingError3y": null,
+        "informationRatio3y": null
+      },
+      "holdings": [
+        {
+          "name": "NVIDIA Corporation",
+          "ticker": "NVDA",
+          "weight": 7.61
+        },
+        {
+          "name": "Apple Inc.",
+          "ticker": "AAPL",
+          "weight": 6.72
+        },
+        {
+          "name": "Microsoft Corporation",
+          "ticker": "MSFT",
+          "weight": 4.52
+        },
+        {
+          "name": "Amazon.com, Inc.",
+          "ticker": "AMZN",
+          "weight": 3.91
+        },
+        {
+          "name": "Alphabet Inc.",
+          "ticker": "GOOGL",
+          "weight": 3.34
+        },
+        {
+          "name": "Broadcom Inc.",
+          "ticker": "AVGO",
+          "weight": 2.95
+        },
+        {
+          "name": "Alphabet Inc.",
+          "ticker": "GOOG",
+          "weight": 2.65
+        },
+        {
+          "name": "E-mini S&P 500 Future June 26",
+          "ticker": "n/a",
+          "weight": 2.27
+        },
+        {
+          "name": "Meta Platforms, Inc.",
+          "ticker": "META",
+          "weight": 2.05
+        },
+        {
+          "name": "Vanguard S&P 500 ETF",
+          "ticker": "VOO",
+          "weight": 1.85
+        }
+      ],
+      "sparkline": [
+        25983.5078,
+        26088.2598,
+        26168.0703,
+        26198,
+        26198,
+        26215,
+        26160,
+        26340,
+        26285,
+        26550,
+        26820,
+        26980,
+        27280,
+        27410,
+        27595,
+        27765,
+        27360,
+        27605,
+        27520,
+        27745,
+        28100,
+        28085,
+        28020,
+        28000,
+        28300,
+        28365,
+        28520,
+        28590
+      ],
+      "dataQuality": {
+        "quoteAsOf": "2026-06-04T06:16:43.000Z",
+        "profileAsOf": "2026-06-04T06:36:45.943Z",
+        "holdingsAsOf": "2026-06-04T06:36:45.943Z",
+        "sources": [
+          {
+            "name": "Yahoo Finance chart",
+            "url": "https://query1.finance.yahoo.com/v8/finance/chart/360750.KS?range=5y&interval=1d&events=div%7Csplit&includeAdjustedClose=true",
+            "fields": [
+              "price",
+              "history",
+              "dividends"
+            ]
+          },
+          {
+            "name": "StockAnalysis profile",
+            "url": "https://stockanalysis.com/quote/krx/360750/",
+            "fields": [
+              "expenseRatio",
+              "aum",
+              "dividendYield",
+              "inceptionDate"
+            ]
+          },
+          {
+            "name": "StockAnalysis holdings",
+            "url": "https://stockanalysis.com/quote/krx/360750/holdings/",
+            "fields": [
+              "holdings"
+            ]
+          }
+        ],
+        "missingFields": [
+          "nav",
+          "risk.trackingError3y",
+          "risk.informationRatio3y"
+        ]
+      },
+      "aiynScore": 72,
+      "scoreCoverage": 0.9,
+      "scoreBreakdown": {
+        "수익성": 25,
+        "가치": 94,
+        "안정성": 87,
+        "분산": 90,
+        "효율성": 92
+      }
+    },
+    {
+      "id": "379800",
+      "ticker": "379800",
+      "yahooSymbol": "379800.KS",
+      "name": "KODEX 미국S&P500TR",
+      "shortName": "KODEX S&P500TR",
+      "provider": "삼성자산운용",
+      "market": "국내",
+      "assetClass": "주식",
+      "theme": "대표지수",
+      "category": "미국 대형주",
+      "benchmarkIndex": "S&P 500 TR",
+      "currency": "KRW",
+      "price": 26065,
+      "changePercent": 0.25,
+      "expenseRatio": 0.05,
+      "aum": 9350000000000,
+      "dividendYield": 1.73,
+      "inceptionDate": "2021-04-08",
+      "nav": null,
+      "returns": {
+        "m3": 15.52,
+        "y1": 42.23,
+        "y3Annualized": 28.49,
+        "y5Annualized": 21
+      },
+      "risk": {
+        "volatility3yAnnualized": 15.35,
+        "maxDrawdown3y": -19.16,
+        "sharpe3y": 1.81,
+        "trackingError3y": null,
+        "informationRatio3y": null
+      },
+      "holdings": [
+        {
+          "name": "NVIDIA Corporation",
+          "ticker": "NVDA",
+          "weight": 7.13
+        },
+        {
+          "name": "Apple Inc.",
+          "ticker": "AAPL",
+          "weight": 6.44
+        },
+        {
+          "name": "Microsoft Corporation",
+          "ticker": "MSFT",
+          "weight": 4.74
+        },
+        {
+          "name": "Amazon.com, Inc.",
+          "ticker": "AMZN",
+          "weight": 3.49
+        },
+        {
+          "name": "Alphabet Inc.",
+          "ticker": "GOOGL",
+          "weight": 2.83
+        },
+        {
+          "name": "KODEX KOFR Active (Synth)",
+          "ticker": "423160.KQ",
+          "weight": 2.71
+        },
+        {
+          "name": "Broadcom Inc.",
+          "ticker": "AVGO",
+          "weight": 2.47
+        },
+        {
+          "name": "Alphabet Inc.",
+          "ticker": "GOOG",
+          "weight": 2.27
+        },
+        {
+          "name": "Meta Platforms, Inc.",
+          "ticker": "META",
+          "weight": 2.09
+        },
+        {
+          "name": "Tesla, Inc.",
+          "ticker": "TSLA",
+          "weight": 1.78
+        }
+      ],
+      "sparkline": [
+        23682.9102,
+        23782.418,
+        23852.0723,
+        23822.2207,
+        23867,
+        23885,
+        23870,
+        23970,
+        23945,
+        24200,
+        24455,
+        24600,
+        24860,
+        25000,
+        25160,
+        25280,
+        24945,
+        25175,
+        25080,
+        25295,
+        25615,
+        25600,
+        25535,
+        25515,
+        25800,
+        25855,
+        26000,
+        26065
+      ],
+      "dataQuality": {
+        "quoteAsOf": "2026-06-04T06:16:44.000Z",
+        "profileAsOf": "2026-06-04T06:36:45.943Z",
+        "holdingsAsOf": "2026-06-04T06:36:45.943Z",
+        "sources": [
+          {
+            "name": "Yahoo Finance chart",
+            "url": "https://query1.finance.yahoo.com/v8/finance/chart/379800.KS?range=5y&interval=1d&events=div%7Csplit&includeAdjustedClose=true",
+            "fields": [
+              "price",
+              "history",
+              "dividends"
+            ]
+          },
+          {
+            "name": "StockAnalysis profile",
+            "url": "https://stockanalysis.com/quote/krx/379800/",
+            "fields": [
+              "expenseRatio",
+              "aum",
+              "dividendYield",
+              "inceptionDate"
+            ]
+          },
+          {
+            "name": "StockAnalysis holdings",
+            "url": "https://stockanalysis.com/quote/krx/379800/holdings/",
+            "fields": [
+              "holdings"
+            ]
+          }
+        ],
+        "missingFields": [
+          "nav",
+          "risk.trackingError3y",
+          "risk.informationRatio3y"
+        ]
+      },
+      "aiynScore": 72,
+      "scoreCoverage": 0.9,
+      "scoreBreakdown": {
+        "수익성": 25,
+        "가치": 91,
+        "안정성": 88,
+        "분산": 95,
+        "효율성": 95
+      }
+    },
+    {
+      "id": "458730",
+      "ticker": "458730",
+      "yahooSymbol": "458730.KS",
+      "name": "TIGER 미국배당다우존스",
+      "shortName": "TIGER 배당다우",
+      "provider": "미래에셋",
+      "market": "국내",
+      "assetClass": "주식",
+      "theme": "배당",
+      "category": "미국 배당성장",
+      "benchmarkIndex": "Dow Jones U.S. Dividend 100",
+      "currency": "KRW",
+      "price": 15642,
+      "changePercent": 1.54,
+      "expenseRatio": 0.01,
+      "aum": 3780000000000,
+      "dividendYield": 2.72,
+      "inceptionDate": "2023-06-15",
+      "nav": null,
+      "returns": {
+        "m3": 7.23,
+        "y1": 40.87,
+        "y3Annualized": 20.09,
+        "y5Annualized": 11.61
+      },
+      "risk": {
+        "volatility3yAnnualized": 14.29,
+        "maxDrawdown3y": -13.12,
+        "sharpe3y": 1.45,
+        "trackingError3y": null,
+        "informationRatio3y": null
+      },
+      "holdings": [
+        {
+          "name": "QUALCOMM Incorporated",
+          "ticker": "QCOM",
+          "weight": 6.4
+        },
+        {
+          "name": "Texas Instruments Incorporated",
+          "ticker": "TXN",
+          "weight": 5.98
+        },
+        {
+          "name": "UnitedHealth Group Incorporated",
+          "ticker": "UNH",
+          "weight": 5.02
+        },
+        {
+          "name": "The Coca-Cola Company",
+          "ticker": "KO",
+          "weight": 3.95
+        },
+        {
+          "name": "Merck & Co., Inc.",
+          "ticker": "MRK",
+          "weight": 3.82
+        },
+        {
+          "name": "Chevron Corporation",
+          "ticker": "CVX",
+          "weight": 3.77
+        },
+        {
+          "name": "Verizon Communications Inc.",
+          "ticker": "VZ",
+          "weight": 3.59
+        },
+        {
+          "name": "The Procter & Gamble Company",
+          "ticker": "PG",
+          "weight": 3.53
+        },
+        {
+          "name": "ConocoPhillips",
+          "ticker": "COP",
+          "weight": 3.47
+        },
+        {
+          "name": "PepsiCo, Inc.",
+          "ticker": "PEP",
+          "weight": 3.42
+        }
+      ],
+      "sparkline": [
+        14533.4746,
+        14563.3369,
+        14707.6768,
+        14588.2236,
+        14573.291,
+        14686.0303,
+        14745.8916,
+        14810.7422,
+        14651.1113,
+        14586.2617,
+        14661.0879,
+        14710.9727,
+        14870.6035,
+        14950.4189,
+        14980.3496,
+        15090.0957,
+        14995.3154,
+        15279.6572,
+        15349.4961,
+        15294.623,
+        15534.0693,
+        15738.5957,
+        15564,
+        15535,
+        15540,
+        15450,
+        15405,
+        15642
+      ],
+      "dataQuality": {
+        "quoteAsOf": "2026-06-04T06:16:41.000Z",
+        "profileAsOf": "2026-06-04T06:36:45.943Z",
+        "holdingsAsOf": "2026-06-04T06:36:45.943Z",
+        "sources": [
+          {
+            "name": "Yahoo Finance chart",
+            "url": "https://query1.finance.yahoo.com/v8/finance/chart/458730.KS?range=5y&interval=1d&events=div%7Csplit&includeAdjustedClose=true",
+            "fields": [
+              "price",
+              "history",
+              "dividends"
+            ]
+          },
+          {
+            "name": "StockAnalysis profile",
+            "url": "https://stockanalysis.com/quote/krx/458730/",
+            "fields": [
+              "expenseRatio",
+              "aum",
+              "dividendYield",
+              "inceptionDate"
+            ]
+          },
+          {
+            "name": "StockAnalysis holdings",
+            "url": "https://stockanalysis.com/quote/krx/458730/holdings/",
+            "fields": [
+              "holdings"
+            ]
+          }
+        ],
+        "missingFields": [
+          "nav",
+          "risk.trackingError3y",
+          "risk.informationRatio3y"
+        ]
+      },
+      "aiynScore": 65,
+      "scoreCoverage": 0.9,
+      "scoreBreakdown": {
+        "수익성": 15,
+        "가치": 88,
+        "안정성": 82,
+        "분산": 78,
+        "효율성": 100
+      }
+    },
+    {
+      "id": "069500",
+      "ticker": "069500",
+      "yahooSymbol": "069500.KS",
+      "name": "KODEX 200",
+      "shortName": "KODEX 200",
+      "provider": "삼성자산운용",
+      "market": "국내",
+      "assetClass": "주식",
+      "theme": "대표지수",
+      "category": "KOSPI 200",
+      "benchmarkIndex": "KOSPI 200",
+      "currency": "KRW",
+      "price": 138870,
+      "changePercent": -1.91,
+      "expenseRatio": 0.15,
+      "aum": 25360000000000,
+      "dividendYield": 0.6,
+      "inceptionDate": "2002-10-13",
+      "nav": null,
+      "returns": {
+        "m3": 83.78,
+        "y1": 278.41,
+        "y3Annualized": 62.09,
+        "y5Annualized": 28.73
+      },
+      "risk": {
+        "volatility3yAnnualized": 28.89,
+        "maxDrawdown3y": -21.61,
+        "sharpe3y": 1.92,
+        "trackingError3y": null,
+        "informationRatio3y": null
+      },
+      "holdings": [
+        {
+          "name": "Samsung Electronics Co., Ltd.",
+          "ticker": "KRX: 005930",
+          "weight": 30.51
+        },
+        {
+          "name": "SK hynix Inc.",
+          "ticker": "KRX: 000660",
+          "weight": 17.72
+        },
+        {
+          "name": "Hyundai Motor Company",
+          "ticker": "KRX: 005380",
+          "weight": 2.38
+        },
+        {
+          "name": "KB Financial Group Inc.",
+          "ticker": "KRX: 105560",
+          "weight": 1.8
+        },
+        {
+          "name": "KODEX Samsung Group",
+          "ticker": "102780.KQ",
+          "weight": 1.78
+        },
+        {
+          "name": "SK Square Co., Ltd.",
+          "ticker": "KRX: 402340",
+          "weight": 1.67
+        },
+        {
+          "name": "Hanwha Aerospace Co., Ltd.",
+          "ticker": "KRX: 012450",
+          "weight": 1.63
+        },
+        {
+          "name": "Doosan Enerbility Co., Ltd.",
+          "ticker": "KRX: 034020",
+          "weight": 1.57
+        },
+        {
+          "name": "Shinhan Financial Group Co., Ltd.",
+          "ticker": "KRX: 055550",
+          "weight": 1.43
+        },
+        {
+          "name": "Kia Corporation",
+          "ticker": "KRX: 000270",
+          "weight": 1.4
+        }
+      ],
+      "sparkline": [
+        96869.0625,
+        97919.3906,
+        97565.9609,
+        99796.0391,
+        100254,
+        101045,
+        99905,
+        105295,
+        113270,
+        115620,
+        115810,
+        121805,
+        119100,
+        122655,
+        124855,
+        117200,
+        117840,
+        114315,
+        113340,
+        123060,
+        123350,
+        126755,
+        130600,
+        129990,
+        134815,
+        141395,
+        141575,
+        138870
+      ],
+      "dataQuality": {
+        "quoteAsOf": "2026-06-04T06:16:48.000Z",
+        "profileAsOf": "2026-06-04T06:36:45.943Z",
+        "holdingsAsOf": "2026-06-04T06:36:45.943Z",
+        "sources": [
+          {
+            "name": "Yahoo Finance chart",
+            "url": "https://query1.finance.yahoo.com/v8/finance/chart/069500.KS?range=5y&interval=1d&events=div%7Csplit&includeAdjustedClose=true",
+            "fields": [
+              "price",
+              "history",
+              "dividends"
+            ]
+          },
+          {
+            "name": "StockAnalysis profile",
+            "url": "https://stockanalysis.com/quote/krx/069500/",
+            "fields": [
+              "expenseRatio",
+              "aum",
+              "dividendYield",
+              "inceptionDate"
+            ]
+          },
+          {
+            "name": "StockAnalysis holdings",
+            "url": "https://stockanalysis.com/quote/krx/069500/holdings/",
+            "fields": [
+              "holdings"
+            ]
+          }
+        ],
+        "missingFields": [
+          "nav",
+          "risk.trackingError3y",
+          "risk.informationRatio3y"
+        ]
+      },
+      "aiynScore": 73,
+      "scoreCoverage": 0.9,
+      "scoreBreakdown": {
+        "수익성": 72,
+        "가치": 91,
+        "안정성": 75,
+        "분산": 34,
+        "효율성": 81
+      }
+    },
+    {
+      "id": "091160",
+      "ticker": "091160",
+      "yahooSymbol": "091160.KS",
+      "name": "KODEX 반도체",
+      "shortName": "KODEX 반도체",
+      "provider": "삼성자산운용",
+      "market": "국내",
+      "assetClass": "주식",
+      "theme": "반도체",
+      "category": "국내 반도체",
+      "benchmarkIndex": "KRX Semicon",
+      "currency": "KRW",
+      "price": 168300,
+      "changePercent": 2.7,
+      "expenseRatio": 0.45,
+      "aum": 6090000000000,
+      "dividendYield": 0.07,
+      "inceptionDate": "2006-06-26",
+      "nav": null,
+      "returns": {
+        "m3": 98.41,
+        "y1": 423.23,
+        "y3Annualized": 78.11,
+        "y5Annualized": 35.81
+      },
+      "risk": {
+        "volatility3yAnnualized": 41.9,
+        "maxDrawdown3y": -41.11,
+        "sharpe3y": 1.67,
+        "trackingError3y": null,
+        "informationRatio3y": null
+      },
+      "holdings": [
+        {
+          "name": "SK hynix Inc.",
+          "ticker": "KRX: 000660",
+          "weight": 24.71
+        },
+        {
+          "name": "Samsung Electronics Co., Ltd.",
+          "ticker": "KRX: 005930",
+          "weight": 21.93
+        },
+        {
+          "name": "HANMI Semiconductor Co., Ltd.",
+          "ticker": "KRX: 042700",
+          "weight": 10.15
+        },
+        {
+          "name": "LEENO Industrial Inc.",
+          "ticker": "KOSDAQ: 058470",
+          "weight": 4.51
+        },
+        {
+          "name": "Wonik IPS Co., Ltd.",
+          "ticker": "KOSDAQ: 240810",
+          "weight": 3.43
+        },
+        {
+          "name": "EO Technics Co., Ltd.",
+          "ticker": "KOSDAQ: 039030",
+          "weight": 3.1
+        },
+        {
+          "name": "DB HiTek CO., LTD.",
+          "ticker": "KRX: 000990",
+          "weight": 2.3
+        },
+        {
+          "name": "ISC Co., Ltd.",
+          "ticker": "KOSDAQ: 095340",
+          "weight": 2.28
+        },
+        {
+          "name": "HPSP Co., Ltd.",
+          "ticker": "KOSDAQ: 403870",
+          "weight": 1.85
+        },
+        {
+          "name": "JUSUNG ENGINEERING Co.,Ltd.",
+          "ticker": "KOSDAQ: 036930",
+          "weight": 1.85
+        }
+      ],
+      "sparkline": [
+        116857.9063,
+        117437.375,
+        119485.5,
+        125245.2188,
+        125485,
+        124750,
+        123850,
+        130460,
+        140020,
+        142100,
+        143715,
+        153085,
+        147995,
+        155855,
+        157200,
+        145885,
+        146250,
+        140375,
+        140995,
+        154805,
+        155500,
+        162660,
+        163570,
+        160810,
+        160980,
+        165410,
+        163875,
+        168300
+      ],
+      "dataQuality": {
+        "quoteAsOf": "2026-06-04T06:16:48.000Z",
+        "profileAsOf": "2026-06-04T06:36:45.943Z",
+        "holdingsAsOf": "2026-06-04T06:36:45.943Z",
+        "sources": [
+          {
+            "name": "Yahoo Finance chart",
+            "url": "https://query1.finance.yahoo.com/v8/finance/chart/091160.KS?range=5y&interval=1d&events=div%7Csplit&includeAdjustedClose=true",
+            "fields": [
+              "price",
+              "history",
+              "dividends"
+            ]
+          },
+          {
+            "name": "StockAnalysis profile",
+            "url": "https://stockanalysis.com/quote/krx/091160/",
+            "fields": [
+              "expenseRatio",
+              "aum",
+              "dividendYield",
+              "inceptionDate"
+            ]
+          },
+          {
+            "name": "StockAnalysis holdings",
+            "url": "https://stockanalysis.com/quote/krx/091160/holdings/",
+            "fields": [
+              "holdings"
+            ]
+          }
+        ],
+        "missingFields": [
+          "nav",
+          "risk.trackingError3y",
+          "risk.informationRatio3y"
+        ]
+      },
+      "aiynScore": 56,
+      "scoreCoverage": 0.9,
+      "scoreBreakdown": {
+        "수익성": 100,
+        "가치": 62,
+        "안정성": 33,
+        "분산": 0,
+        "효율성": 41
+      }
+    },
+    {
+      "id": "QQQ",
+      "ticker": "QQQ",
+      "yahooSymbol": "QQQ",
+      "name": "Invesco QQQ Trust",
+      "shortName": "QQQ",
+      "provider": "Invesco",
+      "market": "미국",
+      "assetClass": "주식",
+      "theme": "테크",
+      "category": "NASDAQ-100",
+      "benchmarkIndex": "NASDAQ-100",
+      "currency": "USD",
+      "price": 744.21,
+      "changePercent": -0.26,
+      "expenseRatio": 0.18,
+      "aum": 495180000000,
+      "dividendYield": 0.38,
+      "inceptionDate": "1999-03-09",
+      "nav": null,
+      "returns": {
+        "m3": 23.87,
+        "y1": 41.82,
+        "y3Annualized": 28.75,
+        "y5Annualized": 17.97
+      },
+      "risk": {
+        "volatility3yAnnualized": 19.66,
+        "maxDrawdown3y": -22.77,
+        "sharpe3y": 1.39,
+        "trackingError3y": null,
+        "informationRatio3y": null
+      },
+      "holdings": [
+        {
+          "name": "NVIDIA Corporation",
+          "ticker": "NVDA",
+          "weight": 8.61
+        },
+        {
+          "name": "Apple Inc.",
+          "ticker": "AAPL",
+          "weight": 7.1
+        },
+        {
+          "name": "Microsoft Corporation",
+          "ticker": "MSFT",
+          "weight": 5.4
+        },
+        {
+          "name": "Micron Technology, Inc.",
+          "ticker": "MU",
+          "weight": 5.08
+        },
+        {
+          "name": "Amazon.com, Inc.",
+          "ticker": "AMZN",
+          "weight": 4.43
+        },
+        {
+          "name": "Advanced Micro Devices, Inc.",
+          "ticker": "AMD",
+          "weight": 3.63
+        },
+        {
+          "name": "Alphabet Inc.",
+          "ticker": "GOOGL",
+          "weight": 3.46
+        },
+        {
+          "name": "Broadcom Inc.",
+          "ticker": "AVGO",
+          "weight": 3.44
+        },
+        {
+          "name": "Tesla, Inc.",
+          "ticker": "TSLA",
+          "weight": 3.28
+        },
+        {
+          "name": "Alphabet Inc.",
+          "ticker": "GOOG",
+          "weight": 3.2
+        }
+      ],
+      "sparkline": [
+        663.88,
+        664.23,
+        657.55,
+        661.57,
+        667.74,
+        674.15,
+        672.88,
+        681.61,
+        695.77,
+        694.94,
+        711.23,
+        713.29,
+        707.24,
+        714.71,
+        719.79,
+        708.93,
+        705.88,
+        701.53,
+        713.15,
+        714.51,
+        717.54,
+        730.28,
+        729.45,
+        735.6,
+        738.31,
+        742.74,
+        746.16,
+        744.21
+      ],
+      "dataQuality": {
+        "quoteAsOf": "2026-06-03T20:00:00.000Z",
+        "profileAsOf": "2026-06-04T06:36:45.943Z",
+        "holdingsAsOf": "2026-06-04T06:36:45.943Z",
+        "sources": [
+          {
+            "name": "Yahoo Finance chart",
+            "url": "https://query1.finance.yahoo.com/v8/finance/chart/QQQ?range=5y&interval=1d&events=div%7Csplit&includeAdjustedClose=true",
+            "fields": [
+              "price",
+              "history",
+              "dividends"
+            ]
+          },
+          {
+            "name": "StockAnalysis profile",
+            "url": "https://stockanalysis.com/etf/qqq/",
+            "fields": [
+              "expenseRatio",
+              "aum",
+              "dividendYield",
+              "inceptionDate"
+            ]
+          },
+          {
+            "name": "StockAnalysis holdings",
+            "url": "https://stockanalysis.com/etf/qqq/holdings/",
+            "fields": [
+              "holdings"
+            ]
+          }
+        ],
+        "missingFields": [
+          "nav",
+          "risk.trackingError3y",
+          "risk.informationRatio3y"
+        ]
+      },
+      "aiynScore": 54,
+      "scoreCoverage": 0.9,
+      "scoreBreakdown": {
+        "수익성": 23,
+        "가치": 64,
+        "안정성": 65,
+        "분산": 67,
+        "효율성": 77
+      }
+    },
+    {
+      "id": "VTI",
+      "ticker": "VTI",
+      "yahooSymbol": "VTI",
+      "name": "Vanguard Total Stock Market ETF",
+      "shortName": "VTI",
+      "provider": "Vanguard",
+      "market": "미국",
+      "assetClass": "주식",
+      "theme": "대표지수",
+      "category": "미국 전체시장",
+      "benchmarkIndex": "CRSP US Total Market",
+      "currency": "USD",
+      "price": 371.65,
+      "changePercent": -0.72,
+      "expenseRatio": 0.03,
+      "aum": 662310000000,
+      "dividendYield": 1.01,
+      "inceptionDate": "2001-05-23",
+      "nav": null,
+      "returns": {
+        "m3": 11.05,
+        "y1": 28.18,
+        "y3Annualized": 22.18,
+        "y5Annualized": 12.69
+      },
+      "risk": {
+        "volatility3yAnnualized": 15.27,
+        "maxDrawdown3y": -19.3,
+        "sharpe3y": 1.4,
+        "trackingError3y": null,
+        "informationRatio3y": null
+      },
+      "holdings": [
+        {
+          "name": "NVIDIA Corporation",
+          "ticker": "NVDA",
+          "weight": 6.64
+        },
+        {
+          "name": "Apple Inc.",
+          "ticker": "AAPL",
+          "weight": 5.74
+        },
+        {
+          "name": "Microsoft Corporation",
+          "ticker": "MSFT",
+          "weight": 4.36
+        },
+        {
+          "name": "Amazon.com, Inc.",
+          "ticker": "AMZN",
+          "weight": 3.69
+        },
+        {
+          "name": "Alphabet Inc.",
+          "ticker": "GOOGL",
+          "weight": 3.23
+        },
+        {
+          "name": "Broadcom Inc.",
+          "ticker": "AVGO",
+          "weight": 2.85
+        },
+        {
+          "name": "Alphabet Inc.",
+          "ticker": "GOOG",
+          "weight": 2.54
+        },
+        {
+          "name": "Meta Platforms, Inc.",
+          "ticker": "META",
+          "weight": 1.93
+        },
+        {
+          "name": "Tesla, Inc.",
+          "ticker": "TSLA",
+          "weight": 1.55
+        },
+        {
+          "name": "Berkshire Hathaway Inc.",
+          "ticker": "BRK.B",
+          "weight": 1.22
+        }
+      ],
+      "sparkline": [
+        352.05,
+        352.53,
+        350.63,
+        350.21,
+        354.18,
+        355.29,
+        353.98,
+        356.99,
+        361.86,
+        360.2,
+        362.87,
+        363.63,
+        362.79,
+        364.71,
+        367.4,
+        362.74,
+        362.36,
+        360.06,
+        364.19,
+        365.09,
+        366.79,
+        369.46,
+        369.36,
+        371.66,
+        372.54,
+        373.4,
+        374.36,
+        371.65
+      ],
+      "dataQuality": {
+        "quoteAsOf": "2026-06-03T20:00:00.000Z",
+        "profileAsOf": "2026-06-04T06:36:45.943Z",
+        "holdingsAsOf": "2026-06-04T06:36:45.943Z",
+        "sources": [
+          {
+            "name": "Yahoo Finance chart",
+            "url": "https://query1.finance.yahoo.com/v8/finance/chart/VTI?range=5y&interval=1d&events=div%7Csplit&includeAdjustedClose=true",
+            "fields": [
+              "price",
+              "history",
+              "dividends"
+            ]
+          },
+          {
+            "name": "StockAnalysis profile",
+            "url": "https://stockanalysis.com/etf/vti/",
+            "fields": [
+              "expenseRatio",
+              "aum",
+              "dividendYield",
+              "inceptionDate"
+            ]
+          },
+          {
+            "name": "StockAnalysis holdings",
+            "url": "https://stockanalysis.com/etf/vti/holdings/",
+            "fields": [
+              "holdings"
+            ]
+          }
+        ],
+        "missingFields": [
+          "nav",
+          "risk.trackingError3y",
+          "risk.informationRatio3y"
+        ]
+      },
+      "aiynScore": 62,
+      "scoreCoverage": 0.9,
+      "scoreBreakdown": {
+        "수익성": 15,
+        "가치": 76,
+        "안정성": 73,
+        "분산": 100,
+        "효율성": 97
+      }
+    },
+    {
+      "id": "SOXX",
+      "ticker": "SOXX",
+      "yahooSymbol": "SOXX",
+      "name": "iShares Semiconductor ETF",
+      "shortName": "SOXX",
+      "provider": "iShares",
+      "market": "미국",
+      "assetClass": "주식",
+      "theme": "반도체",
+      "category": "글로벌 반도체",
+      "benchmarkIndex": "NYSE Semiconductor",
+      "currency": "USD",
+      "price": 615.68,
+      "changePercent": 1.76,
+      "expenseRatio": 0.34,
+      "aum": 39840000000,
+      "dividendYield": 0.27,
+      "inceptionDate": "2001-07-09",
+      "nav": null,
+      "returns": {
+        "m3": 84.02,
+        "y1": 190.05,
+        "y3Annualized": 58.21,
+        "y5Annualized": 34.5
+      },
+      "risk": {
+        "volatility3yAnnualized": 35.87,
+        "maxDrawdown3y": -41.36,
+        "sharpe3y": 1.47,
+        "trackingError3y": null,
+        "informationRatio3y": null
+      },
+      "holdings": [
+        {
+          "name": "Micron Technology, Inc.",
+          "ticker": "MU",
+          "weight": 11.97
+        },
+        {
+          "name": "Advanced Micro Devices, Inc.",
+          "ticker": "AMD",
+          "weight": 9.01
+        },
+        {
+          "name": "Marvell Technology, Inc.",
+          "ticker": "MRVL",
+          "weight": 8.26
+        },
+        {
+          "name": "Broadcom Inc.",
+          "ticker": "AVGO",
+          "weight": 6.99
+        },
+        {
+          "name": "NVIDIA Corporation",
+          "ticker": "NVDA",
+          "weight": 5.83
+        },
+        {
+          "name": "Intel Corporation",
+          "ticker": "INTC",
+          "weight": 5.49
+        },
+        {
+          "name": "Applied Materials, Inc.",
+          "ticker": "AMAT",
+          "weight": 4.55
+        },
+        {
+          "name": "QUALCOMM Incorporated",
+          "ticker": "QCOM",
+          "weight": 3.92
+        },
+        {
+          "name": "Texas Instruments Incorporated",
+          "ticker": "TXN",
+          "weight": 3.37
+        },
+        {
+          "name": "Lam Research Corporation",
+          "ticker": "LRCX",
+          "weight": 3.32
+        }
+      ],
+      "sparkline": [
+        461.6,
+        455.41,
+        438.71,
+        449.99,
+        461.44,
+        465.75,
+        462.06,
+        482.73,
+        506.87,
+        492.36,
+        520.3,
+        532.76,
+        515.99,
+        528.29,
+        530.03,
+        508.52,
+        495.87,
+        496.74,
+        520.31,
+        524.71,
+        537.33,
+        570.09,
+        563.98,
+        569.47,
+        569.08,
+        571.93,
+        605.02,
+        615.68
+      ],
+      "dataQuality": {
+        "quoteAsOf": "2026-06-03T20:00:00.000Z",
+        "profileAsOf": "2026-06-04T06:36:45.943Z",
+        "holdingsAsOf": "2026-06-04T06:36:45.943Z",
+        "sources": [
+          {
+            "name": "Yahoo Finance chart",
+            "url": "https://query1.finance.yahoo.com/v8/finance/chart/SOXX?range=5y&interval=1d&events=div%7Csplit&includeAdjustedClose=true",
+            "fields": [
+              "price",
+              "history",
+              "dividends"
+            ]
+          },
+          {
+            "name": "StockAnalysis profile",
+            "url": "https://stockanalysis.com/etf/soxx/",
+            "fields": [
+              "expenseRatio",
+              "aum",
+              "dividendYield",
+              "inceptionDate"
+            ]
+          },
+          {
+            "name": "StockAnalysis holdings",
+            "url": "https://stockanalysis.com/etf/soxx/holdings/",
+            "fields": [
+              "holdings"
+            ]
+          }
+        ],
+        "missingFields": [
+          "nav",
+          "risk.trackingError3y",
+          "risk.informationRatio3y"
+        ]
+      },
+      "aiynScore": 45,
+      "scoreCoverage": 0.9,
+      "scoreBreakdown": {
+        "수익성": 65,
+        "가치": 38,
+        "안정성": 32,
+        "분산": 32,
+        "효율성": 55
+      }
+    },
+    {
+      "id": "SCHD",
+      "ticker": "SCHD",
+      "yahooSymbol": "SCHD",
+      "name": "Schwab U.S. Dividend Equity ETF",
+      "shortName": "SCHD",
+      "provider": "Schwab",
+      "market": "미국",
+      "assetClass": "주식",
+      "theme": "배당",
+      "category": "미국 배당성장",
+      "benchmarkIndex": "Dow Jones U.S. Dividend 100",
+      "currency": "USD",
+      "price": 32.37,
+      "changePercent": 0,
+      "expenseRatio": 0.06,
+      "aum": 94180000000,
+      "dividendYield": 3.26,
+      "inceptionDate": "2011-10-19",
+      "nav": null,
+      "returns": {
+        "m3": 3.34,
+        "y1": 27.16,
+        "y3Annualized": 15.33,
+        "y5Annualized": 8.36
+      },
+      "risk": {
+        "volatility3yAnnualized": 13.05,
+        "maxDrawdown3y": -16.12,
+        "sharpe3y": 1.17,
+        "trackingError3y": null,
+        "informationRatio3y": null
+      },
+      "holdings": [
+        {
+          "name": "QUALCOMM Incorporated",
+          "ticker": "QCOM",
+          "weight": 6.21
+        },
+        {
+          "name": "Texas Instruments Incorporated",
+          "ticker": "TXN",
+          "weight": 5.72
+        },
+        {
+          "name": "UnitedHealth Group Incorporated",
+          "ticker": "UNH",
+          "weight": 5.14
+        },
+        {
+          "name": "The Coca-Cola Company",
+          "ticker": "KO",
+          "weight": 3.98
+        },
+        {
+          "name": "Chevron Corporation",
+          "ticker": "CVX",
+          "weight": 3.95
+        },
+        {
+          "name": "Merck & Co., Inc.",
+          "ticker": "MRK",
+          "weight": 3.78
+        },
+        {
+          "name": "Verizon Communications Inc.",
+          "ticker": "VZ",
+          "weight": 3.68
+        },
+        {
+          "name": "ConocoPhillips",
+          "ticker": "COP",
+          "weight": 3.6
+        },
+        {
+          "name": "The Procter & Gamble Company",
+          "ticker": "PG",
+          "weight": 3.5
+        },
+        {
+          "name": "Amgen Inc.",
+          "ticker": "AMGN",
+          "weight": 3.43
+        }
+      ],
+      "sparkline": [
+        31.2,
+        31.13,
+        31.31,
+        31.45,
+        32.07,
+        31.86,
+        31.52,
+        31.69,
+        31.66,
+        31.54,
+        31.62,
+        31.75,
+        31.76,
+        31.75,
+        31.8,
+        31.72,
+        32.04,
+        32.1,
+        32.12,
+        32.25,
+        32.83,
+        32.67,
+        32.55,
+        32.63,
+        32.5,
+        32.18,
+        32.37,
+        32.37
+      ],
+      "dataQuality": {
+        "quoteAsOf": "2026-06-03T20:00:00.000Z",
+        "profileAsOf": "2026-06-04T06:36:45.943Z",
+        "holdingsAsOf": "2026-06-04T06:36:45.943Z",
+        "sources": [
+          {
+            "name": "Yahoo Finance chart",
+            "url": "https://query1.finance.yahoo.com/v8/finance/chart/SCHD?range=5y&interval=1d&events=div%7Csplit&includeAdjustedClose=true",
+            "fields": [
+              "price",
+              "history",
+              "dividends"
+            ]
+          },
+          {
+            "name": "StockAnalysis profile",
+            "url": "https://stockanalysis.com/etf/schd/",
+            "fields": [
+              "expenseRatio",
+              "aum",
+              "dividendYield",
+              "inceptionDate"
+            ]
+          },
+          {
+            "name": "StockAnalysis holdings",
+            "url": "https://stockanalysis.com/etf/schd/holdings/",
+            "fields": [
+              "holdings"
+            ]
+          }
+        ],
+        "missingFields": [
+          "nav",
+          "risk.trackingError3y",
+          "risk.informationRatio3y"
+        ]
+      },
+      "aiynScore": 53,
+      "scoreCoverage": 0.9,
+      "scoreBreakdown": {
+        "수익성": 9,
+        "가치": 62,
+        "안정성": 71,
+        "분산": 78,
+        "효율성": 93
+      }
+    },
+    {
+      "id": "ARKK",
+      "ticker": "ARKK",
+      "yahooSymbol": "ARKK",
+      "name": "ARK Innovation ETF",
+      "shortName": "ARKK",
+      "provider": "ARK Invest",
+      "market": "미국",
+      "assetClass": "주식",
+      "theme": "혁신성장",
+      "category": "테마 성장주",
+      "benchmarkIndex": "Active",
+      "currency": "USD",
+      "price": 78.16,
+      "changePercent": -2.19,
+      "expenseRatio": 0.75,
+      "aum": 7210000000,
+      "dividendYield": null,
+      "inceptionDate": "2014-10-30",
+      "nav": null,
+      "returns": {
+        "m3": 8.16,
+        "y1": 34.9,
+        "y3Annualized": 23.28,
+        "y5Annualized": -6.21
+      },
+      "risk": {
+        "volatility3yAnnualized": 39.35,
+        "maxDrawdown3y": -39.56,
+        "sharpe3y": 0.73,
+        "trackingError3y": null,
+        "informationRatio3y": null
+      },
+      "holdings": [
+        {
+          "name": "Tesla, Inc.",
+          "ticker": "TSLA",
+          "weight": 9.86
+        },
+        {
+          "name": "Tempus AI, Inc.",
+          "ticker": "TEM",
+          "weight": 5.04
+        },
+        {
+          "name": "Advanced Micro Devices, Inc.",
+          "ticker": "AMD",
+          "weight": 5.03
+        },
+        {
+          "name": "CRISPR Therapeutics AG",
+          "ticker": "CRSP",
+          "weight": 4.79
+        },
+        {
+          "name": "Robinhood Markets, Inc.",
+          "ticker": "HOOD",
+          "weight": 4.79
+        },
+        {
+          "name": "Shopify Inc.",
+          "ticker": "SHOP",
+          "weight": 4.59
+        },
+        {
+          "name": "Circle Internet Group, Inc.",
+          "ticker": "CRCL",
+          "weight": 4.17
+        },
+        {
+          "name": "Roku, Inc.",
+          "ticker": "ROKU",
+          "weight": 4.16
+        },
+        {
+          "name": "Coinbase Global, Inc.",
+          "ticker": "COIN",
+          "weight": 3.82
+        },
+        {
+          "name": "Palantir Technologies Inc.",
+          "ticker": "PLTR",
+          "weight": 3.36
+        }
+      ],
+      "sparkline": [
+        76.5,
+        76.55,
+        75.45,
+        73.53,
+        75.84,
+        76.92,
+        78.23,
+        76.58,
+        79.58,
+        77.93,
+        79.12,
+        80.03,
+        78.21,
+        78.05,
+        78,
+        74.9,
+        74.51,
+        73.84,
+        75.84,
+        76.62,
+        76.4,
+        77.23,
+        77.95,
+        81.01,
+        81.95,
+        81.26,
+        79.91,
+        78.16
+      ],
+      "dataQuality": {
+        "quoteAsOf": "2026-06-03T20:00:00.000Z",
+        "profileAsOf": "2026-06-04T06:36:45.943Z",
+        "holdingsAsOf": "2026-06-04T06:36:45.943Z",
+        "sources": [
+          {
+            "name": "Yahoo Finance chart",
+            "url": "https://query1.finance.yahoo.com/v8/finance/chart/ARKK?range=5y&interval=1d&events=div%7Csplit&includeAdjustedClose=true",
+            "fields": [
+              "price",
+              "history",
+              "dividends"
+            ]
+          },
+          {
+            "name": "StockAnalysis profile",
+            "url": "https://stockanalysis.com/etf/arkk/",
+            "fields": [
+              "expenseRatio",
+              "aum",
+              "dividendYield",
+              "inceptionDate"
+            ]
+          },
+          {
+            "name": "StockAnalysis holdings",
+            "url": "https://stockanalysis.com/etf/arkk/holdings/",
+            "fields": [
+              "holdings"
+            ]
+          }
+        ],
+        "missingFields": [
+          "dividendYield",
+          "nav",
+          "risk.trackingError3y",
+          "risk.informationRatio3y"
+        ]
+      },
+      "aiynScore": 11,
+      "scoreCoverage": 0.9,
+      "scoreBreakdown": {
+        "수익성": 5,
+        "가치": 0,
+        "안정성": 4,
+        "분산": 63,
+        "효율성": 0
+      }
+    }
+  ]
+}
