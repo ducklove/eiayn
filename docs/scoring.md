@@ -30,12 +30,19 @@ The score is calculated from these components:
 | --- | ---: | --- |
 | Cost efficiency | 18% | lower expense ratio is better |
 | Scale/liquidity proxy | 12% | higher log AUM is better |
-| Performance | 26% | higher 1Y/3Y/5Y returns are better |
+| Performance | 26% | higher 3M/1Y/3Y/5Y returns are better |
 | Risk-adjusted profile | 22% | higher Sharpe, lower volatility, lower drawdown are better |
 | Tracking quality | 10% | lower tracking error and higher information ratio are better |
 | Diversification | 12% | lower top-holding concentration is better |
 
-Each component is normalized across the current ETF universe to a 0-100 range. Missing component values are excluded and the remaining component weights are redistributed for that ETF. Missing data is therefore not treated as a forced zero, and the available score coverage is stored as `scoreCoverage`.
+Most components are normalized across the current ETF universe to a 0-100 range. Return metrics use percentile-rank normalization so one or two extreme leveraged products do not compress otherwise strong performers near the bottom of the scale. Missing component values are excluded and the remaining component weights are redistributed for that ETF. Missing data is therefore not treated as a forced zero, and the available score coverage is stored as `scoreCoverage`.
+
+The performance component weights available return windows as:
+
+- 3-month return: 20%
+- 1-year return: 35%
+- 3-year annualized return: 25%
+- 5-year annualized return: 20%
 
 ## Display Factors
 

@@ -39,6 +39,31 @@ describe('scoreEtfs', () => {
     expect(scored[1].scoreBreakdown.총보수).toBeGreaterThan(scored[0].scoreBreakdown.총보수);
   });
 
+  it('uses 3-month returns in the profitability component', () => {
+    const [slow, fast] = scoreEtfs([
+      { ...baseEtf, id: 'SLOW', returns: { m3: 1, y1: 10, y3Annualized: null, y5Annualized: null } },
+      { ...baseEtf, id: 'FAST', returns: { m3: 20, y1: 10, y3Annualized: null, y5Annualized: null } },
+    ]);
+
+    expect(fast.scoreBreakdown.수익성).toBeGreaterThan(slow.scoreBreakdown.수익성);
+  });
+
+  it('keeps strong performers high when one leveraged outlier sets an extreme return', () => {
+    const peers = Array.from({ length: 98 }, (_, index) => ({
+      ...baseEtf,
+      id: `PEER-${index}`,
+      returns: { m3: index % 30, y1: index, y3Annualized: null, y5Annualized: null },
+    }));
+    const scored = scoreEtfs([
+      ...peers,
+      { ...baseEtf, id: 'STRONG', returns: { m3: 55, y1: 421, y3Annualized: null, y5Annualized: null } },
+      { ...baseEtf, id: 'OUTLIER', returns: { m3: 1092, y1: 3142, y3Annualized: null, y5Annualized: null } },
+    ]);
+    const strong = scored.find((etf) => etf.id === 'STRONG');
+
+    expect(strong.scoreBreakdown.수익성).toBeGreaterThan(95);
+  });
+
   it('redistributes weights instead of treating missing fields as zero', () => {
     const [scored] = scoreEtfs([
       {

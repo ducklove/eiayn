@@ -44,10 +44,11 @@ export function scoreComponents(etf, context) {
     cost: normalizeLow(etf.expenseRatio, context.expenseRatio),
     scale: normalizeHigh(logOrNull(etf.aum), context.logAum),
     performance: weightedAverage([
-      normalizeHigh(etf.returns?.y1, context.y1),
-      normalizeHigh(etf.returns?.y3Annualized, context.y3Annualized),
-      normalizeHigh(etf.returns?.y5Annualized, context.y5Annualized),
-    ], [0.4, 0.35, 0.25]),
+      percentileHigh(etf.returns?.m3, context.m3Returns),
+      percentileHigh(etf.returns?.y1, context.y1Returns),
+      percentileHigh(etf.returns?.y3Annualized, context.y3AnnualizedReturns),
+      percentileHigh(etf.returns?.y5Annualized, context.y5AnnualizedReturns),
+    ], [0.2, 0.35, 0.25, 0.2]),
     riskAdjusted: weightedAverage([
       normalizeHigh(etf.risk?.sharpe3y, context.sharpe3y),
       normalizeLow(etf.risk?.volatility3yAnnualized, context.volatility3yAnnualized),
@@ -65,9 +66,10 @@ export function buildScoringContext(etfs) {
   return {
     expenseRatio: extent(etfs.map((etf) => etf.expenseRatio)),
     logAum: extent(etfs.map((etf) => logOrNull(etf.aum))),
-    y1: extent(etfs.map((etf) => etf.returns?.y1)),
-    y3Annualized: extent(etfs.map((etf) => etf.returns?.y3Annualized)),
-    y5Annualized: extent(etfs.map((etf) => etf.returns?.y5Annualized)),
+    m3Returns: distribution(etfs.map((etf) => etf.returns?.m3)),
+    y1Returns: distribution(etfs.map((etf) => etf.returns?.y1)),
+    y3AnnualizedReturns: distribution(etfs.map((etf) => etf.returns?.y3Annualized)),
+    y5AnnualizedReturns: distribution(etfs.map((etf) => etf.returns?.y5Annualized)),
     volatility3yAnnualized: extent(etfs.map((etf) => etf.risk?.volatility3yAnnualized)),
     maxDrawdownAbs: extent(etfs.map((etf) => Math.abs(etf.risk?.maxDrawdown3y ?? Number.NaN))),
     sharpe3y: extent(etfs.map((etf) => etf.risk?.sharpe3y)),
@@ -87,6 +89,11 @@ function extent(values) {
   return { min: Math.min(...finite), max: Math.max(...finite) };
 }
 
+function distribution(values) {
+  const finite = values.filter(isFiniteNumber).sort((a, b) => a - b);
+  return finite.length ? finite : null;
+}
+
 function normalizeHigh(value, range) {
   if (!isFiniteNumber(value) || !range) return null;
   if (range.max === range.min) return 70;
@@ -97,6 +104,16 @@ function normalizeLow(value, range) {
   if (!isFiniteNumber(value) || !range) return null;
   if (range.max === range.min) return 70;
   return clamp(((range.max - value) / (range.max - range.min)) * 100);
+}
+
+function percentileHigh(value, sortedValues) {
+  if (!isFiniteNumber(value) || !sortedValues?.length) return null;
+  if (sortedValues.length === 1) return 70;
+
+  const firstEqual = lowerBound(sortedValues, value);
+  const firstGreater = upperBound(sortedValues, value);
+  const midpointRank = (firstEqual + firstGreater - 1) / 2;
+  return clamp((midpointRank / (sortedValues.length - 1)) * 100);
 }
 
 function weightedAverage(values, weights = []) {
@@ -118,4 +135,26 @@ function logOrNull(value) {
 
 function clamp(value) {
   return Math.max(0, Math.min(100, value));
+}
+
+function lowerBound(values, target) {
+  let start = 0;
+  let end = values.length;
+  while (start < end) {
+    const middle = Math.floor((start + end) / 2);
+    if (values[middle] < target) start = middle + 1;
+    else end = middle;
+  }
+  return start;
+}
+
+function upperBound(values, target) {
+  let start = 0;
+  let end = values.length;
+  while (start < end) {
+    const middle = Math.floor((start + end) / 2);
+    if (values[middle] <= target) start = middle + 1;
+    else end = middle;
+  }
+  return start;
 }
