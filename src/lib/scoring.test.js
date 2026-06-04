@@ -36,6 +36,7 @@ describe('scoreEtfs', () => {
     expect(scored[0].aiynScore).toBeGreaterThanOrEqual(0);
     expect(scored[0].aiynScore).toBeLessThanOrEqual(100);
     expect(scored[1].aiynScore).toBeGreaterThan(scored[0].aiynScore);
+    expect(scored[1].scoreBreakdown.총보수).toBeGreaterThan(scored[0].scoreBreakdown.총보수);
   });
 
   it('redistributes weights instead of treating missing fields as zero', () => {

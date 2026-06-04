@@ -759,27 +759,29 @@ function SimpleListPanel({ title, items, emptyText }) {
 
 function Radar({ factors }) {
   const entries = Object.entries(factors).filter(([, value]) => typeof value === 'number');
-  const safeEntries = entries.length ? entries : [['수익성', 0], ['가치', 0], ['안정성', 0], ['분산', 0], ['효율성', 0]];
-  const center = 70;
-  const radius = 52;
+  const safeEntries = entries.length ? entries : [['수익성', 0], ['가치', 0], ['총보수', 0], ['안정성', 0], ['분산', 0], ['효율성', 0]];
+  const centerX = 80;
+  const centerY = 76;
+  const radius = 44;
+  const labelRadius = 63;
   const points = safeEntries.map(([, value], index) => {
     const angle = -Math.PI / 2 + (index * 2 * Math.PI) / safeEntries.length;
     const distance = (value / 100) * radius;
-    return `${center + Math.cos(angle) * distance},${center + Math.sin(angle) * distance}`;
+    return `${centerX + Math.cos(angle) * distance},${centerY + Math.sin(angle) * distance}`;
   }).join(' ');
 
   return (
-    <svg className="radar" viewBox="0 0 140 140" aria-label="AIYN 팩터 레이더">
+    <svg className="radar" viewBox="0 0 160 152" aria-label="AIYN 팩터 레이더">
       {[0.25, 0.5, 0.75, 1].map((scale) => {
         const grid = safeEntries.map((_, index) => {
           const angle = -Math.PI / 2 + (index * 2 * Math.PI) / safeEntries.length;
-          return `${center + Math.cos(angle) * radius * scale},${center + Math.sin(angle) * radius * scale}`;
+          return `${centerX + Math.cos(angle) * radius * scale},${centerY + Math.sin(angle) * radius * scale}`;
         }).join(' ');
         return <polygon key={scale} points={grid} className="radar-grid" />;
       })}
       {safeEntries.map(([label], index) => {
         const angle = -Math.PI / 2 + (index * 2 * Math.PI) / safeEntries.length;
-        return <text key={label} x={center + Math.cos(angle) * 64} y={center + Math.sin(angle) * 64 + 4} textAnchor="middle">{label}</text>;
+        return <text key={label} x={centerX + Math.cos(angle) * labelRadius} y={centerY + Math.sin(angle) * labelRadius + 4} textAnchor="middle">{label}</text>;
       })}
       <polygon points={points} className="radar-shape" />
     </svg>

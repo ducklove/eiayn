@@ -39,10 +39,11 @@ Each component is normalized across the current ETF universe to a 0-100 range. M
 
 ## Display Factors
 
-The radar chart maps the score components into five Korean labels:
+The radar chart maps the score components into Korean labels:
 
 - `수익성`: performance
 - `가치`: cost and scale
+- `총보수`: cost efficiency, where lower expense ratio scores higher
 - `안정성`: risk-adjusted profile
 - `분산`: diversification
 - `효율성`: cost and tracking quality

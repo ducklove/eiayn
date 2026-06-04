@@ -565,6 +565,9 @@ a {
 }
 
 .comparison-grid {
+  --compare-head-height: 96px;
+  --compare-row-height: 42px;
+  --compare-favorite-height: 52px;
   margin-top: 14px;
   display: grid;
   grid-template-columns: 230px minmax(0, 1fr);
@@ -603,17 +606,17 @@ a {
 }
 
 .compare-cell {
-  min-height: 38px;
+  height: var(--compare-row-height);
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--line);
-  padding: 8px 12px;
+  padding: 7px 12px;
   font-size: 13px;
 }
 
 .header-cell,
 .etf-head {
-  min-height: 96px;
+  height: var(--compare-head-height);
   align-items: flex-start;
   justify-content: center;
   flex-direction: column;
@@ -713,8 +716,12 @@ a {
 }
 
 .favorite-cell {
-  min-height: 54px;
+  height: var(--compare-favorite-height);
   justify-content: center;
+}
+
+.compare-labels .metric-label:last-child {
+  height: var(--compare-favorite-height);
 }
 
 .favorite-button {
@@ -882,8 +889,9 @@ a {
 
 .radar {
   width: 100%;
-  max-width: 176px;
+  max-width: 196px;
   justify-self: end;
+  overflow: visible;
 }
 
 .radar-grid {

@@ -72,7 +72,7 @@ export async function fetchKoreanCompare(codes) {
 
 export async function fetchKoreanHoldings(codes) {
   let completed = 0;
-  const entries = await mapLimit(codes, 10, async (code) => {
+  const entries = await mapLimit(codes, 4, async (code) => {
     const url = `${ROOT}/instrument/holdings/?code=${encodeURIComponent(code)}&language=${LANG}`;
     const json = await optionalJson(url, { timeoutMs: 30_000 });
     completed += 1;
