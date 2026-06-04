@@ -59,8 +59,46 @@ export async function fetchStockAnalysisHoldings(path) {
   };
 }
 
+export async function fetchStockAnalysisQuoteProfile(ticker, currency) {
+  const path = stockAnalysisQuotePathForTicker(ticker);
+  if (!path) return emptyProfile(null);
+
+  const url = stockAnalysisUrl(path);
+  const html = await optionalText(url);
+  if (!html) return emptyProfile(url);
+
+  const $ = load(html);
+  const aum = parseCompactMoney(summaryValue($, 'Assets'), currency);
+  return {
+    source: {
+      name: 'StockAnalysis quote profile',
+      url,
+      fields: ['expenseRatio', 'aum', 'dividendYield', 'inceptionDate'],
+    },
+    expenseRatio: parsePercent(summaryValue($, 'Expense Ratio')),
+    aum: aum?.value ?? null,
+    dividendYield: parsePercent(summaryValue($, 'Dividend Yield')),
+    inceptionDate: parseDate(summaryValue($, 'Inception Date')),
+  };
+}
+
 export function stockAnalysisPathForTicker(ticker) {
   return `/etf/${String(ticker).toLowerCase()}/`;
+}
+
+export function stockAnalysisQuotePathForTicker(ticker) {
+  const raw = String(ticker ?? '').trim().toUpperCase();
+  if (!raw) return null;
+  if (raw.endsWith('.HK')) {
+    const code = raw.replace('.HK', '');
+    return `/quote/hkg/${code.length === 5 && code.startsWith('8') ? code.slice(1) : code}/`;
+  }
+  if (raw.endsWith('.DE')) return `/quote/etr/${raw.replace('.DE', '')}/`;
+  if (raw.endsWith('.PA')) return `/quote/epa/${raw.replace('.PA', '')}/`;
+  if (raw.endsWith('.T')) return `/quote/tyo/${raw.replace('.T', '')}/`;
+  if (raw.endsWith('.AX')) return `/quote/asx/${raw.replace('.AX', '')}/`;
+  if (raw.endsWith('.VN')) return `/quote/hose/${raw.replace('.VN', '')}/`;
+  return null;
 }
 
 function emptyProfile(url) {
@@ -90,10 +128,34 @@ function summaryValue($, label) {
 
 function parseDate(value) {
   if (!value) return null;
-  const date = new Date(value);
+  const monthMatch = String(value).trim().match(/^([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})$/);
+  if (monthMatch) {
+    const month = MONTHS[monthMatch[1].slice(0, 3).toLowerCase()];
+    if (month) {
+      return `${monthMatch[3]}-${month}-${monthMatch[2].padStart(2, '0')}`;
+    }
+  }
+  const isoMatch = String(value).trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) return isoMatch[0].slice(0, 10);
+  const date = new Date(`${value} UTC`);
   return Number.isNaN(date.getTime()) ? null : date.toISOString().slice(0, 10);
 }
 
 function cleanText(value) {
   return String(value ?? '').replace(/\s+/g, ' ').trim();
 }
+
+const MONTHS = {
+  jan: '01',
+  feb: '02',
+  mar: '03',
+  apr: '04',
+  may: '05',
+  jun: '06',
+  jul: '07',
+  aug: '08',
+  sep: '09',
+  oct: '10',
+  nov: '11',
+  dec: '12',
+};

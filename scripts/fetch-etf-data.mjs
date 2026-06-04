@@ -17,6 +17,7 @@ import {
   fetchExchangeRate,
   fetchYahooChart,
   fetchYahooMostActiveEtfs,
+  fetchYahooQuoteSummaryProfile,
   roundNullable,
   trailingDividendYield,
   YAHOO_CHART_ROOT,
@@ -24,8 +25,10 @@ import {
 import {
   fetchStockAnalysisHoldings,
   fetchStockAnalysisProfile,
+  fetchStockAnalysisQuoteProfile,
   stockAnalysisPathForTicker,
 } from './data/stockanalysis.mjs';
+import { profileOverrideForTicker } from './data/profile-overrides.mjs';
 import { GLOBAL_REPRESENTATIVE_ETFS, US_CORE_SUPPLEMENTS } from './data/universe.mjs';
 
 const ROOT = process.cwd();
@@ -103,7 +106,17 @@ async function main() {
       {
         name: 'StockAnalysis',
         url: 'https://stockanalysis.com/',
-        fields: ['expenseRatio', 'aum', 'dividendYield', 'inceptionDate', 'holdings'],
+        fields: ['expenseRatio', 'aum', 'dividendYield', 'inceptionDate', 'holdings', 'regional quote profile'],
+      },
+      {
+        name: 'Yahoo Finance quoteSummary',
+        url: 'https://query2.finance.yahoo.com/v10/finance/quoteSummary/',
+        fields: ['regional expenseRatio', 'aum', 'dividendYield', 'inceptionDate'],
+      },
+      {
+        name: 'Issuer or exchange profile override',
+        url: 'https://github.com/ducklove/eiayn/blob/main/scripts/data/profile-overrides.mjs',
+        fields: ['expenseRatio for regional ETFs when public aggregators return n/a'],
       },
       {
         name: 'EIAYN regional representative universe',
@@ -287,6 +300,8 @@ async function fetchRegionalEtfs(excluded) {
       market: instrument.market,
       defaultCurrency: defaultCurrencyForMarket(instrument.market),
       useStockAnalysis: !instrument.ticker.includes('.'),
+      useRegionalProfile: true,
+      useYahooQuoteSummaryProfile: true,
       excluded,
     });
   });
@@ -298,9 +313,22 @@ async function fetchYahooBackedEtf(record, options) {
   try {
     const chart = await fetchYahooChart(ticker, '5y');
     const stockAnalysisPath = stockAnalysisPathForTicker(ticker);
-    const profile = options.useStockAnalysis
+    const profileCurrency = chart.meta.currency ?? options.defaultCurrency;
+    const stockAnalysisProfile = options.useStockAnalysis
       ? await fetchStockAnalysisProfile(stockAnalysisPath, chart.meta.currency ?? options.defaultCurrency)
       : emptyProfile();
+    const regionalProfile = options.useRegionalProfile
+      ? await fetchStockAnalysisQuoteProfile(ticker, profileCurrency)
+      : emptyProfile();
+    const yahooQuoteSummaryProfile = options.useYahooQuoteSummaryProfile
+      ? await fetchYahooQuoteSummaryProfile(ticker)
+      : emptyProfile();
+    const profile = mergeProfiles([
+      stockAnalysisProfile,
+      regionalProfile,
+      yahooQuoteSummaryProfile,
+      profileOverrideForTicker(ticker),
+    ]);
     const holdings = options.useStockAnalysis
       ? await fetchStockAnalysisHoldings(stockAnalysisPath)
       : { holdings: [], source: null };
@@ -369,7 +397,7 @@ async function fetchYahooBackedEtf(record, options) {
         sources: compactSources([
           record.universeSource,
           { name: 'Yahoo Finance chart', url: chart.url, fields: ['price', 'history', 'dividends'] },
-          profile.source,
+          ...(profile.sources ?? [profile.source]),
           holdings.source,
         ]),
         missingFields: [],
@@ -512,12 +540,41 @@ function emptyProfile() {
   };
 }
 
+function mergeProfiles(profiles) {
+  const merged = emptyProfile();
+  const sources = [];
+  for (const profile of profiles) {
+    if (!profile) continue;
+    for (const key of ['expenseRatio', 'aum', 'dividendYield', 'inceptionDate']) {
+      if ((merged[key] === null || merged[key] === undefined) && profile[key] !== null && profile[key] !== undefined) {
+        merged[key] = profile[key];
+      }
+    }
+    if (profile.source) sources.push(profile.source);
+    if (Array.isArray(profile.sources)) sources.push(...profile.sources);
+  }
+
+  return {
+    ...merged,
+    source: sources[0] ?? null,
+    sources: dedupeSources(sources),
+  };
+}
+
 function compactSources(sources) {
   return sources.filter(Boolean).map((source) => ({
     name: source.name,
     url: source.url,
     fields: source.fields ?? [],
   }));
+}
+
+function dedupeSources(sources) {
+  const byKey = new Map();
+  for (const source of sources.filter(Boolean)) {
+    byKey.set(`${source.name}|${source.url}`, source);
+  }
+  return Array.from(byKey.values());
 }
 
 function uniqueStrings(values) {

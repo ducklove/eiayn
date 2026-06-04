@@ -9,7 +9,9 @@ EIAYN is designed for GitHub Pages static hosting. The browser does not call ext
 | K-ETF | `https://www.k-etf.com/` and `https://anchor.k-etf.com/api/` | Korea active ETF lineup, price, 1-day return, volume, trading value, market cap, category, issuer when available, 3M/1Y returns, total fee, 1Y history, top holdings |
 | Yahoo Finance MOST_ACTIVES_ETFS screener | `https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved` | US high-volume ETF universe, US ETF price, volume, AUM, expense ratio where available |
 | Yahoo Finance chart | `https://query1.finance.yahoo.com/v8/finance/chart/` | price, adjusted-close history, dividend events, quote timestamp, listed-symbol currency, USD/KRW |
-| StockAnalysis | `https://stockanalysis.com/` | US ETF expense ratio, assets/AUM, dividend yield, inception date, top holdings where available |
+| Yahoo Finance quoteSummary | `https://query2.finance.yahoo.com/v10/finance/quoteSummary/` | regional ETF profile fallback for expense ratio, AUM, dividend yield, inception date |
+| StockAnalysis | `https://stockanalysis.com/` | US ETF expense ratio, assets/AUM, dividend yield, inception date, top holdings where available; regional quote profile fields where available |
+| Issuer or exchange profile override | `scripts/data/profile-overrides.mjs` | narrowly scoped expense ratio values for regional ETFs when public aggregators return `n/a` |
 | EIAYN regional representative universe | `https://github.com/ducklove/eiayn` | regional representative ETF selection and market classification |
 
 ## Korea Collection
@@ -41,12 +43,21 @@ EIAYN requests the top high-volume records and supplements core ETFs that should
 
 ## Regional Collection
 
-Hong Kong, Germany, France, Japan, Australia, and Vietnam representative ETFs are listed in `scripts/data/universe.mjs`. Vietnam representatives explicitly include `FUEVFVND.VN` VFMVN Diamond ETF. Each symbol is included only if Yahoo Finance chart returns a valid quote/history response. Regional holdings, AUM, and expense data are often unavailable from the public sources used here, so those fields are kept as `null` or empty arrays.
+Hong Kong, Germany, France, Japan, Australia, and Vietnam representative ETFs are listed in `scripts/data/universe.mjs`. Vietnam representatives explicitly include `FUEVFVND.VN` VFMVN Diamond ETF. Each symbol is included only if Yahoo Finance chart returns a valid quote/history response.
+
+Regional profile fields are enriched in this order:
+
+1. StockAnalysis regional quote profile pages, such as `/quote/hkg/2800/`, `/quote/etr/EUNL/`, `/quote/tyo/1321/`, `/quote/asx/A200/`, and `/quote/hose/FUEVFVND/`.
+2. Yahoo Finance quoteSummary, using a build-time public Yahoo session cookie/crumb, for profile fallback fields.
+3. Issuer or exchange profile overrides in `scripts/data/profile-overrides.mjs` for narrow cases where public aggregators return `n/a`; currently `STW.AX` uses State Street and `1365.T` uses JPX.
+
+Regional holdings are still unavailable from these public profile sources and remain empty arrays unless a future source is added.
 
 ## Update Behavior
 
 - Required source failures cause `npm run data:update` to fail.
-- Optional StockAnalysis profile/holdings failures are logged and leave affected fields missing.
+- Optional StockAnalysis, Yahoo quoteSummary, and holdings failures are logged and leave affected fields missing unless `check:data` marks the field as required.
+- `check:data` requires an expense ratio for all configured regional representative ETFs so GitHub Pages is not deployed with blank regional total-fee cells.
 - The script does not silently fall back to fake data.
 - Missing fields are stored as `null` and listed in `dataQuality.missingFields`.
 - `npm run check:data` validates ETF counts, required fields, numeric price values, source attribution, and production-data wording before build.

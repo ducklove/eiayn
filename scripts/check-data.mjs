@@ -15,6 +15,7 @@ const MINIMUMS = {
 const REQUIRED_KOREA_IDS = ['360750', '379800', '458730', '069500', '091160'];
 const REQUIRED_US_IDS = ['QQQ', 'VTI', 'SOXX', 'SCHD', 'ARKK'];
 const REQUIRED_REGIONAL_IDS = ['FUEVFVND.VN'];
+const REQUIRED_REGIONAL_EXPENSE_MARKETS = ['홍콩', '독일', '프랑스', '일본', '호주', '베트남'];
 const REQUIRED_USER_REQUEST_IDS = [
   'SIVR',
   'PPLT',
@@ -91,6 +92,9 @@ for (const etf of etfs) {
   if (Object.hasOwn(etf, 'category') === false) errors.push(`${etf.id}: category field missing`);
   if (Object.hasOwn(etf, 'benchmarkIndex') === false) errors.push(`${etf.id}: benchmarkIndex field missing`);
   if (!isFiniteNumber(etf.price)) errors.push(`${etf.id}: price must be a number`);
+  if (REQUIRED_REGIONAL_EXPENSE_MARKETS.includes(etf.market) && !isFiniteNumber(etf.expenseRatio)) {
+    errors.push(`${etf.id}: regional ETF expenseRatio is required`);
+  }
   if (!Array.isArray(etf.holdings)) errors.push(`${etf.id}: holdings must be an array`);
   if (!Array.isArray(etf.sparkline)) errors.push(`${etf.id}: sparkline must be an array`);
   if (!Array.isArray(etf.dataQuality?.sources) || !etf.dataQuality.sources.length) {
