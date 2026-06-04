@@ -77,7 +77,7 @@ async function main() {
       us: {
         mostActiveRequested: US_MOST_ACTIVE_COUNT,
         screenerRecords: usData.screenerRecords,
-        coreSupplements: US_CORE_SUPPLEMENTS,
+        coreSupplements: US_CORE_SUPPLEMENTS.map(supplementTicker),
         stockAnalysisEnrichmentLimit: US_STOCKANALYSIS_LIMIT,
         included: usData.etfs.length,
       },
@@ -202,6 +202,14 @@ function buildKoreanEtfs(base) {
   });
 }
 
+function supplementTicker(supplement) {
+  return typeof supplement === 'string' ? supplement : supplement.ticker;
+}
+
+function supplementAliases(supplement) {
+  return typeof supplement === 'string' ? [] : (supplement.aliases ?? []);
+}
+
 async function fetchUsEtfs(excluded) {
   const { records, source } = await fetchYahooMostActiveEtfs(US_MOST_ACTIVE_COUNT);
   const byTicker = new Map();
@@ -209,17 +217,30 @@ async function fetchUsEtfs(excluded) {
     const ticker = record.ticker ?? record.symbol;
     if (ticker) byTicker.set(ticker, { ...record, universeSource: source });
   }
-  for (const ticker of US_CORE_SUPPLEMENTS) {
-    if (!byTicker.has(ticker)) {
+  for (const supplement of US_CORE_SUPPLEMENTS) {
+    const ticker = supplementTicker(supplement);
+    const aliases = supplementAliases(supplement);
+    const universeSource = {
+      name: 'EIAYN US core supplement',
+      url: 'https://github.com/ducklove/eiayn',
+      fields: ['US core ETF supplement'],
+    };
+
+    if (byTicker.has(ticker)) {
+      const existing = byTicker.get(ticker);
+      byTicker.set(ticker, {
+        ...existing,
+        aliases: uniqueStrings([...(existing.aliases ?? []), ...aliases]),
+        coreSupplement: true,
+        universeSource: existing.universeSource ?? universeSource,
+      });
+    } else {
       byTicker.set(ticker, {
         ticker,
         symbol: ticker,
+        aliases,
         coreSupplement: true,
-        universeSource: {
-          name: 'EIAYN US core supplement',
-          url: 'https://github.com/ducklove/eiayn',
-          fields: ['US core ETF supplement'],
-        },
+        universeSource,
       });
     }
   }
@@ -301,6 +322,7 @@ async function fetchYahooBackedEtf(record, options) {
       id: ticker,
       ticker,
       yahooSymbol: ticker,
+      aliases: record.aliases ?? [],
       name,
       shortName: chart.meta.shortName ?? record.shortName ?? name,
       provider: providerFromName(name),
@@ -496,6 +518,10 @@ function compactSources(sources) {
     url: source.url,
     fields: source.fields ?? [],
   }));
+}
+
+function uniqueStrings(values) {
+  return Array.from(new Set(values.filter(Boolean)));
 }
 
 function dedupeEtfs(etfs) {

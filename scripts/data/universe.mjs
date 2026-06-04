@@ -1,5 +1,6 @@
 export const US_CORE_SUPPLEMENTS = [
   'SPY', 'QQQ', 'VOO', 'VTI', 'IVV', 'DIA', 'IWM', 'SCHD', 'SOXX', 'ARKK',
+  'SIVR', 'PPLT', { ticker: 'DAX', aliases: ['DAX.O'] }, 'EWM', { ticker: 'SCHP', aliases: ['SCHP.K'] },
 ];
 
 export const GLOBAL_REPRESENTATIVE_ETFS = [
@@ -9,6 +10,9 @@ export const GLOBAL_REPRESENTATIVE_ETFS = [
   { ticker: '3033.HK', market: '홍콩', category: '홍콩 테크', benchmarkIndex: 'Hang Seng TECH Index' },
   { ticker: '3067.HK', market: '홍콩', category: '홍콩 테크', benchmarkIndex: 'Hang Seng TECH Index' },
   { ticker: '3188.HK', market: '홍콩', category: '중국 본토', benchmarkIndex: 'CSI 300' },
+  { ticker: '83188.HK', market: '홍콩', category: '중국 본토', benchmarkIndex: 'CSI 300' },
+  { ticker: '3199.HK', market: '홍콩', category: '중국 채권', benchmarkIndex: null },
+  { ticker: '83199.HK', market: '홍콩', category: '중국 채권', benchmarkIndex: null },
   { ticker: '2822.HK', market: '홍콩', category: '중국 본토', benchmarkIndex: 'FTSE China A50' },
   { ticker: '3088.HK', market: '홍콩', category: '홍콩 테크', benchmarkIndex: 'Hang Seng TECH Index' },
   { ticker: '2834.HK', market: '홍콩', category: '미국 나스닥', benchmarkIndex: 'NASDAQ-100' },
@@ -17,6 +21,7 @@ export const GLOBAL_REPRESENTATIVE_ETFS = [
 
   // Germany
   { ticker: 'EUNL.DE', market: '독일', category: '글로벌 주식', benchmarkIndex: 'MSCI World' },
+  { ticker: 'EUN2.DE', market: '독일', category: '유럽 시장대표', benchmarkIndex: 'EURO STOXX 50' },
   { ticker: 'SXR8.DE', market: '독일', category: '미국 대형주', benchmarkIndex: 'S&P 500' },
   { ticker: 'EXS1.DE', market: '독일', category: '독일 시장대표', benchmarkIndex: 'DAX' },
   { ticker: 'EXSA.DE', market: '독일', category: '유럽 주식', benchmarkIndex: 'STOXX Europe 600' },
@@ -55,6 +60,7 @@ export const GLOBAL_REPRESENTATIVE_ETFS = [
   { ticker: 'STW.AX', market: '호주', category: '호주 시장대표', benchmarkIndex: 'S&P/ASX 200' },
   { ticker: 'NDQ.AX', market: '호주', category: '미국 나스닥', benchmarkIndex: 'NASDAQ-100' },
   { ticker: 'A200.AX', market: '호주', category: '호주 시장대표', benchmarkIndex: 'Solactive Australia 200' },
+  { ticker: 'AAA.AX', market: '호주', category: '현금/단기금리', benchmarkIndex: null },
   { ticker: 'IOZ.AX', market: '호주', category: '호주 시장대표', benchmarkIndex: 'S&P/ASX 200' },
   { ticker: 'VHY.AX', market: '호주', category: '고배당', benchmarkIndex: 'FTSE Australia High Dividend Yield' },
   { ticker: 'HACK.AX', market: '호주', category: '사이버보안', benchmarkIndex: 'Nasdaq CTA Cybersecurity' },

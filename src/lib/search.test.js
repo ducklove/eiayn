@@ -6,6 +6,7 @@ describe('search utilities', () => {
     {
       id: 'QQQ',
       ticker: 'QQQ',
+      aliases: ['QQQ.O'],
       name: 'Invesco QQQ Trust',
       shortName: 'QQQ',
       provider: 'Invesco',
@@ -31,6 +32,17 @@ describe('search utilities', () => {
 
   it('searches holdings as well as ETF metadata', () => {
     const result = filterEtfs(etfs, 'nvidia', {
+      market: '시장 전체',
+      theme: '테마 전체',
+      provider: '운용사 전체',
+      risk: '리스크 전체',
+    });
+
+    expect(result.map((etf) => etf.id)).toEqual(['QQQ']);
+  });
+
+  it('searches ticker aliases', () => {
+    const result = filterEtfs(etfs, 'qqq.o', {
       market: '시장 전체',
       theme: '테마 전체',
       provider: '운용사 전체',

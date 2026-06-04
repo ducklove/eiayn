@@ -15,6 +15,24 @@ const MINIMUMS = {
 const REQUIRED_KOREA_IDS = ['360750', '379800', '458730', '069500', '091160'];
 const REQUIRED_US_IDS = ['QQQ', 'VTI', 'SOXX', 'SCHD', 'ARKK'];
 const REQUIRED_REGIONAL_IDS = ['FUEVFVND.VN'];
+const REQUIRED_USER_REQUEST_IDS = [
+  'SIVR',
+  'PPLT',
+  'EUN2.DE',
+  'DAX',
+  '83188.HK',
+  '3188.HK',
+  'EWM',
+  'A200.AX',
+  'AAA.AX',
+  '83199.HK',
+  '3199.HK',
+  'SCHP',
+];
+const REQUIRED_ALIASES = {
+  DAX: 'DAX.O',
+  SCHP: 'SCHP.K',
+};
 
 const raw = await readFile(DATA_FILE, 'utf8');
 const payload = JSON.parse(raw);
@@ -39,8 +57,15 @@ if (payload.coverage?.korea?.sourceTotal && payload.coverage.korea.included !== 
   errors.push(`Korea coverage mismatch: included ${payload.coverage.korea.included}, sourceTotal ${payload.coverage.korea.sourceTotal}`);
 }
 
-for (const id of [...REQUIRED_KOREA_IDS, ...REQUIRED_US_IDS, ...REQUIRED_REGIONAL_IDS]) {
+for (const id of [...REQUIRED_KOREA_IDS, ...REQUIRED_US_IDS, ...REQUIRED_REGIONAL_IDS, ...REQUIRED_USER_REQUEST_IDS]) {
   if (!byId.has(id)) errors.push(`missing required ETF ${id}`);
+}
+
+for (const [id, alias] of Object.entries(REQUIRED_ALIASES)) {
+  const etf = byId.get(id);
+  if (etf && !(etf.aliases ?? []).includes(alias)) {
+    errors.push(`${id}: missing requested alias ${alias}`);
+  }
 }
 
 for (const etf of etfs) {

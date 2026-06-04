@@ -15,6 +15,7 @@ export function searchableText(etf) {
   return normalizeText([
     etf.id,
     etf.ticker,
+    ...(etf.aliases ?? []),
     etf.name,
     etf.shortName,
     etf.provider,
