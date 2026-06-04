@@ -14,6 +14,7 @@ const MINIMUMS = {
 };
 const REQUIRED_KOREA_IDS = ['360750', '379800', '458730', '069500', '091160'];
 const REQUIRED_US_IDS = ['QQQ', 'VTI', 'SOXX', 'SCHD', 'ARKK'];
+const REQUIRED_REGIONAL_IDS = ['FUEVFVND.VN'];
 
 const raw = await readFile(DATA_FILE, 'utf8');
 const payload = JSON.parse(raw);
@@ -38,7 +39,7 @@ if (payload.coverage?.korea?.sourceTotal && payload.coverage.korea.included !== 
   errors.push(`Korea coverage mismatch: included ${payload.coverage.korea.included}, sourceTotal ${payload.coverage.korea.sourceTotal}`);
 }
 
-for (const id of [...REQUIRED_KOREA_IDS, ...REQUIRED_US_IDS]) {
+for (const id of [...REQUIRED_KOREA_IDS, ...REQUIRED_US_IDS, ...REQUIRED_REGIONAL_IDS]) {
   if (!byId.has(id)) errors.push(`missing required ETF ${id}`);
 }
 

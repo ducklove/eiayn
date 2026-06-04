@@ -19,7 +19,7 @@ The generated snapshot currently targets:
 
 - Korea: all active ETFs published by K-ETF.
 - US: Yahoo Finance `MOST_ACTIVES_ETFS` top list plus core ETF supplements such as `SPY`, `QQQ`, `VTI`, `SCHD`, `SOXX`, and `ARKK`.
-- Regional representatives: Hong Kong, Germany, France, Japan, Australia, and Vietnam ETFs with Yahoo Finance chart coverage.
+- Regional representatives: Hong Kong, Germany, France, Japan, Australia, and Vietnam ETFs with Yahoo Finance chart coverage. Vietnam coverage explicitly includes `FUEVFVND.VN` VFMVN Diamond ETF.
 
 Exact counts are recorded in `public/data/etfs.json` under `coverage`.
 

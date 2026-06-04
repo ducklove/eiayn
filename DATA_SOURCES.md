@@ -41,7 +41,7 @@ EIAYN requests the top high-volume records and supplements core ETFs that should
 
 ## Regional Collection
 
-Hong Kong, Germany, France, Japan, Australia, and Vietnam representative ETFs are listed in `scripts/data/universe.mjs`. Each symbol is included only if Yahoo Finance chart returns a valid quote/history response. Regional holdings, AUM, and expense data are often unavailable from the public sources used here, so those fields are kept as `null` or empty arrays.
+Hong Kong, Germany, France, Japan, Australia, and Vietnam representative ETFs are listed in `scripts/data/universe.mjs`. Vietnam representatives explicitly include `FUEVFVND.VN` VFMVN Diamond ETF. Each symbol is included only if Yahoo Finance chart returns a valid quote/history response. Regional holdings, AUM, and expense data are often unavailable from the public sources used here, so those fields are kept as `null` or empty arrays.
 
 ## Update Behavior
 
