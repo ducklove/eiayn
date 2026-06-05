@@ -21,6 +21,7 @@ describe('deep link utilities', () => {
 
     expect(result.activeId).toBe('DAX');
     expect(result.selectedIds).toEqual(['DAX']);
+    expect(result.viewMode).toBe('analysis');
     expect(result.matchedCodeId).toBe('DAX');
   });
 
@@ -29,8 +30,17 @@ describe('deep link utilities', () => {
     const result = resolveInitialSelection(etfs, params);
 
     expect(result.activeId).toBe('QQQ');
-    expect(result.selectedIds).toEqual(['QQQ']);
+    expect(result.selectedIds).toEqual(['QQQ', 'DAX', 'SCHP']);
+    expect(result.viewMode).toBe('analysis');
     expect(result.requestedCode).toBe('NOPE');
     expect(result.matchedCodeId).toBeNull();
+  });
+
+  it('uses the comparison basket by default', () => {
+    const result = resolveInitialSelection(etfs, new URLSearchParams(''));
+
+    expect(result.activeId).toBe('QQQ');
+    expect(result.selectedIds).toEqual(['QQQ', 'DAX', 'SCHP']);
+    expect(result.viewMode).toBe('compare');
   });
 });

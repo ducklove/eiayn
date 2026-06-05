@@ -60,6 +60,17 @@ const metricRows = [
   ['기초지수', 'benchmarkIndex', 'text'],
 ];
 
+const FACTOR_DESCRIPTIONS = {
+  수익성: '3개월, 1년, 3년·5년 연환산 수익률을 ETF 유니버스 안의 백분위로 비교합니다. 1년 수익률 비중이 가장 큽니다.',
+  가치: '총보수 점수와 순자산(AUM) 규모 점수를 합친 항목입니다. 비용이 낮고 규모가 클수록 높게 잡힙니다.',
+  총보수: '연 총보수(expense ratio)가 낮을수록 높은 점수를 받습니다. 같은 시장/테마만이 아니라 전체 수집 ETF 기준으로 정규화합니다.',
+  안정성: '3년 샤프지수, 3년 연환산 변동성, 3년 최대낙폭을 함께 봅니다. 변동성과 낙폭은 낮을수록 유리합니다.',
+  분산: '상위 10개 보유종목의 집중도가 낮을수록 높은 점수를 받습니다. 보유종목 데이터가 없으면 이 팩터는 점수 계산에서 제외됩니다.',
+  효율성: '낮은 총보수와 추적 안정성(추적오차·정보비율)을 함께 반영합니다. 추적 데이터가 없으면 총보수 중심으로 계산됩니다.',
+};
+
+const HOLDING_COLORS = ['#0f3761', '#e06f42', '#2fbf71', '#7b8794', '#f2b84b', '#009b7d', '#4f77be', '#b66dff', '#d44949', '#667588'];
+
 function App() {
   const { data, loading, error, reload } = useEtfData();
   const etfs = data?.etfs ?? [];
@@ -67,6 +78,7 @@ function App() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [selectedIds, setSelectedIds] = useState([]);
   const [activeId, setActiveId] = useState(null);
+  const [viewMode, setViewMode] = useState('compare');
   const [favorites, setFavorites] = usePersistentState('eiayn:favorites:v1', []);
   const [recentIds, setRecentIds] = usePersistentState('eiayn:recent:v1', []);
   const [actionNote, setActionNote] = useState('');
@@ -80,6 +92,7 @@ function App() {
 
     setSelectedIds(initialSelection.selectedIds);
     setActiveId(initialSelection.activeId);
+    setViewMode(initialSelection.viewMode);
     setQuery(params.get('q') ?? '');
     setFilters({
       market: params.get('market') ?? DEFAULT_FILTERS.market,
@@ -102,9 +115,10 @@ function App() {
   const selectedEtfs = useMemo(() => (
     selectedIds.map((id) => etfs.find((etf) => etf.id === id)).filter(Boolean)
   ), [selectedIds, etfs]);
-  const selectedEtf = selectedEtfs.find((etf) => etf.id === activeId) ?? selectedEtfs[0] ?? etfs[0];
+  const selectedEtf = etfs.find((etf) => etf.id === activeId) ?? selectedEtfs[0] ?? etfs[0];
   const favoriteEtfs = etfs.filter((etf) => favorites.includes(etf.id));
   const recentEtfs = recentIds.map((id) => etfs.find((etf) => etf.id === id)).filter(Boolean);
+  const isAnalysisView = viewMode === 'analysis';
 
   const filterOptions = useMemo(() => ({
     markets: uniqueOptions(etfs, 'market', '시장 전체'),
@@ -113,9 +127,36 @@ function App() {
     risks: ['리스크 전체', '낮음', '보통', '높음', '데이터 없음'],
   }), [etfs]);
 
-  const selectEtf = (id) => {
-    setSelectedIds([id]);
+  const addNext = () => {
+    const next = filteredEtfs.find((etf) => !selectedIds.includes(etf.id));
+    if (!next) {
+      setActionNote('추가할 ETF가 없습니다. 검색 조건을 조정해보세요.');
+      return;
+    }
+    const nextIds = [...selectedIds, next.id].slice(-4);
+    setSelectedIds(nextIds);
+    setActiveId(next.id);
+    setViewMode('compare');
+    setActionNote(`${next.shortName}을 비교 바구니에 추가했습니다.`);
+  };
+
+  const openAnalysis = (id) => {
+    const next = etfs.find((etf) => etf.id === id);
+    if (!next) return;
     setActiveId(id);
+    setViewMode('analysis');
+    setActionNote(`${next.shortName} 개별 분석 화면을 열었습니다.`);
+    writeAnalysisUrl(id);
+  };
+
+  const showCompare = () => {
+    setViewMode('compare');
+    setActionNote('ETF 비교 화면으로 돌아왔습니다.');
+    writeCompareUrl(selectedIds, activeId);
+  };
+
+  const showActiveAnalysis = () => {
+    openAnalysis(selectedEtf.id);
   };
 
   const selectFirstResult = () => {
@@ -124,8 +165,7 @@ function App() {
       setActionNote('선택할 ETF가 없습니다. 검색 조건을 조정해보세요.');
       return;
     }
-    selectEtf(next.id);
-    setActionNote(`${next.shortName} 분석 화면을 열었습니다.`);
+    openAnalysis(next.id);
   };
 
   const removeEtf = (id) => {
@@ -153,7 +193,8 @@ function App() {
   };
 
   const exportCsv = () => {
-    const rows = selectedEtfs.map((etf) => ({
+    const exportEtfs = isAnalysisView ? [selectedEtf] : selectedEtfs;
+    const rows = exportEtfs.map((etf) => ({
       id: etf.id,
       ticker: etf.ticker,
       name: etf.name,
@@ -177,14 +218,18 @@ function App() {
       headers.join(','),
       ...rows.map((row) => headers.map((header) => csvCell(row[header])).join(',')),
     ].join('\n');
-    downloadFile(`eiayn-${selectedEtf.id}-${new Date().toISOString().slice(0, 10)}.csv`, csv, 'text/csv;charset=utf-8');
-    setActionNote(`${selectedEtf.shortName} 분석 데이터를 CSV로 내보냈습니다.`);
+    const prefix = isAnalysisView ? selectedEtf.id : 'compare';
+    downloadFile(`eiayn-${prefix}-${new Date().toISOString().slice(0, 10)}.csv`, csv, 'text/csv;charset=utf-8');
+    setActionNote(isAnalysisView ? `${selectedEtf.shortName} 분석 데이터를 CSV로 내보냈습니다.` : '현재 비교 바구니를 CSV로 내보냈습니다.');
   };
 
   const shareState = async () => {
     const params = new URLSearchParams();
-    if (selectedEtf?.id) {
+    if (isAnalysisView && selectedEtf?.id) {
       params.set('code', selectedEtf.id);
+    } else {
+      if (selectedIds.length) params.set('compare', selectedIds.join(','));
+      if (activeId) params.set('active', activeId);
     }
     if (query) params.set('q', query);
     for (const [key, value] of Object.entries(filters)) {
@@ -229,15 +274,24 @@ function App() {
         favorites={favoriteEtfs}
         recentEtfs={recentEtfs}
         generatedAt={data.generatedAt}
+        viewMode={viewMode}
+        onShowCompare={showCompare}
+        onShowAnalysis={showActiveAnalysis}
+        onOpenEtf={openAnalysis}
       />
       <div className="main-shell">
         <TopBar query={query} onQueryChange={setQuery} exchangeRate={data.exchangeRates?.usdKrw} />
-        <main className="content-grid single-analysis">
-          <div className="workspace analysis-workspace">
-            <AnalysisHeader
+        <main className={`content-grid ${isAnalysisView ? 'single-analysis' : ''}`}>
+          <div className={`workspace ${isAnalysisView ? 'analysis-workspace' : ''}`}>
+            <WorkspaceHeader
+              viewMode={viewMode}
               selectedEtf={selectedEtf}
+              selectedIds={selectedIds}
               favorites={favorites}
               toggleFavorite={toggleFavorite}
+              onShowCompare={showCompare}
+              onShowAnalysis={showActiveAnalysis}
+              onAddNext={addNext}
               onSelectFirstResult={selectFirstResult}
               onClearFilters={clearFilters}
               filters={filters}
@@ -250,12 +304,24 @@ function App() {
               onShare={shareState}
               onGuide={() => setShowGuide(true)}
             />
-            <EtfAnalysisDashboard selectedEtf={selectedEtf} favorites={favorites} toggleFavorite={toggleFavorite} />
+            {isAnalysisView ? (
+              <EtfAnalysisDashboard selectedEtf={selectedEtf} favorites={favorites} toggleFavorite={toggleFavorite} />
+            ) : (
+              <ComparisonGrid
+                selectedEtfs={selectedEtfs}
+                activeId={selectedEtf.id}
+                onSelect={setActiveId}
+                onRemove={removeEtf}
+                favorites={favorites}
+                toggleFavorite={toggleFavorite}
+                onAddNext={addNext}
+              />
+            )}
             <UniverseStrip
               filteredEtfs={filteredEtfs}
               activeEtf={selectedEtf}
               activeId={selectedEtf.id}
-              onSelect={selectEtf}
+              onSelect={openAnalysis}
             />
             <div className="bottom-grid">
               <RankingPanel filteredEtfs={filteredEtfs.length ? filteredEtfs : etfs} />
@@ -263,6 +329,7 @@ function App() {
               <SimpleListPanel title="관심상품" items={favoriteEtfs} emptyText="별 버튼으로 관심상품을 추가하세요." />
             </div>
           </div>
+          {!isAnalysisView && <AnalysisPanel selectedEtf={selectedEtf} favorites={favorites} toggleFavorite={toggleFavorite} />}
         </main>
         <footer className="site-footer">
           <span>마지막 업데이트: {formatDateTime(data.generatedAt)} KST</span>
@@ -288,7 +355,7 @@ function StatusScreen({ title, message, action }) {
   );
 }
 
-function Sidebar({ selectedIds, favorites, recentEtfs, generatedAt }) {
+function Sidebar({ selectedIds, favorites, recentEtfs, generatedAt, viewMode, onShowCompare, onShowAnalysis, onOpenEtf }) {
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -300,8 +367,8 @@ function Sidebar({ selectedIds, favorites, recentEtfs, generatedAt }) {
       </div>
 
       <nav className="side-nav" aria-label="주요 메뉴">
-        <a className="active" href="#dashboard"><LayoutDashboard size={18} />대시보드</a>
-        <a href="#compare"><WalletCards size={18} />ETF 분석</a>
+        <a className={viewMode === 'compare' ? 'active' : ''} href="#dashboard" onClick={(event) => { event.preventDefault(); onShowCompare(); }}><LayoutDashboard size={18} />대시보드</a>
+        <a className={viewMode === 'analysis' ? 'active' : ''} href="#model" onClick={(event) => { event.preventDefault(); onShowAnalysis(); }}><WalletCards size={18} />ETF 분석</a>
         <a href="#model"><ShieldCheck size={18} />평가 모델</a>
         <a href="#ranking"><TrendingUp size={18} />수익률 랭킹</a>
         <a href="#search"><Search size={18} />ETF 검색</a>
@@ -318,7 +385,7 @@ function Sidebar({ selectedIds, favorites, recentEtfs, generatedAt }) {
         </div>
         <div className="watchlist-items">
           {favorites.slice(0, 6).map((item) => (
-            <div className="watch-row" key={item.id}>
+            <a className="watch-row" href={`?code=${encodeURIComponent(item.id)}`} key={item.id} onClick={(event) => { event.preventDefault(); onOpenEtf(item.id); }}>
               <span className="dot" />
               <div>
                 <strong>{item.shortName}</strong>
@@ -328,7 +395,7 @@ function Sidebar({ selectedIds, favorites, recentEtfs, generatedAt }) {
                 {formatPrice(item.price, item.currency)}
                 <span className={item.changePercent >= 0 ? 'positive' : 'negative'}>{formatPercent(item.changePercent)}</span>
               </p>
-            </div>
+            </a>
           ))}
           {!favorites.length && <p className="empty-side">관심상품이 없습니다.</p>}
         </div>
@@ -340,10 +407,10 @@ function Sidebar({ selectedIds, favorites, recentEtfs, generatedAt }) {
           <button type="button" disabled title="최근 조회는 ETF 선택 시 자동 기록됩니다.">더보기</button>
         </div>
         {recentEtfs.slice(0, 3).map((item) => (
-          <div className="recent-row" key={item.id}>
+          <a className="recent-row" href={`?code=${encodeURIComponent(item.id)}`} key={item.id} onClick={(event) => { event.preventDefault(); onOpenEtf(item.id); }}>
             <strong>{item.shortName}</strong>
             <span>{item.provider}</span>
-          </div>
+          </a>
         ))}
         {!recentEtfs.length && <p className="empty-side">조회 기록이 없습니다.</p>}
       </section>
@@ -394,10 +461,15 @@ function TopBar({ query, onQueryChange, exchangeRate }) {
   );
 }
 
-function AnalysisHeader({
+function WorkspaceHeader({
+  viewMode,
   selectedEtf,
+  selectedIds,
   favorites,
   toggleFavorite,
+  onShowCompare,
+  onShowAnalysis,
+  onAddNext,
   onSelectFirstResult,
   onClearFilters,
   filters,
@@ -410,35 +482,55 @@ function AnalysisHeader({
   onShare,
   onGuide,
 }) {
+  const isAnalysisView = viewMode === 'analysis';
+
   return (
     <div className="workspace-header" id="compare">
       <div className="title-block">
         <div>
-          <h2>ETF 개별 분석</h2>
-          <p>{selectedEtf.name}의 비용, 성과, 위험, 보유종목, 데이터 품질을 한 화면에서 확인합니다.</p>
+          <h2>{isAnalysisView ? 'ETF 개별 분석' : 'ETF 비교'}</h2>
+          <p>
+            {isAnalysisView
+              ? `${selectedEtf.name}의 비용, 성과, 위험, 보유종목을 한 화면에서 확인합니다.`
+              : '총보수, 순자산, 추적오차, 배당, 변동성을 실제 스냅샷 기준으로 비교합니다.'}
+          </p>
         </div>
-        <button className="guide-button" type="button" onClick={onGuide}>
-          <BookOpenCheck size={16} />
-          사용 가이드
-        </button>
       </div>
 
-      <div className="workspace-actions">
+      <div className="workspace-toolbar">
+        <div className="view-switch" role="tablist" aria-label="화면 전환">
+          <button className={viewMode === 'compare' ? 'active' : ''} type="button" role="tab" aria-selected={viewMode === 'compare'} onClick={onShowCompare}>
+            <WalletCards size={16} />
+            비교 화면
+            <span>{selectedIds.length}/4</span>
+          </button>
+          <button className={viewMode === 'analysis' ? 'active' : ''} type="button" role="tab" aria-selected={viewMode === 'analysis'} onClick={onShowAnalysis}>
+            <ShieldCheck size={16} />
+            개별 분석
+          </button>
+        </div>
+
+        <div className="workspace-actions">
+          <button className="guide-button" type="button" onClick={onGuide}>
+            <BookOpenCheck size={16} />
+            사용 가이드
+          </button>
         <button className={`ghost-button ${favorites.includes(selectedEtf.id) ? 'selected-action' : ''}`} type="button" onClick={() => toggleFavorite(selectedEtf.id)}>
           <Star size={17} />
           관심상품
         </button>
         <button className="ghost-button" type="button" onClick={onExport}>
           <Download size={17} />
-          분석 내보내기
+          {isAnalysisView ? '분석 내보내기' : '비교 내보내기'}
         </button>
         <button className="ghost-button" type="button" onClick={onShare}>
           <Share2 size={17} />
           공유
         </button>
-        <button className="primary-button" type="button" onClick={() => setActionNote(`${selectedEtf.shortName} 분석을 최신 화면 상태로 확인했습니다.`)}>
-          분석 보기
+        <button className="primary-button" type="button" onClick={isAnalysisView ? onShowCompare : onShowAnalysis}>
+          {isAnalysisView ? '비교로 돌아가기' : '분석 보기'}
         </button>
+        </div>
       </div>
 
       <div className="filters" id="search">
@@ -458,6 +550,12 @@ function AnalysisHeader({
           <Plus size={15} />
           결과 열기
         </button>
+        {!isAnalysisView && (
+          <button className="ghost-button slim" type="button" onClick={onAddNext}>
+            <Plus size={15} />
+            비교 추가
+          </button>
+        )}
         <span className="result-count">{resultCount}개 검색됨</span>
       </div>
 
@@ -484,12 +582,26 @@ function FilterSelect({ label, value, options, onChange }) {
   );
 }
 
+function InfoPopover({ title, children }) {
+  return (
+    <details className="info-popover">
+      <summary aria-label={title}>
+        <CircleHelp size={15} />
+      </summary>
+      <div className="popover-panel">
+        <strong>{title}</strong>
+        {children}
+      </div>
+    </details>
+  );
+}
+
 function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite }) {
   const holdings = selectedEtf.holdings ?? [];
   const topHoldings = holdings.slice(0, 10);
-  const otherHoldings = Math.max(0, 100 - topHoldings.reduce((sum, holding) => sum + (holding.weight ?? 0), 0));
+  const holdingChart = buildHoldingChart(topHoldings);
   const factorEntries = Object.entries(selectedEtf.scoreBreakdown ?? {}).filter(([, value]) => typeof value === 'number');
-  const dataSources = selectedEtf.dataQuality?.sources ?? [];
+  const riskRows = riskMetricRows(selectedEtf);
   const m3Tone = returnTone(selectedEtf.returns.m3);
   const y1Tone = returnTone(selectedEtf.returns.y1);
   const y3Tone = returnTone(selectedEtf.returns.y3Annualized);
@@ -543,11 +655,9 @@ function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite }) {
         <section className="analysis-card performance-card">
           <div className="section-heading">
             <h3>성과 흐름</h3>
-            <span>조정가격 기반</span>
+            <span>최근 {sparklinePointCount(selectedEtf.sparkline)}개 관측치 · 조정가격 기반</span>
           </div>
-          <div className="performance-visual">
-            <Sparkline values={selectedEtf.sparkline} />
-          </div>
+          <DetailedSparkline values={selectedEtf.sparkline} currency={selectedEtf.currency} quoteAsOf={selectedEtf.dataQuality.quoteAsOf} />
           <div className="return-grid">
             <MetricTile label="3개월" value={formatPercent(selectedEtf.returns.m3)} tone={m3Tone} />
             <MetricTile label="1년" value={formatPercent(selectedEtf.returns.y1)} tone={y1Tone} />
@@ -558,33 +668,40 @@ function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite }) {
 
         <section className="analysis-card factor-card">
           <div className="section-heading">
-            <h3>AIYN 팩터</h3>
+            <div className="heading-title">
+              <h3>AIYN 팩터</h3>
+              <InfoPopover title="AIYN 팩터란?">
+                <p>AIYN 점수는 비용, 규모, 성과, 위험조정, 추종 안정성, 분산도를 0-100으로 정규화한 뒤 데이터가 있는 항목끼리 가중 평균합니다.</p>
+                <p>데이터가 없는 팩터는 0점 처리하지 않고 계산에서 제외한 뒤 남은 가중치를 재배분합니다.</p>
+              </InfoPopover>
+            </div>
             <span>0-100 정규화</span>
           </div>
           <div className="factor-list">
             {factorEntries.map(([label, value]) => (
-              <div className="factor-row" key={label}>
-                <span>{label}</span>
-                <div className="factor-bar" aria-hidden="true"><i style={{ width: `${value}%` }} /></div>
-                <strong>{value}</strong>
-              </div>
+              <details className="factor-row" key={label}>
+                <summary>
+                  <span>{label}</span>
+                  <div className="factor-bar" aria-hidden="true"><i style={{ width: `${value}%` }} /></div>
+                  <strong>{value}</strong>
+                </summary>
+                <p>{FACTOR_DESCRIPTIONS[label] ?? '해당 팩터는 수집된 실제 지표를 전체 ETF 유니버스 기준으로 정규화한 값입니다.'}</p>
+              </details>
             ))}
           </div>
         </section>
 
-        <section className="analysis-card">
-          <div className="section-heading">
-            <h3>위험 지표</h3>
-            <span>{getRiskBand(selectedEtf)}</span>
-          </div>
-          <dl className="detail-list">
-            <RiskRow label="변동성 (3년 연환산)" value={formatPlainPercent(selectedEtf.risk.volatility3yAnnualized)} />
-            <RiskRow label="최대낙폭 (3년)" value={formatPlainPercent(selectedEtf.risk.maxDrawdown3y)} />
-            <RiskRow label="샤프지수 (3년)" value={formatNumber(selectedEtf.risk.sharpe3y)} />
-            <RiskRow label="추적오차 (3년)" value={formatPlainPercent(selectedEtf.risk.trackingError3y)} />
-            <RiskRow label="정보비율 (3년)" value={formatNumber(selectedEtf.risk.informationRatio3y)} />
-          </dl>
-        </section>
+        {riskRows.length ? (
+          <section className="analysis-card">
+            <div className="section-heading">
+              <h3>위험 지표</h3>
+              <span>{getRiskBand(selectedEtf)}</span>
+            </div>
+            <dl className="detail-list">
+              {riskRows.map((row) => <RiskRow key={row.label} label={row.label} value={row.value} />)}
+            </dl>
+          </section>
+        ) : null}
 
         <section className="analysis-card holdings-card" id="holdings">
           <div className="section-heading">
@@ -592,41 +709,26 @@ function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite }) {
             <span>상위 {Math.min(topHoldings.length, 10)}개</span>
           </div>
           {topHoldings.length ? (
-            <div className="wide-holdings">
-              {topHoldings.map((holding, index) => (
-                <div className="wide-holding-row" key={`${holding.ticker}-${holding.name}-${index}`}>
-                  <span>{index + 1}</span>
-                  <strong>{holding.name}</strong>
-                  <em>{holding.ticker ?? '-'}</em>
-                  <b>{formatPlainPercent(holding.weight)}</b>
+            <div className="portfolio-wide-layout">
+              <div className="donut large" style={{ '--donut': holdingChart.stops.join(', ') }} aria-label="상위 보유종목 비중 도넛 차트" />
+              <div className="wide-holdings">
+                {topHoldings.map((holding, index) => (
+                  <div className="wide-holding-row" key={`${holding.ticker}-${holding.name}-${index}`}>
+                    <span style={{ '--dot-color': HOLDING_COLORS[index % HOLDING_COLORS.length] }}>{index + 1}</span>
+                    <strong>{holding.name}</strong>
+                    <em>{holding.ticker ?? '-'}</em>
+                    <b>{formatPlainPercent(holding.weight)}</b>
+                  </div>
+                ))}
+                <div className="wide-holding-row muted">
+                  <span style={{ '--dot-color': '#c9d1d9' }} />
+                  <strong>기타</strong>
+                  <em />
+                  <b>{formatPlainPercent(holdingChart.otherWeight)}</b>
                 </div>
-              ))}
-              <div className="wide-holding-row muted">
-                <span />
-                <strong>기타</strong>
-                <em />
-                <b>{formatPlainPercent(otherHoldings)}</b>
               </div>
             </div>
           ) : <p className="empty-state">보유종목 데이터 없음</p>}
-        </section>
-
-        <section className="analysis-card data-quality-card">
-          <div className="section-heading">
-            <h3>데이터 품질</h3>
-            <span>{selectedEtf.dataQuality?.missingFields?.length ? '일부 미제공' : '주요 지표 제공'}</span>
-          </div>
-          <dl className="detail-list">
-            <RiskRow label="시세 기준" value={`${formatDateTime(selectedEtf.dataQuality.quoteAsOf)} KST`} />
-            <RiskRow label="프로필 기준" value={`${formatDateTime(selectedEtf.dataQuality.profileAsOf)} KST`} />
-            <RiskRow label="보유종목 기준" value={selectedEtf.dataQuality.holdingsAsOf ? `${formatDateTime(selectedEtf.dataQuality.holdingsAsOf)} KST` : '-'} />
-          </dl>
-          {selectedEtf.dataQuality?.missingFields?.length ? (
-            <p className="inline-warning">미제공 지표: {selectedEtf.dataQuality.missingFields.slice(0, 8).join(', ')}{selectedEtf.dataQuality.missingFields.length > 8 ? ' 외' : ''}</p>
-          ) : null}
-          <div className="source-pills">
-            {dataSources.slice(0, 5).map((source) => <span key={`${source.name}-${source.url}`}>{source.name}</span>)}
-          </div>
         </section>
 
         <section className="analysis-card risk-note single-risk-note" id="risk">
@@ -714,16 +816,8 @@ function ComparisonGrid({ selectedEtfs, activeId, onSelect, onRemove, favorites,
 
 function AnalysisPanel({ selectedEtf, favorites, toggleFavorite }) {
   const holdings = selectedEtf.holdings ?? [];
-  const otherHoldings = Math.max(0, 100 - holdings.reduce((sum, holding) => sum + (holding.weight ?? 0), 0));
-  const colors = ['#0f3761', '#e06f42', '#2fbf71', '#7b8794', '#f2b84b', '#009b7d', '#4f77be', '#b66dff', '#d44949', '#667588'];
-  const donutStops = holdings.slice(0, 5).reduce((acc, holding, index) => {
-    const start = acc.total;
-    const end = start + holding.weight;
-    acc.parts.push(`${colors[index]} ${start}% ${end}%`);
-    acc.total = end;
-    return acc;
-  }, { parts: [], total: 0 });
-  donutStops.parts.push(`#c9d1d9 ${donutStops.total}% ${donutStops.total + otherHoldings}%`);
+  const holdingChart = buildHoldingChart(holdings.slice(0, 5));
+  const riskRows = riskMetricRows(selectedEtf);
 
   return (
     <aside className="analysis-panel" id="model">
@@ -762,9 +856,6 @@ function AnalysisPanel({ selectedEtf, favorites, toggleFavorite }) {
         </div>
         <Radar factors={selectedEtf.scoreBreakdown ?? {}} />
       </section>
-      {selectedEtf.dataQuality.missingFields?.length ? (
-        <p className="missing-note">일부 지표 미제공: {selectedEtf.dataQuality.missingFields.slice(0, 4).join(', ')}{selectedEtf.dataQuality.missingFields.length > 4 ? ' 외' : ''}</p>
-      ) : null}
 
       <section className="portfolio-block" id="holdings">
         <div className="section-heading">
@@ -773,11 +864,11 @@ function AnalysisPanel({ selectedEtf, favorites, toggleFavorite }) {
         </div>
         {holdings.length ? (
           <div className="portfolio-body">
-            <div className="donut" style={{ '--donut': donutStops.parts.join(', ') }} aria-label="구성종목 비중 도넛 차트" />
+            <div className="donut" style={{ '--donut': holdingChart.stops.join(', ') }} aria-label="구성종목 비중 도넛 차트" />
             <div className="holding-list">
               {holdings.slice(0, 5).map((holding, index) => (
                 <div className="holding-row" key={`${holding.ticker}-${holding.name}`}>
-                  <span style={{ '--dot-color': colors[index] }} />
+                  <span style={{ '--dot-color': HOLDING_COLORS[index % HOLDING_COLORS.length] }} />
                   <strong>{holding.name}</strong>
                   <em>{formatPlainPercent(holding.weight)}</em>
                 </div>
@@ -785,22 +876,21 @@ function AnalysisPanel({ selectedEtf, favorites, toggleFavorite }) {
               <div className="holding-row muted">
                 <span style={{ '--dot-color': '#c9d1d9' }} />
                 <strong>기타</strong>
-                <em>{formatPlainPercent(otherHoldings)}</em>
+                <em>{formatPlainPercent(holdingChart.otherWeight)}</em>
               </div>
             </div>
           </div>
         ) : <p className="empty-state">보유종목 데이터 없음</p>}
       </section>
 
-      <section className="risk-block">
-        <h3>위험 지표</h3>
-        <dl>
-          <RiskRow label="변동성 (3년 연환산)" value={formatPlainPercent(selectedEtf.risk.volatility3yAnnualized)} tag={getRiskBand(selectedEtf)} />
-          <RiskRow label="최대낙폭 (3년)" value={formatPlainPercent(selectedEtf.risk.maxDrawdown3y)} />
-          <RiskRow label="추적오차 (3년)" value={formatPlainPercent(selectedEtf.risk.trackingError3y)} />
-          <RiskRow label="정보비율 (3년)" value={formatNumber(selectedEtf.risk.informationRatio3y)} />
-        </dl>
-      </section>
+      {riskRows.length ? (
+        <section className="risk-block">
+          <h3>위험 지표</h3>
+          <dl>
+            {riskRows.map((row, index) => <RiskRow key={row.label} label={row.label} value={row.value} tag={index === 0 ? getRiskBand(selectedEtf) : undefined} />)}
+          </dl>
+        </section>
+      ) : null}
 
       <section className="risk-note" id="risk">
         <AlertTriangle size={18} />
@@ -822,6 +912,17 @@ function RiskRow({ label, value, tag }) {
       <dd>{value} {tag ? <span>{tag}</span> : null}</dd>
     </div>
   );
+}
+
+function riskMetricRows(etf) {
+  const risk = etf.risk ?? {};
+  return [
+    { label: '변동성 (3년 연환산)', raw: risk.volatility3yAnnualized, value: formatPlainPercent(risk.volatility3yAnnualized) },
+    { label: '최대낙폭 (3년)', raw: risk.maxDrawdown3y, value: formatPlainPercent(risk.maxDrawdown3y) },
+    { label: '샤프지수 (3년)', raw: risk.sharpe3y, value: formatNumber(risk.sharpe3y) },
+    { label: '추적오차 (3년)', raw: risk.trackingError3y, value: formatPlainPercent(risk.trackingError3y) },
+    { label: '정보비율 (3년)', raw: risk.informationRatio3y, value: formatNumber(risk.informationRatio3y) },
+  ].filter((row) => isFiniteValue(row.raw));
 }
 
 function UniverseStrip({ filteredEtfs, activeEtf, activeId, onSelect }) {
@@ -959,6 +1060,50 @@ function Radar({ factors }) {
   );
 }
 
+function DetailedSparkline({ values, currency, quoteAsOf }) {
+  const stats = sparklineStats(values);
+  if (!stats) {
+    return (
+      <div className="performance-visual empty-chart">
+        <span className="sparkline-placeholder">성과 흐름 데이터 없음</span>
+      </div>
+    );
+  }
+
+  const points = stats.values.map((value, index) => {
+    const x = 4 + (index / (stats.values.length - 1)) * 92;
+    const y = 42 - ((value - stats.min) / stats.spread) * 34;
+    return `${x.toFixed(2)},${y.toFixed(2)}`;
+  }).join(' ');
+
+  return (
+    <div className="detailed-chart-block">
+      <div className="performance-visual detailed">
+        <div className="chart-scale" aria-hidden="true">
+          <span>{formatPrice(stats.max, currency)}</span>
+          <span>{formatPrice(stats.mid, currency)}</span>
+          <span>{formatPrice(stats.min, currency)}</span>
+        </div>
+        <svg className="detailed-sparkline" viewBox="0 0 100 48" aria-label="최근 가격 흐름">
+          <line x1="4" y1="8" x2="96" y2="8" />
+          <line x1="4" y1="25" x2="96" y2="25" />
+          <line x1="4" y1="42" x2="96" y2="42" />
+          <polyline points={points} />
+          <circle cx="4" cy={42 - ((stats.start - stats.min) / stats.spread) * 34} r="1.8" />
+          <circle cx="96" cy={42 - ((stats.end - stats.min) / stats.spread) * 34} r="1.8" />
+        </svg>
+      </div>
+      <div className="chart-stat-grid">
+        <MetricTile label="기간" value={`최근 ${stats.count}개 거래일`} />
+        <MetricTile label="시작" value={formatPrice(stats.start, currency)} />
+        <MetricTile label="최근" value={formatPrice(stats.end, currency)} tone={returnTone(stats.changePercent)} />
+        <MetricTile label="구간 변화" value={formatPercent(stats.changePercent)} tone={returnTone(stats.changePercent)} />
+      </div>
+      <p className="chart-asof">최근값 기준: {formatDateTime(quoteAsOf)} KST</p>
+    </div>
+  );
+}
+
 function Sparkline({ values }) {
   const cleanValues = (values ?? []).filter((value) => typeof value === 'number');
   if (cleanValues.length < 2) return <span className="sparkline-placeholder">-</span>;
@@ -976,6 +1121,30 @@ function Sparkline({ values }) {
       <polyline points={points} />
     </svg>
   );
+}
+
+function sparklineStats(values) {
+  const cleanValues = (values ?? []).filter(isFiniteValue);
+  if (cleanValues.length < 2) return null;
+  const min = Math.min(...cleanValues);
+  const max = Math.max(...cleanValues);
+  const start = cleanValues[0];
+  const end = cleanValues.at(-1);
+  return {
+    values: cleanValues,
+    count: cleanValues.length,
+    min,
+    max,
+    mid: (min + max) / 2,
+    spread: max - min || 1,
+    start,
+    end,
+    changePercent: start > 0 ? ((end / start) - 1) * 100 : null,
+  };
+}
+
+function sparklinePointCount(values) {
+  return (values ?? []).filter(isFiniteValue).length;
 }
 
 function GuideModal({ onClose }) {
@@ -1012,7 +1181,7 @@ function formatMetric(etf, key, type) {
     );
   }
   if (type === 'plainPercent') return formatPlainPercent(value);
-  if (type === 'return') return <span className={value >= 0 ? 'positive' : 'negative'}>{formatPercent(value)}</span>;
+  if (type === 'return') return <span className={returnTone(value) ?? ''}>{formatPercent(value)}</span>;
   if (type === 'number') return formatNumber(value);
   if (type === 'aum') return formatAum(value, etf.currency);
   return value ?? '-';
@@ -1038,6 +1207,39 @@ function downloadFile(filename, content, type) {
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(url);
+}
+
+function buildHoldingChart(holdings) {
+  const totalWeight = holdings.reduce((sum, holding) => sum + (holding.weight ?? 0), 0);
+  const otherWeight = Math.max(0, 100 - totalWeight);
+  const state = holdings.reduce((acc, holding, index) => {
+    const start = acc.total;
+    const end = start + (holding.weight ?? 0);
+    acc.stops.push(`${HOLDING_COLORS[index % HOLDING_COLORS.length]} ${start}% ${end}%`);
+    acc.total = end;
+    return acc;
+  }, { stops: [], total: 0 });
+
+  state.stops.push(`#c9d1d9 ${state.total}% ${state.total + otherWeight}%`);
+  return { stops: state.stops, otherWeight };
+}
+
+function isFiniteValue(value) {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function writeAnalysisUrl(id) {
+  const params = new URLSearchParams();
+  params.set('code', id);
+  window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+}
+
+function writeCompareUrl(selectedIds, activeId) {
+  const params = new URLSearchParams();
+  if (selectedIds.length) params.set('compare', selectedIds.join(','));
+  if (activeId) params.set('active', activeId);
+  const query = params.toString();
+  window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`);
 }
 
 export default App;
