@@ -50,9 +50,10 @@ The radar chart maps the score components into Korean labels:
 
 - `수익성`: performance
 - `가치`: cost and scale
-- `총보수`: cost efficiency, where lower expense ratio scores higher
 - `안정성`: risk-adjusted profile
 - `분산`: diversification
 - `효율성`: cost and tracking quality
 
-When a field is unavailable, the UI displays `-` or `데이터 없음` and lists missing field names in the ETF detail panel.
+Cost efficiency is still part of the total score, but it is not shown as a separate radar factor because annual expense ratio is already displayed as a primary ETF metric and is also reflected in `가치` and `효율성`.
+
+When a field is unavailable, the UI displays `-` or `데이터 없음` rather than estimating it.

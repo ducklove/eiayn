@@ -61,11 +61,12 @@ Regional holdings are still unavailable from these public profile sources and re
 - The script does not silently fall back to fake data.
 - Missing fields are stored as `null` and listed in `dataQuality.missingFields`.
 - `npm run check:data` validates ETF counts, required fields, numeric price values, source attribution, and production-data wording before build.
+- `sparkline` is generated from the latest 30 calendar days of available adjusted-price history. The number of plotted points can be below 30 because weekends, holidays, and non-trading days are not fabricated.
 
 ## Known Limitations
 
 - Korean K-ETF batch history currently provides a 1-year series; Korean 3-year and 5-year return/risk fields are therefore `null` unless a future source is added.
-- `nav`, `risk.trackingError3y`, and `risk.informationRatio3y` are `null` until reliable benchmark-aligned series are mapped.
+- `nav`, `risk.trackingError3y`, and `risk.informationRatio3y` are `null` until reliable ETF-level NAV and benchmark-aligned series are mapped.
 - Yahoo Finance endpoints are public web endpoints, not guaranteed official APIs, and may be rate-limited or temporarily unavailable.
 - StockAnalysis is an accessible public web source, not an official issuer API. Field names or table structure may change.
 - Data is a build-time snapshot and may lag live market conditions.

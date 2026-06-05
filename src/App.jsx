@@ -63,7 +63,6 @@ const metricRows = [
 const FACTOR_DESCRIPTIONS = {
   수익성: '3개월, 1년, 3년·5년 연환산 수익률을 ETF 유니버스 안의 백분위로 비교합니다. 1년 수익률 비중이 가장 큽니다.',
   가치: '총보수 점수와 순자산(AUM) 규모 점수를 합친 항목입니다. 비용이 낮고 규모가 클수록 높게 잡힙니다.',
-  총보수: '연 총보수(expense ratio)가 낮을수록 높은 점수를 받습니다. 같은 시장/테마만이 아니라 전체 수집 ETF 기준으로 정규화합니다.',
   안정성: '3년 샤프지수, 3년 연환산 변동성, 3년 최대낙폭을 함께 봅니다. 변동성과 낙폭은 낮을수록 유리합니다.',
   분산: '상위 10개 보유종목의 집중도가 낮을수록 높은 점수를 받습니다. 보유종목 데이터가 없으면 이 팩터는 점수 계산에서 제외됩니다.',
   효율성: '낮은 총보수와 추적 안정성(추적오차·정보비율)을 함께 반영합니다. 추적 데이터가 없으면 총보수 중심으로 계산됩니다.',
@@ -600,7 +599,7 @@ function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite }) {
   const holdings = selectedEtf.holdings ?? [];
   const topHoldings = holdings.slice(0, 10);
   const holdingChart = buildHoldingChart(topHoldings);
-  const factorEntries = Object.entries(selectedEtf.scoreBreakdown ?? {}).filter(([, value]) => typeof value === 'number');
+  const factorEntries = Object.entries(selectedEtf.scoreBreakdown ?? {}).filter(([label, value]) => label !== '총보수' && typeof value === 'number');
   const riskRows = riskMetricRows(selectedEtf);
   const m3Tone = returnTone(selectedEtf.returns.m3);
   const y1Tone = returnTone(selectedEtf.returns.y1);
@@ -655,9 +654,9 @@ function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite }) {
         <section className="analysis-card performance-card">
           <div className="section-heading">
             <h3>성과 흐름</h3>
-            <span>최근 {sparklinePointCount(selectedEtf.sparkline)}개 관측치 · 조정가격 기반</span>
+            <span>최근 30일 · 조정가격 기반</span>
           </div>
-          <DetailedSparkline values={selectedEtf.sparkline} currency={selectedEtf.currency} quoteAsOf={selectedEtf.dataQuality.quoteAsOf} />
+          <DetailedSparkline values={selectedEtf.sparkline} currency={selectedEtf.currency} />
           <div className="return-grid">
             <MetricTile label="3개월" value={formatPercent(selectedEtf.returns.m3)} tone={m3Tone} />
             <MetricTile label="1년" value={formatPercent(selectedEtf.returns.y1)} tone={y1Tone} />
@@ -1031,13 +1030,14 @@ function SimpleListPanel({ title, items, emptyText }) {
 
 function Radar({ factors }) {
   const entries = Object.entries(factors).filter(([, value]) => typeof value === 'number');
-  const safeEntries = entries.length ? entries : [['수익성', 0], ['가치', 0], ['총보수', 0], ['안정성', 0], ['분산', 0], ['효율성', 0]];
+  const safeEntries = entries.filter(([label]) => label !== '총보수');
+  const displayEntries = safeEntries.length ? safeEntries : [['수익성', 0], ['가치', 0], ['안정성', 0], ['분산', 0], ['효율성', 0]];
   const centerX = 80;
   const centerY = 76;
   const radius = 44;
   const labelRadius = 63;
-  const points = safeEntries.map(([, value], index) => {
-    const angle = -Math.PI / 2 + (index * 2 * Math.PI) / safeEntries.length;
+  const points = displayEntries.map(([, value], index) => {
+    const angle = -Math.PI / 2 + (index * 2 * Math.PI) / displayEntries.length;
     const distance = (value / 100) * radius;
     return `${centerX + Math.cos(angle) * distance},${centerY + Math.sin(angle) * distance}`;
   }).join(' ');
@@ -1045,14 +1045,14 @@ function Radar({ factors }) {
   return (
     <svg className="radar" viewBox="0 0 160 152" aria-label="AIYN 팩터 레이더">
       {[0.25, 0.5, 0.75, 1].map((scale) => {
-        const grid = safeEntries.map((_, index) => {
-          const angle = -Math.PI / 2 + (index * 2 * Math.PI) / safeEntries.length;
+        const grid = displayEntries.map((_, index) => {
+          const angle = -Math.PI / 2 + (index * 2 * Math.PI) / displayEntries.length;
           return `${centerX + Math.cos(angle) * radius * scale},${centerY + Math.sin(angle) * radius * scale}`;
         }).join(' ');
         return <polygon key={scale} points={grid} className="radar-grid" />;
       })}
-      {safeEntries.map(([label], index) => {
-        const angle = -Math.PI / 2 + (index * 2 * Math.PI) / safeEntries.length;
+      {displayEntries.map(([label], index) => {
+        const angle = -Math.PI / 2 + (index * 2 * Math.PI) / displayEntries.length;
         return <text key={label} x={centerX + Math.cos(angle) * labelRadius} y={centerY + Math.sin(angle) * labelRadius + 4} textAnchor="middle">{label}</text>;
       })}
       <polygon points={points} className="radar-shape" />
@@ -1060,7 +1060,7 @@ function Radar({ factors }) {
   );
 }
 
-function DetailedSparkline({ values, currency, quoteAsOf }) {
+function DetailedSparkline({ values, currency }) {
   const stats = sparklineStats(values);
   if (!stats) {
     return (
@@ -1094,12 +1094,11 @@ function DetailedSparkline({ values, currency, quoteAsOf }) {
         </svg>
       </div>
       <div className="chart-stat-grid">
-        <MetricTile label="기간" value={`최근 ${stats.count}개 거래일`} />
+        <MetricTile label="기간" value="최근 30일" />
         <MetricTile label="시작" value={formatPrice(stats.start, currency)} />
         <MetricTile label="최근" value={formatPrice(stats.end, currency)} tone={returnTone(stats.changePercent)} />
         <MetricTile label="구간 변화" value={formatPercent(stats.changePercent)} tone={returnTone(stats.changePercent)} />
       </div>
-      <p className="chart-asof">최근값 기준: {formatDateTime(quoteAsOf)} KST</p>
     </div>
   );
 }
@@ -1141,10 +1140,6 @@ function sparklineStats(values) {
     end,
     changePercent: start > 0 ? ((end / start) - 1) * 100 : null,
   };
-}
-
-function sparklinePointCount(values) {
-  return (values ?? []).filter(isFiniteValue).length;
 }
 
 function GuideModal({ onClose }) {

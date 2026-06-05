@@ -36,7 +36,8 @@ describe('scoreEtfs', () => {
     expect(scored[0].aiynScore).toBeGreaterThanOrEqual(0);
     expect(scored[0].aiynScore).toBeLessThanOrEqual(100);
     expect(scored[1].aiynScore).toBeGreaterThan(scored[0].aiynScore);
-    expect(scored[1].scoreBreakdown.총보수).toBeGreaterThan(scored[0].scoreBreakdown.총보수);
+    expect(scored[1].scoreBreakdown.총보수).toBeUndefined();
+    expect(scored[1].scoreBreakdown.가치).toBeGreaterThan(scored[0].scoreBreakdown.가치);
   });
 
   it('uses 3-month returns in the profitability component', () => {

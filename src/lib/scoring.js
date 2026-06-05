@@ -26,7 +26,6 @@ export function scoreEtfs(etfs) {
       scoreBreakdown: {
         수익성: roundScore(components.performance),
         가치: roundScore(weightedAverage([components.cost, components.scale])),
-        총보수: roundScore(components.cost),
         안정성: roundScore(components.riskAdjusted),
         분산: roundScore(components.diversification),
         효율성: roundScore(weightedAverage([components.cost, components.tracking])),

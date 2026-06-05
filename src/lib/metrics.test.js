@@ -5,6 +5,7 @@ import {
   calculateMaxDrawdown,
   calculatePeriodReturn,
   calculateSharpeRatio,
+  normalizeSparkline,
   parseCompactMoney,
 } from './metrics.js';
 
@@ -53,5 +54,18 @@ describe('metrics', () => {
   it('parses compact money strings', () => {
     expect(parseCompactMoney('$12.5B', 'USD')).toEqual({ value: 12_500_000_000, currency: 'USD' });
     expect(parseCompactMoney('18.77T', 'KRW')).toEqual({ value: 18_770_000_000_000, currency: 'KRW' });
+  });
+
+  it('normalizes sparklines to the latest 30 calendar days', () => {
+    const daily = Array.from({ length: 45 }, (_, index) => ({
+      date: new Date(Date.UTC(2025, 0, index + 1)).toISOString().slice(0, 10),
+      value: 100 + index,
+    }));
+
+    const sparkline = normalizeSparkline(daily);
+
+    expect(sparkline.at(0)).toBe(115);
+    expect(sparkline.at(-1)).toBe(144);
+    expect(sparkline).toHaveLength(30);
   });
 });

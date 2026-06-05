@@ -108,10 +108,19 @@ export function sliceSeriesFrom(series, period) {
   return points.filter((point) => new Date(point.date) >= target);
 }
 
-export function normalizeSparkline(series, count = 28) {
-  const points = validSeries(series).slice(-count);
+export function normalizeSparkline(series, period = { days: 30 }) {
+  const points = validSeries(series);
   if (!points.length) return [];
-  return points.map((point) => Number(point.value.toFixed(4)));
+  const end = new Date(points.at(-1).date);
+  const target = shiftDate(end, normalizeInclusivePeriod(period));
+  return points
+    .filter((point) => new Date(point.date) >= target)
+    .map((point) => Number(point.value.toFixed(4)));
+}
+
+function normalizeInclusivePeriod(period) {
+  if (!period?.days) return period;
+  return { ...period, days: Math.max(0, period.days - 1) };
 }
 
 function validSeries(series) {
