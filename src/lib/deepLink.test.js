@@ -15,12 +15,12 @@ describe('deep link utilities', () => {
     expect(findEtfByCode(etfs, '3188.hk')?.id).toBe('3188.HK');
   });
 
-  it('makes code the active ETF and keeps it in the comparison basket', () => {
+  it('makes code the active ETF and selected analysis target', () => {
     const params = new URLSearchParams('code=DAX.O&compare=QQQ,SCHP,3188.HK');
     const result = resolveInitialSelection(etfs, params);
 
     expect(result.activeId).toBe('DAX');
-    expect(result.selectedIds).toEqual(['DAX', 'QQQ', 'SCHP', '3188.HK']);
+    expect(result.selectedIds).toEqual(['DAX']);
     expect(result.matchedCodeId).toBe('DAX');
   });
 
@@ -29,7 +29,7 @@ describe('deep link utilities', () => {
     const result = resolveInitialSelection(etfs, params);
 
     expect(result.activeId).toBe('QQQ');
-    expect(result.selectedIds).toEqual(['QQQ', 'DAX', 'SCHP']);
+    expect(result.selectedIds).toEqual(['QQQ']);
     expect(result.requestedCode).toBe('NOPE');
     expect(result.matchedCodeId).toBeNull();
   });

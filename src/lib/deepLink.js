@@ -15,13 +15,12 @@ export function resolveInitialSelection(etfs, params, maxSelected = 4) {
 
   const codeEtf = findEtfByCode(etfs, params.get('code'));
   const activeEtf = findEtfByCode(etfs, params.get('active'));
-  const defaultIds = etfs.slice(0, 3).map((etf) => etf.id);
-  const baseIds = compareIds.length ? compareIds : defaultIds;
-  const selectedIds = codeEtf
-    ? uniqueIds([codeEtf.id, ...baseIds]).slice(0, maxSelected)
-    : baseIds;
+  const defaultId = etfs[0]?.id ?? null;
   const activeId = codeEtf?.id
-    ?? (activeEtf && selectedIds.includes(activeEtf.id) ? activeEtf.id : selectedIds[0]);
+    ?? activeEtf?.id
+    ?? compareIds[0]
+    ?? defaultId;
+  const selectedIds = activeId ? [activeId] : [];
 
   return {
     selectedIds,
