@@ -61,7 +61,8 @@ const metricRows = [
 ];
 
 const FACTOR_DESCRIPTIONS = {
-  수익성: '3개월, 1년, 3년·5년 연환산 수익률을 ETF 유니버스 안의 백분위로 비교합니다. 1년 수익률 비중이 가장 큽니다.',
+  '단기 수익': '최근 30일 가격 변화와 3개월 수익률을 ETF 유니버스 안의 백분위로 비교합니다. 두 기간을 같은 비중으로 반영합니다.',
+  '장기 수익': '1년, 3년·5년 연환산 수익률을 ETF 유니버스 안의 백분위로 비교합니다. 1년 수익률 비중이 가장 큽니다.',
   가치: '총보수 점수와 순자산(AUM) 규모 점수를 합친 항목입니다. 비용이 낮고 규모가 클수록 높게 잡힙니다.',
   안정성: '3년 샤프지수, 3년 연환산 변동성, 3년 최대낙폭을 함께 봅니다. 변동성과 낙폭은 낮을수록 유리합니다.',
   분산: '상위 10개 보유종목의 집중도가 낮을수록 높은 점수를 받습니다. 보유종목 데이터가 없으면 이 팩터는 점수 계산에서 제외됩니다.',
@@ -670,7 +671,7 @@ function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite }) {
             <div className="heading-title">
               <h3>AIYN 팩터</h3>
               <InfoPopover title="AIYN 팩터란?">
-                <p>AIYN 점수는 비용, 규모, 성과, 위험조정, 추종 안정성, 분산도를 0-100으로 정규화한 뒤 데이터가 있는 항목끼리 가중 평균합니다.</p>
+                <p>AIYN 점수는 비용, 규모, 단기 수익, 장기 수익, 위험조정, 추종 안정성, 분산도를 0-100으로 정규화한 뒤 데이터가 있는 항목끼리 가중 평균합니다.</p>
                 <p>데이터가 없는 팩터는 0점 처리하지 않고 계산에서 제외한 뒤 남은 가중치를 재배분합니다.</p>
               </InfoPopover>
             </div>
@@ -1031,11 +1032,11 @@ function SimpleListPanel({ title, items, emptyText }) {
 function Radar({ factors }) {
   const entries = Object.entries(factors).filter(([, value]) => typeof value === 'number');
   const safeEntries = entries.filter(([label]) => label !== '총보수');
-  const displayEntries = safeEntries.length ? safeEntries : [['수익성', 0], ['가치', 0], ['안정성', 0], ['분산', 0], ['효율성', 0]];
-  const centerX = 80;
+  const displayEntries = safeEntries.length ? safeEntries : [['단기 수익', 0], ['장기 수익', 0], ['가치', 0], ['안정성', 0], ['분산', 0], ['효율성', 0]];
+  const centerX = 96;
   const centerY = 76;
   const radius = 44;
-  const labelRadius = 63;
+  const labelRadius = 67;
   const points = displayEntries.map(([, value], index) => {
     const angle = -Math.PI / 2 + (index * 2 * Math.PI) / displayEntries.length;
     const distance = (value / 100) * radius;
@@ -1043,7 +1044,7 @@ function Radar({ factors }) {
   }).join(' ');
 
   return (
-    <svg className="radar" viewBox="0 0 160 152" aria-label="AIYN 팩터 레이더">
+    <svg className="radar" viewBox="0 0 192 152" aria-label="AIYN 팩터 레이더">
       {[0.25, 0.5, 0.75, 1].map((scale) => {
         const grid = displayEntries.map((_, index) => {
           const angle = -Math.PI / 2 + (index * 2 * Math.PI) / displayEntries.length;

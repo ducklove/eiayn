@@ -37,16 +37,36 @@ describe('scoreEtfs', () => {
     expect(scored[0].aiynScore).toBeLessThanOrEqual(100);
     expect(scored[1].aiynScore).toBeGreaterThan(scored[0].aiynScore);
     expect(scored[1].scoreBreakdown.총보수).toBeUndefined();
+    expect(scored[1].scoreBreakdown.수익성).toBeUndefined();
+    expect(scored[1].scoreBreakdown['장기 수익']).toBeGreaterThan(scored[0].scoreBreakdown['장기 수익']);
     expect(scored[1].scoreBreakdown.가치).toBeGreaterThan(scored[0].scoreBreakdown.가치);
   });
 
-  it('uses 3-month returns in the profitability component', () => {
+  it('uses 30-day sparkline return in the short-term return component', () => {
     const [slow, fast] = scoreEtfs([
-      { ...baseEtf, id: 'SLOW', returns: { m3: 1, y1: 10, y3Annualized: null, y5Annualized: null } },
-      { ...baseEtf, id: 'FAST', returns: { m3: 20, y1: 10, y3Annualized: null, y5Annualized: null } },
+      { ...baseEtf, id: 'SLOW', sparkline: [100, 101], returns: { m3: 10, y1: 10, y3Annualized: null, y5Annualized: null } },
+      { ...baseEtf, id: 'FAST', sparkline: [100, 130], returns: { m3: 10, y1: 10, y3Annualized: null, y5Annualized: null } },
     ]);
 
-    expect(fast.scoreBreakdown.수익성).toBeGreaterThan(slow.scoreBreakdown.수익성);
+    expect(fast.scoreBreakdown['단기 수익']).toBeGreaterThan(slow.scoreBreakdown['단기 수익']);
+  });
+
+  it('uses 3-month returns in the short-term return component', () => {
+    const [slow, fast] = scoreEtfs([
+      { ...baseEtf, id: 'SLOW', sparkline: [100, 110], returns: { m3: 1, y1: 10, y3Annualized: null, y5Annualized: null } },
+      { ...baseEtf, id: 'FAST', sparkline: [100, 110], returns: { m3: 20, y1: 10, y3Annualized: null, y5Annualized: null } },
+    ]);
+
+    expect(fast.scoreBreakdown['단기 수익']).toBeGreaterThan(slow.scoreBreakdown['단기 수익']);
+  });
+
+  it('uses 1-year, 3-year, and 5-year returns in the long-term return component', () => {
+    const [slow, fast] = scoreEtfs([
+      { ...baseEtf, id: 'SLOW', returns: { m3: 10, y1: 3, y3Annualized: 2, y5Annualized: 1 } },
+      { ...baseEtf, id: 'FAST', returns: { m3: 10, y1: 20, y3Annualized: 12, y5Annualized: 9 } },
+    ]);
+
+    expect(fast.scoreBreakdown['장기 수익']).toBeGreaterThan(slow.scoreBreakdown['장기 수익']);
   });
 
   it('keeps strong performers high when one leveraged outlier sets an extreme return', () => {
@@ -62,7 +82,8 @@ describe('scoreEtfs', () => {
     ]);
     const strong = scored.find((etf) => etf.id === 'STRONG');
 
-    expect(strong.scoreBreakdown.수익성).toBeGreaterThan(95);
+    expect(strong.scoreBreakdown['단기 수익']).toBeGreaterThan(95);
+    expect(strong.scoreBreakdown['장기 수익']).toBeGreaterThan(95);
   });
 
   it('redistributes weights instead of treating missing fields as zero', () => {

@@ -3,7 +3,8 @@ import { isFiniteNumber } from './metrics.js';
 const COMPONENT_WEIGHTS = {
   cost: 0.18,
   scale: 0.12,
-  performance: 0.26,
+  shortReturn: 0.08,
+  longReturn: 0.18,
   riskAdjusted: 0.22,
   tracking: 0.1,
   diversification: 0.12,
@@ -24,7 +25,8 @@ export function scoreEtfs(etfs) {
       aiynScore: isFiniteNumber(aiynScore) ? Math.round(aiynScore) : null,
       scoreCoverage: Number(availableWeight.toFixed(2)),
       scoreBreakdown: {
-        수익성: roundScore(components.performance),
+        '단기 수익': roundScore(components.shortReturn),
+        '장기 수익': roundScore(components.longReturn),
         가치: roundScore(weightedAverage([components.cost, components.scale])),
         안정성: roundScore(components.riskAdjusted),
         분산: roundScore(components.diversification),
@@ -42,12 +44,15 @@ export function scoreComponents(etf, context) {
   return {
     cost: normalizeLow(etf.expenseRatio, context.expenseRatio),
     scale: normalizeHigh(logOrNull(etf.aum), context.logAum),
-    performance: weightedAverage([
+    shortReturn: weightedAverage([
+      percentileHigh(sparklineReturn(etf.sparkline), context.return30d),
       percentileHigh(etf.returns?.m3, context.m3Returns),
+    ], [0.5, 0.5]),
+    longReturn: weightedAverage([
       percentileHigh(etf.returns?.y1, context.y1Returns),
       percentileHigh(etf.returns?.y3Annualized, context.y3AnnualizedReturns),
       percentileHigh(etf.returns?.y5Annualized, context.y5AnnualizedReturns),
-    ], [0.2, 0.35, 0.25, 0.2]),
+    ], [0.45, 0.3, 0.25]),
     riskAdjusted: weightedAverage([
       normalizeHigh(etf.risk?.sharpe3y, context.sharpe3y),
       normalizeLow(etf.risk?.volatility3yAnnualized, context.volatility3yAnnualized),
@@ -65,6 +70,7 @@ export function buildScoringContext(etfs) {
   return {
     expenseRatio: extent(etfs.map((etf) => etf.expenseRatio)),
     logAum: extent(etfs.map((etf) => logOrNull(etf.aum))),
+    return30d: distribution(etfs.map((etf) => sparklineReturn(etf.sparkline))),
     m3Returns: distribution(etfs.map((etf) => etf.returns?.m3)),
     y1Returns: distribution(etfs.map((etf) => etf.returns?.y1)),
     y3AnnualizedReturns: distribution(etfs.map((etf) => etf.returns?.y3Annualized)),
@@ -130,6 +136,15 @@ function roundScore(value) {
 
 function logOrNull(value) {
   return isFiniteNumber(value) && value > 0 ? Math.log10(value) : null;
+}
+
+function sparklineReturn(values) {
+  const cleanValues = (values ?? []).filter(isFiniteNumber);
+  if (cleanValues.length < 2) return null;
+  const start = cleanValues[0];
+  const end = cleanValues.at(-1);
+  if (!isFiniteNumber(start) || start <= 0 || !isFiniteNumber(end)) return null;
+  return ((end / start) - 1) * 100;
 }
 
 function clamp(value) {

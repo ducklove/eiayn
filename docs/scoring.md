@@ -6,6 +6,7 @@ AIYN scores are deterministic and computed from the generated ETF snapshot. Scor
 
 Price history uses adjusted close when Yahoo Finance chart provides it, otherwise close. Korean ETF 3-month and 1-year returns use K-ETF return rankings when available, with K-ETF 1-year history as fallback.
 
+- 30-day return: period return from the first to the latest point in the generated recent-30-calendar-day sparkline.
 - 3-month return: period return from the first trading point on or after the date 3 months before the latest point.
 - 1-year return: period return from the first trading point on or after the date 1 year before the latest point.
 - 3-year annualized return: `(ending / beginning)^(1 / 3) - 1`.
@@ -30,25 +31,31 @@ The score is calculated from these components:
 | --- | ---: | --- |
 | Cost efficiency | 18% | lower expense ratio is better |
 | Scale/liquidity proxy | 12% | higher log AUM is better |
-| Performance | 26% | higher 3M/1Y/3Y/5Y returns are better |
+| Short-term return | 8% | higher 30D and 3M returns are better |
+| Long-term return | 18% | higher 1Y/3Y/5Y returns are better |
 | Risk-adjusted profile | 22% | higher Sharpe, lower volatility, lower drawdown are better |
 | Tracking quality | 10% | lower tracking error and higher information ratio are better |
 | Diversification | 12% | lower top-holding concentration is better |
 
 Most components are normalized across the current ETF universe to a 0-100 range. Return metrics use percentile-rank normalization so one or two extreme leveraged products do not compress otherwise strong performers near the bottom of the scale. Missing component values are excluded and the remaining component weights are redistributed for that ETF. Missing data is therefore not treated as a forced zero, and the available score coverage is stored as `scoreCoverage`.
 
-The performance component weights available return windows as:
+The short-term return component weights available return windows as:
 
-- 3-month return: 20%
-- 1-year return: 35%
-- 3-year annualized return: 25%
-- 5-year annualized return: 20%
+- 30-day return: 50%
+- 3-month return: 50%
+
+The long-term return component weights available return windows as:
+
+- 1-year return: 45%
+- 3-year annualized return: 30%
+- 5-year annualized return: 25%
 
 ## Display Factors
 
 The radar chart maps the score components into Korean labels:
 
-- `수익성`: performance
+- `단기 수익`: 30-day and 3-month return profile
+- `장기 수익`: 1-year, 3-year, and 5-year return profile
 - `가치`: cost and scale
 - `안정성`: risk-adjusted profile
 - `분산`: diversification

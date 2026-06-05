@@ -79,6 +79,7 @@ for (const etf of etfs) {
     'currency',
     'returns',
     'risk',
+    'scoreBreakdown',
     'dataQuality',
   ]) {
     if (etf[field] === undefined || etf[field] === null || etf[field] === '') {
@@ -99,6 +100,15 @@ for (const etf of etfs) {
   if (!Array.isArray(etf.sparkline)) errors.push(`${etf.id}: sparkline must be an array`);
   if (!Array.isArray(etf.dataQuality?.sources) || !etf.dataQuality.sources.length) {
     errors.push(`${etf.id}: dataQuality.sources must not be empty`);
+  }
+  if (Object.hasOwn(etf.scoreBreakdown ?? {}, '수익성')) errors.push(`${etf.id}: legacy scoreBreakdown.수익성 must not be present`);
+  if (Object.hasOwn(etf.scoreBreakdown ?? {}, '총보수')) errors.push(`${etf.id}: scoreBreakdown.총보수 must not be present`);
+  for (const field of ['단기 수익', '장기 수익', '가치', '안정성', '분산', '효율성']) {
+    if (Object.hasOwn(etf.scoreBreakdown ?? {}, field) === false) {
+      errors.push(`${etf.id}: scoreBreakdown.${field} is required`);
+    } else if (!isNumberOrNull(etf.scoreBreakdown[field])) {
+      errors.push(`${etf.id}: scoreBreakdown.${field} must be number or null`);
+    }
   }
 
   for (const [key, value] of Object.entries(etf.returns ?? {})) {

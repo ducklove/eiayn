@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-06-05
+
+- Split the AIYN profitability display into short-term return and long-term return factors.
+- Added recent 30-day sparkline return to the short-term return score alongside 3-month return.
+- Updated scoring documentation, factor help text, and unit tests for the new return-factor split.
+
 ## 2026-06-04
 
 - Expanded the production ETF snapshot from a 10-ETF focused universe to all active Korean ETFs, Yahoo Finance high-volume US ETFs, and representative Hong Kong/Germany/France/Japan/Australia/Vietnam ETFs.
