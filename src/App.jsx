@@ -324,9 +324,9 @@ function App() {
               onSelect={openAnalysis}
             />
             <div className="bottom-grid">
-              <RankingPanel filteredEtfs={filteredEtfs.length ? filteredEtfs : etfs} />
-              <SimpleListPanel title="최근 조회" items={recentEtfs} emptyText="아직 조회한 ETF가 없습니다." />
-              <SimpleListPanel title="관심상품" items={favoriteEtfs} emptyText="별 버튼으로 관심상품을 추가하세요." />
+              <RankingPanel filteredEtfs={filteredEtfs.length ? filteredEtfs : etfs} onOpenEtf={openAnalysis} />
+              <SimpleListPanel title="최근 조회" items={recentEtfs} emptyText="아직 조회한 ETF가 없습니다." onOpenEtf={openAnalysis} />
+              <SimpleListPanel title="관심상품" items={favoriteEtfs} emptyText="별 버튼으로 관심상품을 추가하세요." onOpenEtf={openAnalysis} />
             </div>
           </div>
           {!isAnalysisView && <AnalysisPanel selectedEtf={selectedEtf} favorites={favorites} toggleFavorite={toggleFavorite} />}
@@ -385,7 +385,7 @@ function Sidebar({ selectedIds, favorites, recentEtfs, generatedAt, viewMode, on
         </div>
         <div className="watchlist-items">
           {favorites.slice(0, 6).map((item) => (
-            <a className="watch-row" href={`?code=${encodeURIComponent(item.id)}`} key={item.id} onClick={(event) => { event.preventDefault(); onOpenEtf(item.id); }}>
+            <a className="watch-row" href={etfDeepLink(item.id)} key={item.id} onClick={(event) => handleEtfLinkClick(event, item.id, onOpenEtf)}>
               <span className="dot" />
               <div>
                 <strong>{item.shortName}</strong>
@@ -407,7 +407,7 @@ function Sidebar({ selectedIds, favorites, recentEtfs, generatedAt, viewMode, on
           <button type="button" disabled title="최근 조회는 ETF 선택 시 자동 기록됩니다.">더보기</button>
         </div>
         {recentEtfs.slice(0, 3).map((item) => (
-          <a className="recent-row" href={`?code=${encodeURIComponent(item.id)}`} key={item.id} onClick={(event) => { event.preventDefault(); onOpenEtf(item.id); }}>
+          <a className="recent-row" href={etfDeepLink(item.id)} key={item.id} onClick={(event) => handleEtfLinkClick(event, item.id, onOpenEtf)}>
             <strong>{item.shortName}</strong>
             <span>{item.provider}</span>
           </a>
@@ -957,7 +957,7 @@ function UniverseStrip({ filteredEtfs, activeEtf, activeId, onSelect }) {
   );
 }
 
-function RankingPanel({ filteredEtfs }) {
+function RankingPanel({ filteredEtfs, onOpenEtf }) {
   const [tab, setTab] = useState('전체');
   const marketTabs = useMemo(() => (
     ['전체', ...Array.from(new Set(filteredEtfs.map((item) => item.market).filter(Boolean)))]
@@ -988,19 +988,25 @@ function RankingPanel({ filteredEtfs }) {
       </div>
       <div className="ranking-list">
         {ranked.map((item, index) => (
-          <div className="ranking-row" key={item.id}>
+          <a
+            className="ranking-row"
+            href={etfDeepLink(item.id)}
+            key={item.id}
+            onClick={(event) => handleEtfLinkClick(event, item.id, onOpenEtf)}
+            aria-label={`${item.shortName} 개별 분석 열기`}
+          >
             <span>{index + 1}</span>
             <strong>{item.shortName}</strong>
             <em>{item.provider}</em>
             <b className={item.returns.y1 >= 0 ? 'positive' : 'negative'}>{formatPercent(item.returns.y1)}</b>
-          </div>
+          </a>
         ))}
       </div>
     </section>
   );
 }
 
-function SimpleListPanel({ title, items, emptyText }) {
+function SimpleListPanel({ title, items, emptyText, onOpenEtf }) {
   return (
     <section className="bottom-panel">
       <div className="section-heading">
@@ -1016,17 +1022,42 @@ function SimpleListPanel({ title, items, emptyText }) {
             <span>1년 수익률</span>
           </div>
           {items.slice(0, 5).map((item) => (
-            <div className="compact-row" key={item.id}>
+            <a
+              className="compact-row"
+              href={etfDeepLink(item.id)}
+              key={item.id}
+              onClick={(event) => handleEtfLinkClick(event, item.id, onOpenEtf)}
+              aria-label={`${item.shortName} 개별 분석 열기`}
+            >
               <strong>{item.shortName}</strong>
               <span>{item.market}</span>
               <span>{item.assetClass}</span>
               <span className={item.returns.y1 >= 0 ? 'positive' : 'negative'}>{formatPercent(item.returns.y1)}</span>
-            </div>
+            </a>
           ))}
         </div>
       ) : <p className="empty-state">{emptyText}</p>}
     </section>
   );
+}
+
+function etfDeepLink(id) {
+  return `?code=${encodeURIComponent(id)}`;
+}
+
+function handleEtfLinkClick(event, id, onOpenEtf) {
+  if (
+    event.defaultPrevented
+    || event.button !== 0
+    || event.metaKey
+    || event.ctrlKey
+    || event.shiftKey
+    || event.altKey
+  ) {
+    return;
+  }
+  event.preventDefault();
+  onOpenEtf(id);
 }
 
 function Radar({ factors }) {
