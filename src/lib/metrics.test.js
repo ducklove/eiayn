@@ -53,7 +53,10 @@ describe('metrics', () => {
 
   it('parses compact money strings', () => {
     expect(parseCompactMoney('$12.5B', 'USD')).toEqual({ value: 12_500_000_000, currency: 'USD' });
-    expect(parseCompactMoney('18.77T', 'KRW')).toEqual({ value: 18_770_000_000_000, currency: 'KRW' });
+    expect(parseCompactMoney('18.77T', 'KRW')).toEqual({
+      value: 18_770_000_000_000,
+      currency: 'KRW',
+    });
   });
 
   it('normalizes sparklines to the latest 30 calendar days', () => {

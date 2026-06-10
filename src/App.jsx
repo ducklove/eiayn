@@ -90,7 +90,8 @@ function App() {
     const onKeyDown = (event) => {
       if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) return;
       const target = event.target;
-      if (target instanceof HTMLElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+      if (target instanceof HTMLElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
+        return;
       event.preventDefault();
       searchRef.current?.focus();
     };
@@ -103,20 +104,24 @@ function App() {
     () => filterEtfs(etfs, deferredQuery, filters, searchIndex),
     [etfs, deferredQuery, filters, searchIndex],
   );
-  const selectedEtfs = useMemo(() => (
-    selectedIds.map((id) => etfs.find((etf) => etf.id === id)).filter(Boolean)
-  ), [selectedIds, etfs]);
+  const selectedEtfs = useMemo(
+    () => selectedIds.map((id) => etfs.find((etf) => etf.id === id)).filter(Boolean),
+    [selectedIds, etfs],
+  );
   const selectedEtf = etfs.find((etf) => etf.id === activeId) ?? selectedEtfs[0] ?? etfs[0];
   const favoriteEtfs = etfs.filter((etf) => favorites.includes(etf.id));
   const recentEtfs = recentIds.map((id) => etfs.find((etf) => etf.id === id)).filter(Boolean);
   const isAnalysisView = viewMode === 'analysis';
 
-  const filterOptions = useMemo(() => ({
-    markets: uniqueOptions(etfs, 'market', '시장 전체'),
-    themes: uniqueOptions(etfs, 'theme', '테마 전체'),
-    providers: uniqueOptions(etfs, 'provider', '운용사 전체'),
-    risks: ['리스크 전체', '낮음', '보통', '높음', '데이터 없음'],
-  }), [etfs]);
+  const filterOptions = useMemo(
+    () => ({
+      markets: uniqueOptions(etfs, 'market', '시장 전체'),
+      themes: uniqueOptions(etfs, 'theme', '테마 전체'),
+      providers: uniqueOptions(etfs, 'provider', '운용사 전체'),
+      risks: ['리스크 전체', '낮음', '보통', '높음', '데이터 없음'],
+    }),
+    [etfs],
+  );
 
   const addNext = () => {
     const next = filteredEtfs.find((etf) => !selectedIds.includes(etf.id));
@@ -170,11 +175,9 @@ function App() {
   };
 
   const toggleFavorite = (id) => {
-    setFavorites((current) => (
-      current.includes(id)
-        ? current.filter((favoriteId) => favoriteId !== id)
-        : [...current, id]
-    ));
+    setFavorites((current) =>
+      current.includes(id) ? current.filter((favoriteId) => favoriteId !== id) : [...current, id],
+    );
   };
 
   const clearFilters = () => {
@@ -206,8 +209,16 @@ function App() {
     const csv = buildCsv(rows);
     if (!csv) return;
     const prefix = isAnalysisView ? selectedEtf.id : 'compare';
-    downloadFile(`eiayn-${prefix}-${new Date().toISOString().slice(0, 10)}.csv`, csv, 'text/csv;charset=utf-8');
-    setActionNote(isAnalysisView ? `${selectedEtf.shortName} 분석 데이터를 CSV로 내보냈습니다.` : '현재 비교 바구니를 CSV로 내보냈습니다.');
+    downloadFile(
+      `eiayn-${prefix}-${new Date().toISOString().slice(0, 10)}.csv`,
+      csv,
+      'text/csv;charset=utf-8',
+    );
+    setActionNote(
+      isAnalysisView
+        ? `${selectedEtf.shortName} 분석 데이터를 CSV로 내보냈습니다.`
+        : '현재 비교 바구니를 CSV로 내보냈습니다.',
+    );
   };
 
   const shareState = async () => {
@@ -237,12 +248,19 @@ function App() {
       }
     } catch {
       window.history.replaceState(null, '', url);
-      setActionNote('공유 링크를 주소창에 반영했습니다. 복사 권한은 브라우저에서 허용되지 않았습니다.');
+      setActionNote(
+        '공유 링크를 주소창에 반영했습니다. 복사 권한은 브라우저에서 허용되지 않았습니다.',
+      );
     }
   };
 
   if (loading || !initialized) {
-    return <StatusScreen title="ETF 데이터를 불러오는 중입니다" message="빌드 시 생성된 최신 스냅샷을 확인하고 있습니다." />;
+    return (
+      <StatusScreen
+        title="ETF 데이터를 불러오는 중입니다"
+        message="빌드 시 생성된 최신 스냅샷을 확인하고 있습니다."
+      />
+    );
   }
 
   if (error) {
@@ -250,7 +268,11 @@ function App() {
       <StatusScreen
         title="데이터를 불러오지 못했습니다"
         message={error.message}
-        action={<button className="primary-button" type="button" onClick={reload}>다시 시도</button>}
+        action={
+          <button className="primary-button" type="button" onClick={reload}>
+            다시 시도
+          </button>
+        }
       />
     );
   }
@@ -268,7 +290,12 @@ function App() {
         onOpenEtf={openAnalysis}
       />
       <div className="main-shell">
-        <TopBar query={query} onQueryChange={setQuery} exchangeRate={data.exchangeRates?.usdKrw} searchRef={searchRef} />
+        <TopBar
+          query={query}
+          onQueryChange={setQuery}
+          exchangeRate={data.exchangeRates?.usdKrw}
+          searchRef={searchRef}
+        />
         <main className={`content-grid ${isAnalysisView ? 'single-analysis' : ''}`}>
           <div className={`workspace ${isAnalysisView ? 'analysis-workspace' : ''}`}>
             <WorkspaceHeader
@@ -293,7 +320,11 @@ function App() {
               onGuide={() => setShowGuide(true)}
             />
             {isAnalysisView ? (
-              <EtfAnalysisDashboard selectedEtf={selectedEtf} favorites={favorites} toggleFavorite={toggleFavorite} />
+              <EtfAnalysisDashboard
+                selectedEtf={selectedEtf}
+                favorites={favorites}
+                toggleFavorite={toggleFavorite}
+              />
             ) : (
               <ComparisonGrid
                 selectedEtfs={selectedEtfs}
@@ -312,12 +343,31 @@ function App() {
               onSelect={openAnalysis}
             />
             <div className="bottom-grid">
-              <RankingPanel filteredEtfs={filteredEtfs.length ? filteredEtfs : etfs} onOpenEtf={openAnalysis} />
-              <SimpleListPanel title="최근 조회" items={recentEtfs} emptyText="아직 조회한 ETF가 없습니다." onOpenEtf={openAnalysis} />
-              <SimpleListPanel title="관심상품" items={favoriteEtfs} emptyText="별 버튼으로 관심상품을 추가하세요." onOpenEtf={openAnalysis} />
+              <RankingPanel
+                filteredEtfs={filteredEtfs.length ? filteredEtfs : etfs}
+                onOpenEtf={openAnalysis}
+              />
+              <SimpleListPanel
+                title="최근 조회"
+                items={recentEtfs}
+                emptyText="아직 조회한 ETF가 없습니다."
+                onOpenEtf={openAnalysis}
+              />
+              <SimpleListPanel
+                title="관심상품"
+                items={favoriteEtfs}
+                emptyText="별 버튼으로 관심상품을 추가하세요."
+                onOpenEtf={openAnalysis}
+              />
             </div>
           </div>
-          {!isAnalysisView && <AnalysisPanel selectedEtf={selectedEtf} favorites={favorites} toggleFavorite={toggleFavorite} />}
+          {!isAnalysisView && (
+            <AnalysisPanel
+              selectedEtf={selectedEtf}
+              favorites={favorites}
+              toggleFavorite={toggleFavorite}
+            />
+          )}
         </main>
         <footer className="site-footer">
           <span>마지막 업데이트: {formatDateTime(data.generatedAt)} KST</span>

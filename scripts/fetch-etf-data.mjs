@@ -49,7 +49,9 @@ async function main() {
   console.log('[data:update] Collecting Korea active ETF universe');
   const koreanBase = await fetchKoreanEtfBaseData();
   const koreaBaseEtfs = buildKoreanEtfs(koreanBase);
-  console.log(`[data:update] Korea ETFs normalized: ${koreaBaseEtfs.length}/${koreanBase.lineup.trace?.total ?? koreaBaseEtfs.length}`);
+  console.log(
+    `[data:update] Korea ETFs normalized: ${koreaBaseEtfs.length}/${koreanBase.lineup.trace?.total ?? koreaBaseEtfs.length}`,
+  );
 
   // Best-effort long-horizon enrichment from Yahoo KRX charts. Each chart
   // fetch is optional: failures leave the ETF unchanged and never abort the run.
@@ -67,8 +69,7 @@ async function main() {
   const regionalEtfs = await fetchRegionalEtfs(excluded);
   console.log(`[data:update] Regional ETFs normalized: ${regionalEtfs.length}`);
 
-  const etfs = dedupeEtfs([...koreaEtfs, ...usData.etfs, ...regionalEtfs])
-    .sort(sortEtfsForDisplay);
+  const etfs = dedupeEtfs([...koreaEtfs, ...usData.etfs, ...regionalEtfs]).sort(sortEtfsForDisplay);
 
   const scoredEtfs = scoreEtfs(etfs).map((etf) => ({
     ...etf,
@@ -104,7 +105,15 @@ async function main() {
       {
         name: 'K-ETF',
         url: 'https://www.k-etf.com/',
-        fields: ['Korea active ETF lineup', 'price', 'trading value', 'market cap', 'fees', '1Y history', 'holdings'],
+        fields: [
+          'Korea active ETF lineup',
+          'price',
+          'trading value',
+          'market cap',
+          'fees',
+          '1Y history',
+          'holdings',
+        ],
       },
       {
         name: 'Yahoo Finance MOST_ACTIVES_ETFS screener',
@@ -119,12 +128,23 @@ async function main() {
       {
         name: KOREA_YAHOO_SOURCE_NAME,
         url: YAHOO_CHART_ROOT,
-        fields: ['Korea ETF 3y/5y returns', 'Korea ETF 3y risk metrics', 'dividendYield and sparkline fallback'],
+        fields: [
+          'Korea ETF 3y/5y returns',
+          'Korea ETF 3y risk metrics',
+          'dividendYield and sparkline fallback',
+        ],
       },
       {
         name: 'StockAnalysis',
         url: 'https://stockanalysis.com/',
-        fields: ['expenseRatio', 'aum', 'dividendYield', 'inceptionDate', 'holdings', 'regional quote profile'],
+        fields: [
+          'expenseRatio',
+          'aum',
+          'dividendYield',
+          'inceptionDate',
+          'holdings',
+          'regional quote profile',
+        ],
       },
       {
         name: 'Yahoo Finance quoteSummary',
@@ -134,7 +154,9 @@ async function main() {
       {
         name: 'Issuer or exchange profile override',
         url: 'https://github.com/ducklove/eiayn/blob/main/scripts/data/profile-overrides.mjs',
-        fields: ['manually curated expenseRatio for regional ETFs, applied with highest precedence'],
+        fields: [
+          'manually curated expenseRatio for regional ETFs, applied with highest precedence',
+        ],
       },
       {
         name: 'EIAYN regional representative universe',
@@ -171,7 +193,8 @@ function buildKoreanEtfs(base) {
     const series = normalizeHistoricalPairs(compare?.historical?.price);
     const latestPrice = nullableNumber(quote?.price) ?? nullableNumber(compare?.latest?.price);
     const categoryFullCode = metadata.category_fullcode ?? lineupItem.category_code ?? null;
-    const categoryName = metadata.category_name ?? compare?.meta?.category ?? lineupItem.category_code ?? null;
+    const categoryName =
+      metadata.category_name ?? compare?.meta?.category ?? lineupItem.category_code ?? null;
 
     return {
       id: code,
@@ -194,8 +217,12 @@ function buildKoreanEtfs(base) {
       inceptionDate: lineupItem.listed_date ?? null,
       nav: null,
       returns: {
-        m3: roundNullable(nullableNumber(price3m?.value) ?? calculatePeriodReturn(series, { months: 3 })),
-        y1: roundNullable(nullableNumber(price1y?.value) ?? calculatePeriodReturn(series, { years: 1 })),
+        m3: roundNullable(
+          nullableNumber(price3m?.value) ?? calculatePeriodReturn(series, { months: 3 }),
+        ),
+        y1: roundNullable(
+          nullableNumber(price1y?.value) ?? calculatePeriodReturn(series, { years: 1 }),
+        ),
         y3Annualized: null,
         y5Annualized: null,
       },
@@ -216,11 +243,19 @@ function buildKoreanEtfs(base) {
       },
       dataQuality: {
         quoteAsOf: quote?.ts ?? base.quotes.trace?.latest_ts ?? GENERATED_AT,
-        profileAsOf: base.price1y.trace?.asof ? `${base.price1y.trace.asof}T00:00:00.000Z` : GENERATED_AT,
+        profileAsOf: base.price1y.trace?.asof
+          ? `${base.price1y.trace.asof}T00:00:00.000Z`
+          : GENERATED_AT,
         holdingsAsOf: holdingsData.asOf,
         sources: compactSources([
-          { ...KETF_SOURCES.lineup, fields: ['active ETF lineup', 'name', 'listing date', 'category'] },
-          { ...KETF_SOURCES.quotes, fields: ['price', 'changePercent', 'aum', 'volume', 'tradingValue'] },
+          {
+            ...KETF_SOURCES.lineup,
+            fields: ['active ETF lineup', 'name', 'listing date', 'category'],
+          },
+          {
+            ...KETF_SOURCES.quotes,
+            fields: ['price', 'changePercent', 'aum', 'volume', 'tradingValue'],
+          },
           { ...KETF_SOURCES.compare, fields: ['expenseRatio', 'benchmarkIndex', '1Y history'] },
           { ...KETF_SOURCES.priceRanking3m, fields: ['returns.m3', 'issuer', 'category'] },
           { ...KETF_SOURCES.priceRanking1y, fields: ['returns.y1', 'issuer', 'category'] },
@@ -302,26 +337,31 @@ async function fetchUsEtfs(excluded) {
 async function fetchRegionalEtfs(excluded) {
   const etfs = await mapLimit(GLOBAL_REPRESENTATIVE_ETFS, 8, async (instrument, index) => {
     if ((index + 1) % 10 === 0 || index === GLOBAL_REPRESENTATIVE_ETFS.length - 1) {
-      console.log(`[data:update] Regional Yahoo chart ${index + 1}/${GLOBAL_REPRESENTATIVE_ETFS.length}`);
+      console.log(
+        `[data:update] Regional Yahoo chart ${index + 1}/${GLOBAL_REPRESENTATIVE_ETFS.length}`,
+      );
     }
-    return fetchYahooBackedEtf({
-      ticker: instrument.ticker,
-      symbol: instrument.ticker,
-      category: instrument.category,
-      benchmarkIndex: instrument.benchmarkIndex,
-      universeSource: {
-        name: 'EIAYN regional representative universe',
-        url: 'https://github.com/ducklove/eiayn',
-        fields: ['market', 'category', 'benchmarkIndex'],
+    return fetchYahooBackedEtf(
+      {
+        ticker: instrument.ticker,
+        symbol: instrument.ticker,
+        category: instrument.category,
+        benchmarkIndex: instrument.benchmarkIndex,
+        universeSource: {
+          name: 'EIAYN regional representative universe',
+          url: 'https://github.com/ducklove/eiayn',
+          fields: ['market', 'category', 'benchmarkIndex'],
+        },
       },
-    }, {
-      market: instrument.market,
-      defaultCurrency: defaultCurrencyForMarket(instrument.market),
-      useStockAnalysis: !instrument.ticker.includes('.'),
-      useRegionalProfile: true,
-      useYahooQuoteSummaryProfile: true,
-      excluded,
-    });
+      {
+        market: instrument.market,
+        defaultCurrency: defaultCurrencyForMarket(instrument.market),
+        useStockAnalysis: !instrument.ticker.includes('.'),
+        useRegionalProfile: true,
+        useYahooQuoteSummaryProfile: true,
+        excluded,
+      },
+    );
   });
   return etfs.filter(Boolean);
 }
@@ -333,7 +373,10 @@ async function fetchYahooBackedEtf(record, options) {
     const stockAnalysisPath = stockAnalysisPathForTicker(ticker);
     const profileCurrency = chart.meta.currency ?? options.defaultCurrency;
     const stockAnalysisProfile = options.useStockAnalysis
-      ? await fetchStockAnalysisProfile(stockAnalysisPath, chart.meta.currency ?? options.defaultCurrency)
+      ? await fetchStockAnalysisProfile(
+          stockAnalysisPath,
+          chart.meta.currency ?? options.defaultCurrency,
+        )
       : emptyProfile();
     const regionalProfile = options.useRegionalProfile
       ? await fetchStockAnalysisQuoteProfile(ticker, profileCurrency)
@@ -360,9 +403,14 @@ async function fetchYahooBackedEtf(record, options) {
     const series3y = sliceSeriesFrom(series, { years: 3 });
     const latestQuote = chart.quotes.at(-1);
     const previousQuote = chart.quotes.at(-2);
-    const price = chart.meta.regularMarketPrice ?? nullableNumber(record.regularMarketPrice) ?? latestQuote?.close ?? null;
-    const changePercent = nullableNumber(record.regularMarketChangePercent)
-      ?? (price && previousQuote?.close ? ((price / previousQuote.close) - 1) * 100 : null);
+    const price =
+      chart.meta.regularMarketPrice ??
+      nullableNumber(record.regularMarketPrice) ??
+      latestQuote?.close ??
+      null;
+    const changePercent =
+      nullableNumber(record.regularMarketChangePercent) ??
+      (price && previousQuote?.close ? (price / previousQuote.close - 1) * 100 : null);
     const name = record.companyName ?? chart.meta.longName ?? chart.meta.shortName ?? ticker;
     const classification = classifyYahooEtf(name, record.category);
 
@@ -380,18 +428,36 @@ async function fetchYahooBackedEtf(record, options) {
       category: record.category ?? classification.category,
       benchmarkIndex: record.benchmarkIndex ?? classification.benchmarkIndex,
       currency: chart.meta.currency ?? options.defaultCurrency,
-      price: roundNullable(price, zeroDecimalCurrency(chart.meta.currency ?? options.defaultCurrency) ? 0 : 2),
+      price: roundNullable(
+        price,
+        zeroDecimalCurrency(chart.meta.currency ?? options.defaultCurrency) ? 0 : 2,
+      ),
       changePercent: roundNullable(changePercent),
-      expenseRatio: roundNullable(profile.expenseRatio ?? nullableNumber(record.netExpenseRatio) ?? nullableNumber(record.grossExpenseRatio), 4),
+      expenseRatio: roundNullable(
+        profile.expenseRatio ??
+          nullableNumber(record.netExpenseRatio) ??
+          nullableNumber(record.grossExpenseRatio),
+        4,
+      ),
       aum: profile.aum ?? nullableNumber(record.fundNetAssets),
-      dividendYield: roundNullable(profile.dividendYield ?? nullableNumber(record.yieldTTM) ?? trailingDividendYield(chart.dividends, price)),
+      dividendYield: roundNullable(
+        profile.dividendYield ??
+          nullableNumber(record.yieldTTM) ??
+          trailingDividendYield(chart.dividends, price),
+      ),
       inceptionDate: profile.inceptionDate ?? chart.firstTradeDate,
       nav: null,
       returns: {
         m3: roundNullable(calculatePeriodReturn(series, { months: 3 })),
-        y1: roundNullable(calculatePeriodReturn(series, { years: 1 }) ?? nullableNumber(record.annualReturnNavY1)),
-        y3Annualized: roundNullable(calculateAnnualizedReturn(series, 3) ?? nullableNumber(record.annualReturnNavY3)),
-        y5Annualized: roundNullable(calculateAnnualizedReturn(series, 5) ?? nullableNumber(record.annualReturnNavY5)),
+        y1: roundNullable(
+          calculatePeriodReturn(series, { years: 1 }) ?? nullableNumber(record.annualReturnNavY1),
+        ),
+        y3Annualized: roundNullable(
+          calculateAnnualizedReturn(series, 3) ?? nullableNumber(record.annualReturnNavY3),
+        ),
+        y5Annualized: roundNullable(
+          calculateAnnualizedReturn(series, 5) ?? nullableNumber(record.annualReturnNavY5),
+        ),
       },
       risk: {
         volatility3yAnnualized: roundNullable(calculateAnnualizedVolatility(series3y)),
@@ -404,9 +470,13 @@ async function fetchYahooBackedEtf(record, options) {
       sparkline: normalizeSparkline(series),
       liquidity: {
         volume: nullableNumber(record.regularMarketVolume) ?? latestQuote?.volume ?? null,
-        tradingValue: price && (nullableNumber(record.regularMarketVolume) ?? latestQuote?.volume)
-          ? roundNullable(price * (nullableNumber(record.regularMarketVolume) ?? latestQuote.volume), 0)
-          : null,
+        tradingValue:
+          price && (nullableNumber(record.regularMarketVolume) ?? latestQuote?.volume)
+            ? roundNullable(
+                price * (nullableNumber(record.regularMarketVolume) ?? latestQuote.volume),
+                0,
+              )
+            : null,
         marketCap: nullableNumber(record.fundNetAssets),
         sourceRank: null,
       },
@@ -416,7 +486,11 @@ async function fetchYahooBackedEtf(record, options) {
         holdingsAsOf: holdings.holdings?.length ? GENERATED_AT : null,
         sources: compactSources([
           record.universeSource,
-          { name: 'Yahoo Finance chart', url: chart.url, fields: ['price', 'history', 'dividends'] },
+          {
+            name: 'Yahoo Finance chart',
+            url: chart.url,
+            fields: ['price', 'history', 'dividends'],
+          },
           ...(profile.sources ?? [profile.source]),
           holdings.source,
         ]),
@@ -439,36 +513,93 @@ function normalizeHistoricalPairs(pairs) {
 function classifyYahooEtf(name, fallbackCategory) {
   const lower = name.toLowerCase();
   if (/treasury|bond|income|aggregate|muni|mortgage|loan|high yield|tips?\b/.test(lower)) {
-    return { assetClass: '채권', theme: '채권', category: fallbackCategory ?? '채권 ETF', benchmarkIndex: null };
+    return {
+      assetClass: '채권',
+      theme: '채권',
+      category: fallbackCategory ?? '채권 ETF',
+      benchmarkIndex: null,
+    };
   }
   if (/gold|silver|oil|gas|commodity|bitcoin|ether|crypto/.test(lower)) {
-    return { assetClass: '대체자산', theme: '원자재/디지털자산', category: fallbackCategory ?? '대체자산 ETF', benchmarkIndex: null };
+    return {
+      assetClass: '대체자산',
+      theme: '원자재/디지털자산',
+      category: fallbackCategory ?? '대체자산 ETF',
+      benchmarkIndex: null,
+    };
   }
   if (/bear|short|inverse/.test(lower)) {
-    return { assetClass: '주식', theme: '인버스', category: fallbackCategory ?? '인버스 ETF', benchmarkIndex: null };
+    return {
+      assetClass: '주식',
+      theme: '인버스',
+      category: fallbackCategory ?? '인버스 ETF',
+      benchmarkIndex: null,
+    };
   }
   if (/leveraged|ultra|2x|3x|bull/.test(lower)) {
-    return { assetClass: '주식', theme: '레버리지', category: fallbackCategory ?? '레버리지 ETF', benchmarkIndex: null };
+    return {
+      assetClass: '주식',
+      theme: '레버리지',
+      category: fallbackCategory ?? '레버리지 ETF',
+      benchmarkIndex: null,
+    };
   }
   if (/dividend|yield|covered call|premium income/.test(lower)) {
-    return { assetClass: '주식', theme: '배당', category: fallbackCategory ?? '배당 ETF', benchmarkIndex: null };
+    return {
+      assetClass: '주식',
+      theme: '배당',
+      category: fallbackCategory ?? '배당 ETF',
+      benchmarkIndex: null,
+    };
   }
-  if (/semiconductor|technology|nasdaq|software|cyber|internet|innovation|ai\b|robotics/.test(lower)) {
-    return { assetClass: '주식', theme: '테크', category: fallbackCategory ?? '테크 ETF', benchmarkIndex: null };
+  if (
+    /semiconductor|technology|nasdaq|software|cyber|internet|innovation|ai\b|robotics/.test(lower)
+  ) {
+    return {
+      assetClass: '주식',
+      theme: '테크',
+      category: fallbackCategory ?? '테크 ETF',
+      benchmarkIndex: null,
+    };
   }
   if (/health|biotech|medical/.test(lower)) {
-    return { assetClass: '주식', theme: '헬스케어', category: fallbackCategory ?? '헬스케어 ETF', benchmarkIndex: null };
+    return {
+      assetClass: '주식',
+      theme: '헬스케어',
+      category: fallbackCategory ?? '헬스케어 ETF',
+      benchmarkIndex: null,
+    };
   }
   if (/financial|bank/.test(lower)) {
-    return { assetClass: '주식', theme: '금융', category: fallbackCategory ?? '금융 ETF', benchmarkIndex: null };
+    return {
+      assetClass: '주식',
+      theme: '금융',
+      category: fallbackCategory ?? '금융 ETF',
+      benchmarkIndex: null,
+    };
   }
   if (/energy|solar|uranium/.test(lower)) {
-    return { assetClass: '주식', theme: '에너지', category: fallbackCategory ?? '에너지 ETF', benchmarkIndex: null };
+    return {
+      assetClass: '주식',
+      theme: '에너지',
+      category: fallbackCategory ?? '에너지 ETF',
+      benchmarkIndex: null,
+    };
   }
   if (/emerging|china|japan|india|vietnam|international|world|global/.test(lower)) {
-    return { assetClass: '주식', theme: '글로벌', category: fallbackCategory ?? '글로벌 주식 ETF', benchmarkIndex: null };
+    return {
+      assetClass: '주식',
+      theme: '글로벌',
+      category: fallbackCategory ?? '글로벌 주식 ETF',
+      benchmarkIndex: null,
+    };
   }
-  return { assetClass: '주식', theme: '시장대표', category: fallbackCategory ?? '주식 ETF', benchmarkIndex: null };
+  return {
+    assetClass: '주식',
+    theme: '시장대표',
+    category: fallbackCategory ?? '주식 ETF',
+    benchmarkIndex: null,
+  };
 }
 
 function koreanAssetClass(fullCode) {
@@ -529,15 +660,17 @@ function providerFromName(name) {
 }
 
 function defaultCurrencyForMarket(market) {
-  return ({
-    홍콩: 'HKD',
-    독일: 'EUR',
-    프랑스: 'EUR',
-    일본: 'JPY',
-    호주: 'AUD',
-    베트남: 'VND',
-    미국: 'USD',
-  })[market] ?? 'USD';
+  return (
+    {
+      홍콩: 'HKD',
+      독일: 'EUR',
+      프랑스: 'EUR',
+      일본: 'JPY',
+      호주: 'AUD',
+      베트남: 'VND',
+      미국: 'USD',
+    }[market] ?? 'USD'
+  );
 }
 
 function zeroDecimalCurrency(currency) {
@@ -550,7 +683,11 @@ function mergeProfiles(profiles) {
   for (const profile of profiles) {
     if (!profile) continue;
     for (const key of ['expenseRatio', 'aum', 'dividendYield', 'inceptionDate']) {
-      if ((merged[key] === null || merged[key] === undefined) && profile[key] !== null && profile[key] !== undefined) {
+      if (
+        (merged[key] === null || merged[key] === undefined) &&
+        profile[key] !== null &&
+        profile[key] !== undefined
+      ) {
         merged[key] = profile[key];
       }
     }

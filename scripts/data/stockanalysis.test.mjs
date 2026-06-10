@@ -9,7 +9,9 @@ import {
 const PROFILE_URL = 'https://stockanalysis.com/etf/spy/';
 
 function profileHtml(rows) {
-  const body = rows.map(([label, value]) => `      <tr><td>${label}</td><td>${value}</td></tr>`).join('\n');
+  const body = rows
+    .map(([label, value]) => `      <tr><td>${label}</td><td>${value}</td></tr>`)
+    .join('\n');
   return `<!DOCTYPE html>
 <html>
   <body>
@@ -57,7 +59,12 @@ describe('parseStockAnalysisProfile', () => {
   });
 
   it('supports an alternate source name for quote profile pages', () => {
-    const profile = parseStockAnalysisProfile(html, 'USD', PROFILE_URL, 'StockAnalysis quote profile');
+    const profile = parseStockAnalysisProfile(
+      html,
+      'USD',
+      PROFILE_URL,
+      'StockAnalysis quote profile',
+    );
     expect(profile.source.name).toBe('StockAnalysis quote profile');
     expect(profile.expenseRatio).toBe(0.09);
   });

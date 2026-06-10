@@ -77,15 +77,17 @@ function isNumber(value) {
 }
 
 function localeForCurrency(currency) {
-  return ({
-    KRW: 'ko-KR',
-    USD: 'en-US',
-    HKD: 'en-HK',
-    EUR: 'de-DE',
-    JPY: 'ja-JP',
-    AUD: 'en-AU',
-    VND: 'vi-VN',
-  })[currency] ?? 'en-US';
+  return (
+    {
+      KRW: 'ko-KR',
+      USD: 'en-US',
+      HKD: 'en-HK',
+      EUR: 'de-DE',
+      JPY: 'ja-JP',
+      AUD: 'en-AU',
+      VND: 'vi-VN',
+    }[currency] ?? 'en-US'
+  );
 }
 
 export function zeroDecimalCurrency(currency) {

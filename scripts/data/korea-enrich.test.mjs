@@ -17,7 +17,8 @@ import {
   selectKoreanYahooTargets,
 } from './korea-enrich.mjs';
 
-const CHART_URL = 'https://query1.finance.yahoo.com/v8/finance/chart/069500.KS?range=5y&interval=1d';
+const CHART_URL =
+  'https://query1.finance.yahoo.com/v8/finance/chart/069500.KS?range=5y&interval=1d';
 
 function buildSeries() {
   const points = [];
@@ -76,13 +77,22 @@ function makeKoreanEtf(overrides = {}) {
     },
     holdings: [],
     sparkline: [36000, 36500],
-    liquidity: { volume: 5_000_000, tradingValue: 180_000_000_000, marketCap: 6_100_000_000_000, sourceRank: 1 },
+    liquidity: {
+      volume: 5_000_000,
+      tradingValue: 180_000_000_000,
+      marketCap: 6_100_000_000_000,
+      sourceRank: 1,
+    },
     dataQuality: {
       quoteAsOf: '2026-06-05T06:00:00.000Z',
       profileAsOf: '2026-06-05T00:00:00.000Z',
       holdingsAsOf: null,
       sources: [
-        { name: 'K-ETF active ETF lineup', url: 'https://anchor.k-etf.com/api/instrument/instruments/', fields: ['name'] },
+        {
+          name: 'K-ETF active ETF lineup',
+          url: 'https://anchor.k-etf.com/api/instrument/instruments/',
+          fields: ['name'],
+        },
       ],
       missingFields: [],
     },
@@ -110,7 +120,9 @@ describe('applyKoreanYahooEnrichment', () => {
     expect(result.returns.y3Annualized).not.toBeNull();
     expect(result.returns.y5Annualized).not.toBeNull();
 
-    expect(result.risk.volatility3yAnnualized).toBe(roundNullable(calculateAnnualizedVolatility(series3y)));
+    expect(result.risk.volatility3yAnnualized).toBe(
+      roundNullable(calculateAnnualizedVolatility(series3y)),
+    );
     expect(result.risk.maxDrawdown3y).toBe(roundNullable(calculateMaxDrawdown(series3y)));
     expect(result.risk.sharpe3y).toBe(roundNullable(calculateSharpeRatio(series3y)));
     expect(result.risk.volatility3yAnnualized).not.toBeNull();
@@ -294,9 +306,24 @@ describe('enrichKoreanEtfsWithYahoo', () => {
 
   function makeUniverse() {
     return [
-      makeKoreanEtf({ id: '069500', ticker: '069500', returns: { ...nullReturns }, liquidity: { tradingValue: 900 } }),
-      makeKoreanEtf({ id: '360750', ticker: '360750', returns: { ...nullReturns }, liquidity: { tradingValue: 500 } }),
-      makeKoreanEtf({ id: '458730', ticker: '458730', returns: { ...nullReturns }, liquidity: { tradingValue: 100 } }),
+      makeKoreanEtf({
+        id: '069500',
+        ticker: '069500',
+        returns: { ...nullReturns },
+        liquidity: { tradingValue: 900 },
+      }),
+      makeKoreanEtf({
+        id: '360750',
+        ticker: '360750',
+        returns: { ...nullReturns },
+        liquidity: { tradingValue: 500 },
+      }),
+      makeKoreanEtf({
+        id: '458730',
+        ticker: '458730',
+        returns: { ...nullReturns },
+        liquidity: { tradingValue: 100 },
+      }),
     ];
   }
 

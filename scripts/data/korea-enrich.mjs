@@ -42,14 +42,49 @@ export function applyKoreanYahooEnrichment(etf, chart) {
     filledFields.push(label);
   };
 
-  fill(enriched.returns, 'm3', 'returns.m3', roundNullable(calculatePeriodReturn(series, { months: 3 })));
-  fill(enriched.returns, 'y1', 'returns.y1', roundNullable(calculatePeriodReturn(series, { years: 1 })));
-  fill(enriched.returns, 'y3Annualized', 'returns.y3Annualized', roundNullable(calculateAnnualizedReturn(series, 3)));
-  fill(enriched.returns, 'y5Annualized', 'returns.y5Annualized', roundNullable(calculateAnnualizedReturn(series, 5)));
-  fill(enriched.risk, 'volatility3yAnnualized', 'risk.volatility3yAnnualized', roundNullable(calculateAnnualizedVolatility(series3y)));
-  fill(enriched.risk, 'maxDrawdown3y', 'risk.maxDrawdown3y', roundNullable(calculateMaxDrawdown(series3y)));
+  fill(
+    enriched.returns,
+    'm3',
+    'returns.m3',
+    roundNullable(calculatePeriodReturn(series, { months: 3 })),
+  );
+  fill(
+    enriched.returns,
+    'y1',
+    'returns.y1',
+    roundNullable(calculatePeriodReturn(series, { years: 1 })),
+  );
+  fill(
+    enriched.returns,
+    'y3Annualized',
+    'returns.y3Annualized',
+    roundNullable(calculateAnnualizedReturn(series, 3)),
+  );
+  fill(
+    enriched.returns,
+    'y5Annualized',
+    'returns.y5Annualized',
+    roundNullable(calculateAnnualizedReturn(series, 5)),
+  );
+  fill(
+    enriched.risk,
+    'volatility3yAnnualized',
+    'risk.volatility3yAnnualized',
+    roundNullable(calculateAnnualizedVolatility(series3y)),
+  );
+  fill(
+    enriched.risk,
+    'maxDrawdown3y',
+    'risk.maxDrawdown3y',
+    roundNullable(calculateMaxDrawdown(series3y)),
+  );
   fill(enriched.risk, 'sharpe3y', 'risk.sharpe3y', roundNullable(calculateSharpeRatio(series3y)));
-  fill(enriched, 'dividendYield', 'dividendYield', roundNullable(trailingDividendYield(chart.dividends ?? [], etf.price)));
+  fill(
+    enriched,
+    'dividendYield',
+    'dividendYield',
+    roundNullable(trailingDividendYield(chart.dividends ?? [], etf.price)),
+  );
 
   if (!etf.sparkline?.length) {
     const sparkline = normalizeSparkline(series);
@@ -126,6 +161,8 @@ export async function enrichKoreanEtfsWithYahoo(etfs, options) {
     }
   });
 
-  log(`[data:update] Korea Yahoo enrichment: ${enrichedCount}/${targets.length} enriched (${failedCount} unavailable)`);
+  log(
+    `[data:update] Korea Yahoo enrichment: ${enrichedCount}/${targets.length} enriched (${failedCount} unavailable)`,
+  );
   return etfs.map((etf) => enrichedById.get(etf.id) ?? etf);
 }

@@ -50,12 +50,24 @@ export function WorkspaceHeader({
 
       <div className="workspace-toolbar">
         <div className="view-switch" role="tablist" aria-label="화면 전환">
-          <button className={viewMode === 'compare' ? 'active' : ''} type="button" role="tab" aria-selected={viewMode === 'compare'} onClick={onShowCompare}>
+          <button
+            className={viewMode === 'compare' ? 'active' : ''}
+            type="button"
+            role="tab"
+            aria-selected={viewMode === 'compare'}
+            onClick={onShowCompare}
+          >
             <WalletCards size={16} />
             비교 화면
             <span>{selectedIds.length}/4</span>
           </button>
-          <button className={viewMode === 'analysis' ? 'active' : ''} type="button" role="tab" aria-selected={viewMode === 'analysis'} onClick={onShowAnalysis}>
+          <button
+            className={viewMode === 'analysis' ? 'active' : ''}
+            type="button"
+            role="tab"
+            aria-selected={viewMode === 'analysis'}
+            onClick={onShowAnalysis}
+          >
             <ShieldCheck size={16} />
             개별 분석
           </button>
@@ -66,7 +78,11 @@ export function WorkspaceHeader({
             <BookOpenCheck size={16} />
             사용 가이드
           </button>
-          <button className={`ghost-button ${favorites.includes(selectedEtf.id) ? 'selected-action' : ''}`} type="button" onClick={() => toggleFavorite(selectedEtf.id)}>
+          <button
+            className={`ghost-button ${favorites.includes(selectedEtf.id) ? 'selected-action' : ''}`}
+            type="button"
+            onClick={() => toggleFavorite(selectedEtf.id)}
+          >
             <Star size={17} />
             관심상품
           </button>
@@ -78,7 +94,11 @@ export function WorkspaceHeader({
             <Share2 size={17} />
             공유
           </button>
-          <button className="primary-button" type="button" onClick={isAnalysisView ? onShowCompare : onShowAnalysis}>
+          <button
+            className="primary-button"
+            type="button"
+            onClick={isAnalysisView ? onShowCompare : onShowAnalysis}
+          >
             {isAnalysisView ? '비교로 돌아가기' : '분석 보기'}
           </button>
         </div>
@@ -89,10 +109,30 @@ export function WorkspaceHeader({
           <Filter size={17} />
           ETF 상품 검색 필터
         </button>
-        <FilterSelect label="시장" value={filters.market} options={filterOptions.markets} onChange={(value) => setFilters((current) => ({ ...current, market: value }))} />
-        <FilterSelect label="테마" value={filters.theme} options={filterOptions.themes} onChange={(value) => setFilters((current) => ({ ...current, theme: value }))} />
-        <FilterSelect label="운용사" value={filters.provider} options={filterOptions.providers} onChange={(value) => setFilters((current) => ({ ...current, provider: value }))} />
-        <FilterSelect label="리스크" value={filters.risk} options={filterOptions.risks} onChange={(value) => setFilters((current) => ({ ...current, risk: value }))} />
+        <FilterSelect
+          label="시장"
+          value={filters.market}
+          options={filterOptions.markets}
+          onChange={(value) => setFilters((current) => ({ ...current, market: value }))}
+        />
+        <FilterSelect
+          label="테마"
+          value={filters.theme}
+          options={filterOptions.themes}
+          onChange={(value) => setFilters((current) => ({ ...current, theme: value }))}
+        />
+        <FilterSelect
+          label="운용사"
+          value={filters.provider}
+          options={filterOptions.providers}
+          onChange={(value) => setFilters((current) => ({ ...current, provider: value }))}
+        />
+        <FilterSelect
+          label="리스크"
+          value={filters.risk}
+          options={filterOptions.risks}
+          onChange={(value) => setFilters((current) => ({ ...current, risk: value }))}
+        />
         <button className="ghost-button slim" type="button" onClick={onClearFilters}>
           <RefreshCw size={15} />
           초기화
@@ -114,7 +154,9 @@ export function WorkspaceHeader({
         <div className="action-note" role="status">
           <ShieldCheck size={16} />
           {actionNote}
-          <button type="button" onClick={() => setActionNote('')} aria-label="알림 닫기"><X size={14} /></button>
+          <button type="button" onClick={() => setActionNote('')} aria-label="알림 닫기">
+            <X size={14} />
+          </button>
         </div>
       )}
     </div>

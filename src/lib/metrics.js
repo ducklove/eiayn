@@ -39,7 +39,7 @@ export function calculatePeriodReturn(series, period) {
   const target = shiftDate(new Date(end.date), period);
   const start = firstPointOnOrAfter(points, target);
   if (!start || start.date === end.date) return null;
-  return ((end.value / start.value) - 1) * 100;
+  return (end.value / start.value - 1) * 100;
 }
 
 export function calculateAnnualizedReturn(series, years) {
@@ -55,7 +55,7 @@ export function dailyReturns(series) {
     const previous = points[index - 1].value;
     const current = points[index].value;
     if (previous > 0 && current > 0) {
-      returns.push((current / previous) - 1);
+      returns.push(current / previous - 1);
     }
   }
   return returns;
@@ -65,7 +65,8 @@ export function calculateAnnualizedVolatility(series) {
   const returns = dailyReturns(series);
   if (returns.length < 2) return null;
   const average = mean(returns);
-  const variance = returns.reduce((sum, value) => sum + ((value - average) ** 2), 0) / (returns.length - 1);
+  const variance =
+    returns.reduce((sum, value) => sum + (value - average) ** 2, 0) / (returns.length - 1);
   return Math.sqrt(variance) * Math.sqrt(TRADING_DAYS) * 100;
 }
 
@@ -77,7 +78,7 @@ export function calculateMaxDrawdown(series) {
   for (const point of points) {
     peak = Math.max(peak, point.value);
     if (peak > 0) {
-      maxDrawdown = Math.min(maxDrawdown, (point.value / peak) - 1);
+      maxDrawdown = Math.min(maxDrawdown, point.value / peak - 1);
     }
   }
   return maxDrawdown * 100;

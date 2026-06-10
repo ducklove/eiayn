@@ -6,7 +6,9 @@ export function SimpleListPanel({ title, items, emptyText, onOpenEtf }) {
     <section className="bottom-panel">
       <div className="section-heading">
         <h3>{title}</h3>
-        <button type="button" disabled title="목록은 선택/관심상품 상태에 따라 자동 갱신됩니다.">더보기</button>
+        <button type="button" disabled title="목록은 선택/관심상품 상태에 따라 자동 갱신됩니다.">
+          더보기
+        </button>
       </div>
       {items.length ? (
         <div className="compact-table">
@@ -27,11 +29,15 @@ export function SimpleListPanel({ title, items, emptyText, onOpenEtf }) {
               <strong>{item.shortName}</strong>
               <span>{item.market}</span>
               <span>{item.assetClass}</span>
-              <span className={item.returns.y1 >= 0 ? 'positive' : 'negative'}>{formatPercent(item.returns.y1)}</span>
+              <span className={item.returns.y1 >= 0 ? 'positive' : 'negative'}>
+                {formatPercent(item.returns.y1)}
+              </span>
             </a>
           ))}
         </div>
-      ) : <p className="empty-state">{emptyText}</p>}
+      ) : (
+        <p className="empty-state">{emptyText}</p>
+      )}
     </section>
   );
 }

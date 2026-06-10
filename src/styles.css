@@ -1,13 +1,7 @@
 :root {
   color-scheme: light;
   font-family:
-    Inter,
-    Pretendard,
-    "Noto Sans KR",
-    "Apple SD Gothic Neo",
-    "Malgun Gothic",
-    system-ui,
-    sans-serif;
+    Inter, Pretendard, 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
   --bg: #f5f8fb;
   --surface: #ffffff;
   --surface-soft: #f9fbfd;
@@ -657,8 +651,7 @@ a {
   grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
   gap: 18px;
   padding: 18px;
-  background:
-    linear-gradient(135deg, #ffffff 0%, #f8fbfd 58%, #e9f7f4 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fbfd 58%, #e9f7f4 100%);
   border-bottom: 1px solid var(--line);
 }
 

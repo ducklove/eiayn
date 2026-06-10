@@ -28,7 +28,12 @@ export async function fetchStockAnalysisQuoteProfile(ticker, currency) {
   return parseStockAnalysisProfile(html, currency, url, 'StockAnalysis quote profile');
 }
 
-export function parseStockAnalysisProfile(html, currency, url, sourceName = 'StockAnalysis profile') {
+export function parseStockAnalysisProfile(
+  html,
+  currency,
+  url,
+  sourceName = 'StockAnalysis profile',
+) {
   const $ = load(html);
   const aum = parseCompactMoney(summaryValue($, 'Assets'), currency);
   return {
@@ -48,22 +53,30 @@ export function parseStockAnalysisHoldings(html) {
   const $ = load(html);
   const rows = [];
   $('table').each((_, table) => {
-    const headers = $(table).find('th').map((__, th) => cleanText($(th).text())).get();
+    const headers = $(table)
+      .find('th')
+      .map((__, th) => cleanText($(th).text()))
+      .get();
     const nameIndex = headers.findIndex((header) => /^name$/i.test(header));
     const tickerIndex = headers.findIndex((header) => /^(symbol|ticker)$/i.test(header));
     const weightIndex = headers.findIndex((header) => /weight/i.test(header));
     if (nameIndex < 0 || weightIndex < 0) return;
-    $(table).find('tbody tr').each((__, row) => {
-      const cells = $(row).find('td').map((___, td) => cleanText($(td).text())).get();
-      if (cells.length <= Math.max(nameIndex, weightIndex)) return;
-      const weight = toFiniteNumber(cells[weightIndex]);
-      if (weight === null) return;
-      rows.push({
-        name: cells[nameIndex],
-        ticker: tickerIndex >= 0 ? cells[tickerIndex] || null : null,
-        weight,
+    $(table)
+      .find('tbody tr')
+      .each((__, row) => {
+        const cells = $(row)
+          .find('td')
+          .map((___, td) => cleanText($(td).text()))
+          .get();
+        if (cells.length <= Math.max(nameIndex, weightIndex)) return;
+        const weight = toFiniteNumber(cells[weightIndex]);
+        if (weight === null) return;
+        rows.push({
+          name: cells[nameIndex],
+          ticker: tickerIndex >= 0 ? cells[tickerIndex] || null : null,
+          weight,
+        });
       });
-    });
   });
 
   return rows.slice(0, 10);
@@ -74,7 +87,9 @@ export function stockAnalysisPathForTicker(ticker) {
 }
 
 export function stockAnalysisQuotePathForTicker(ticker) {
-  const raw = String(ticker ?? '').trim().toUpperCase();
+  const raw = String(ticker ?? '')
+    .trim()
+    .toUpperCase();
   if (!raw) return null;
   if (raw.endsWith('.HK')) {
     const code = raw.replace('.HK', '');
@@ -105,14 +120,18 @@ function summaryValue($, label) {
 
 function parseDate(value) {
   if (!value) return null;
-  const monthMatch = String(value).trim().match(/^([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})$/);
+  const monthMatch = String(value)
+    .trim()
+    .match(/^([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})$/);
   if (monthMatch) {
     const month = MONTHS[monthMatch[1].slice(0, 3).toLowerCase()];
     if (month) {
       return `${monthMatch[3]}-${month}-${monthMatch[2].padStart(2, '0')}`;
     }
   }
-  const isoMatch = String(value).trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+  const isoMatch = String(value)
+    .trim()
+    .match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (isoMatch) return isoMatch[0].slice(0, 10);
   const date = new Date(`${value} UTC`);
   return Number.isNaN(date.getTime()) ? null : date.toISOString().slice(0, 10);

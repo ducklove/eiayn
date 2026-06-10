@@ -1,8 +1,10 @@
 export async function fetchJson(url, options = {}) {
-  return JSON.parse(await fetchText(url, {
-    accept: 'application/json,text/plain,*/*',
-    ...options,
-  }));
+  return JSON.parse(
+    await fetchText(url, {
+      accept: 'application/json,text/plain,*/*',
+      ...options,
+    }),
+  );
 }
 
 export async function fetchText(url, options = {}) {
@@ -23,7 +25,8 @@ export async function fetchText(url, options = {}) {
         headers: {
           accept,
           'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-          'user-agent': 'Mozilla/5.0 (compatible; EIAYNDataBot/1.0; +https://github.com/ducklove/eiayn)',
+          'user-agent':
+            'Mozilla/5.0 (compatible; EIAYNDataBot/1.0; +https://github.com/ducklove/eiayn)',
         },
       });
       if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
@@ -31,7 +34,9 @@ export async function fetchText(url, options = {}) {
     } catch (error) {
       lastError = error;
       if (warn) {
-        console.warn(`[data:update] Fetch failed (${attempt}/${attempts}) ${url}: ${error.message}`);
+        console.warn(
+          `[data:update] Fetch failed (${attempt}/${attempts}) ${url}: ${error.message}`,
+        );
       }
       if (attempt < attempts) await wait(800 * attempt);
     } finally {

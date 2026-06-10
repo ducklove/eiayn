@@ -5,7 +5,9 @@ export function nullableNumber(value) {
 }
 
 export function cleanText(value) {
-  return String(value ?? '').replace(/\s+/g, ' ').trim();
+  return String(value ?? '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 export function emptyProfile() {

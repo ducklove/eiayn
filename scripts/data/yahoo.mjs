@@ -40,7 +40,8 @@ export async function fetchYahooMostActiveEtfs(count = 150) {
   }).toString();
   const json = await fetchJson(url.toString());
   const records = json.finance?.result?.[0]?.records;
-  if (!Array.isArray(records)) throw new Error('Yahoo most active ETF screener returned no records');
+  if (!Array.isArray(records))
+    throw new Error('Yahoo most active ETF screener returned no records');
   return {
     records,
     source: {
@@ -105,7 +106,7 @@ export async function fetchExchangeRate() {
   return {
     pair: 'USD/KRW',
     value: roundNullable(latest, 4),
-    changePercent: latest && previous ? roundNullable(((latest / previous) - 1) * 100) : null,
+    changePercent: latest && previous ? roundNullable((latest / previous - 1) * 100) : null,
     asOf: chart.quoteAsOf,
     source: { name: 'Yahoo Finance chart', url: chart.url },
   };
@@ -116,7 +117,10 @@ export async function fetchYahooQuoteSummaryProfile(symbol) {
   try {
     const json = await fetchYahooQuoteSummary(url);
     const result = json.quoteSummary?.result?.[0];
-    if (!result) throw new Error(json.quoteSummary?.error?.description ?? 'Yahoo quoteSummary response missing result');
+    if (!result)
+      throw new Error(
+        json.quoteSummary?.error?.description ?? 'Yahoo quoteSummary response missing result',
+      );
 
     const fees = result.fundProfile?.feesExpensesInvestment ?? {};
     const statistics = result.defaultKeyStatistics ?? {};
@@ -131,7 +135,8 @@ export async function fetchYahooQuoteSummaryProfile(symbol) {
         url,
         fields: ['expenseRatio', 'aum', 'dividendYield', 'inceptionDate'],
       },
-      expenseRatio: annualReportExpenseRatio > 0 ? roundNullable(annualReportExpenseRatio * 100, 4) : null,
+      expenseRatio:
+        annualReportExpenseRatio > 0 ? roundNullable(annualReportExpenseRatio * 100, 4) : null,
       aum: totalAssets,
       dividendYield: yieldDecimal !== null ? roundNullable(yieldDecimal * 100) : null,
       inceptionDate: statistics.fundInceptionDate
@@ -156,7 +161,9 @@ export function yahooChartUrl(symbol, range) {
 }
 
 export function yahooQuoteSummaryUrl(symbol) {
-  const url = new URL(`https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}`);
+  const url = new URL(
+    `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}`,
+  );
   url.search = new URLSearchParams({
     modules: 'fundProfile,defaultKeyStatistics,summaryDetail,price',
     formatted: 'false',
@@ -167,9 +174,11 @@ export function yahooQuoteSummaryUrl(symbol) {
 export function trailingDividendYield(dividends, price) {
   if (!price) return null;
   const cutoff = Date.now() - 365 * 24 * 60 * 60 * 1000;
-  const total = dividends.reduce((sum, dividend) => (
-    dividend.date * 1000 >= cutoff ? sum + (asNumber(dividend.amount) ?? 0) : sum
-  ), 0);
+  const total = dividends.reduce(
+    (sum, dividend) =>
+      dividend.date * 1000 >= cutoff ? sum + (asNumber(dividend.amount) ?? 0) : sum,
+    0,
+  );
   return total > 0 ? roundNullable((total / price) * 100) : null;
 }
 
@@ -178,9 +187,7 @@ export function asNumber(value) {
 }
 
 export function roundNullable(value, digits = 2) {
-  return typeof value === 'number' && Number.isFinite(value)
-    ? Number(value.toFixed(digits))
-    : null;
+  return typeof value === 'number' && Number.isFinite(value) ? Number(value.toFixed(digits)) : null;
 }
 
 let yahooSessionPromise = null;

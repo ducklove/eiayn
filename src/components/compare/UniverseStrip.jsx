@@ -17,15 +17,24 @@ export function UniverseStrip({ filteredEtfs, activeEtf, activeId, onSelect }) {
           {candidates.map((item) => {
             const selected = activeId === item.id;
             return (
-              <button className={selected ? 'selected' : ''} key={item.id} type="button" onClick={() => onSelect(item.id)}>
+              <button
+                className={selected ? 'selected' : ''}
+                key={item.id}
+                type="button"
+                onClick={() => onSelect(item.id)}
+              >
                 <span>{item.shortName}</span>
                 <em>{item.category}</em>
-                <b className={item.changePercent >= 0 ? 'positive' : 'negative'}>{formatPercent(item.changePercent)}</b>
+                <b className={item.changePercent >= 0 ? 'positive' : 'negative'}>
+                  {formatPercent(item.changePercent)}
+                </b>
               </button>
             );
           })}
         </div>
-      ) : <p className="empty-state">검색 조건에 맞는 ETF가 없습니다.</p>}
+      ) : (
+        <p className="empty-state">검색 조건에 맞는 ETF가 없습니다.</p>
+      )}
     </section>
   );
 }

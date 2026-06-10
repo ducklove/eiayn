@@ -38,14 +38,26 @@ describe('scoreEtfs', () => {
     expect(scored[1].aiynScore).toBeGreaterThan(scored[0].aiynScore);
     expect(scored[1].scoreBreakdown.총보수).toBeUndefined();
     expect(scored[1].scoreBreakdown.수익성).toBeUndefined();
-    expect(scored[1].scoreBreakdown['장기 수익']).toBeGreaterThan(scored[0].scoreBreakdown['장기 수익']);
+    expect(scored[1].scoreBreakdown['장기 수익']).toBeGreaterThan(
+      scored[0].scoreBreakdown['장기 수익'],
+    );
     expect(scored[1].scoreBreakdown.가치).toBeGreaterThan(scored[0].scoreBreakdown.가치);
   });
 
   it('uses 30-day sparkline return in the short-term return component', () => {
     const [slow, fast] = scoreEtfs([
-      { ...baseEtf, id: 'SLOW', sparkline: [100, 101], returns: { m3: 10, y1: 10, y3Annualized: null, y5Annualized: null } },
-      { ...baseEtf, id: 'FAST', sparkline: [100, 130], returns: { m3: 10, y1: 10, y3Annualized: null, y5Annualized: null } },
+      {
+        ...baseEtf,
+        id: 'SLOW',
+        sparkline: [100, 101],
+        returns: { m3: 10, y1: 10, y3Annualized: null, y5Annualized: null },
+      },
+      {
+        ...baseEtf,
+        id: 'FAST',
+        sparkline: [100, 130],
+        returns: { m3: 10, y1: 10, y3Annualized: null, y5Annualized: null },
+      },
     ]);
 
     expect(fast.scoreBreakdown['단기 수익']).toBeGreaterThan(slow.scoreBreakdown['단기 수익']);
@@ -53,8 +65,18 @@ describe('scoreEtfs', () => {
 
   it('uses 3-month returns in the short-term return component', () => {
     const [slow, fast] = scoreEtfs([
-      { ...baseEtf, id: 'SLOW', sparkline: [100, 110], returns: { m3: 1, y1: 10, y3Annualized: null, y5Annualized: null } },
-      { ...baseEtf, id: 'FAST', sparkline: [100, 110], returns: { m3: 20, y1: 10, y3Annualized: null, y5Annualized: null } },
+      {
+        ...baseEtf,
+        id: 'SLOW',
+        sparkline: [100, 110],
+        returns: { m3: 1, y1: 10, y3Annualized: null, y5Annualized: null },
+      },
+      {
+        ...baseEtf,
+        id: 'FAST',
+        sparkline: [100, 110],
+        returns: { m3: 20, y1: 10, y3Annualized: null, y5Annualized: null },
+      },
     ]);
 
     expect(fast.scoreBreakdown['단기 수익']).toBeGreaterThan(slow.scoreBreakdown['단기 수익']);
@@ -77,8 +99,16 @@ describe('scoreEtfs', () => {
     }));
     const scored = scoreEtfs([
       ...peers,
-      { ...baseEtf, id: 'STRONG', returns: { m3: 55, y1: 421, y3Annualized: null, y5Annualized: null } },
-      { ...baseEtf, id: 'OUTLIER', returns: { m3: 1092, y1: 3142, y3Annualized: null, y5Annualized: null } },
+      {
+        ...baseEtf,
+        id: 'STRONG',
+        returns: { m3: 55, y1: 421, y3Annualized: null, y5Annualized: null },
+      },
+      {
+        ...baseEtf,
+        id: 'OUTLIER',
+        returns: { m3: 1092, y1: 3142, y3Annualized: null, y5Annualized: null },
+      },
     ]);
     const strong = scored.find((etf) => etf.id === 'STRONG');
 

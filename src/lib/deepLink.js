@@ -2,7 +2,11 @@ export function findEtfByCode(etfs, code) {
   const normalized = normalizeCode(code);
   if (!normalized) return null;
 
-  return etfs.find((etf) => etfCodes(etf).some((candidate) => normalizeCode(candidate) === normalized)) ?? null;
+  return (
+    etfs.find((etf) =>
+      etfCodes(etf).some((candidate) => normalizeCode(candidate) === normalized),
+    ) ?? null
+  );
 }
 
 export function resolveInitialSelection(etfs, params, maxSelected = 4) {
@@ -16,12 +20,11 @@ export function resolveInitialSelection(etfs, params, maxSelected = 4) {
   const codeEtf = findEtfByCode(etfs, params.get('code'));
   const activeEtf = findEtfByCode(etfs, params.get('active'));
   const defaultIds = etfs.slice(0, Math.min(3, maxSelected)).map((etf) => etf.id);
-  const selectedIds = codeEtf
-    ? [codeEtf.id]
-    : (compareIds.length ? compareIds : defaultIds);
-  const activeId = codeEtf?.id
-    ?? (activeEtf && selectedIds.includes(activeEtf.id) ? activeEtf.id : selectedIds[0])
-    ?? null;
+  const selectedIds = codeEtf ? [codeEtf.id] : compareIds.length ? compareIds : defaultIds;
+  const activeId =
+    codeEtf?.id ??
+    (activeEtf && selectedIds.includes(activeEtf.id) ? activeEtf.id : selectedIds[0]) ??
+    null;
   const requestedView = params.get('view')?.trim().toLowerCase();
   const viewMode = params.get('code') || requestedView === 'analysis' ? 'analysis' : 'compare';
 
@@ -35,16 +38,13 @@ export function resolveInitialSelection(etfs, params, maxSelected = 4) {
 }
 
 function etfCodes(etf) {
-  return [
-    etf.id,
-    etf.ticker,
-    etf.yahooSymbol,
-    ...(etf.aliases ?? []),
-  ].filter(Boolean);
+  return [etf.id, etf.ticker, etf.yahooSymbol, ...(etf.aliases ?? [])].filter(Boolean);
 }
 
 function normalizeCode(code) {
-  return String(code ?? '').trim().toUpperCase();
+  return String(code ?? '')
+    .trim()
+    .toUpperCase();
 }
 
 function uniqueIds(ids) {

@@ -42,7 +42,8 @@ const errors = [];
 if (!payload.generatedAt) errors.push('generatedAt is required');
 if (!Array.isArray(payload.etfs)) errors.push('etfs must be an array');
 if (!payload.coverage?.korea) errors.push('coverage.korea is required');
-if (!Array.isArray(payload.sources) || !payload.sources.length) errors.push('sources must not be empty');
+if (!Array.isArray(payload.sources) || !payload.sources.length)
+  errors.push('sources must not be empty');
 
 const etfs = payload.etfs ?? [];
 const byId = new Map(etfs.map((etf) => [etf.id, etf]));
@@ -54,11 +55,21 @@ for (const [market, minimum] of Object.entries(MINIMUMS)) {
   }
 }
 
-if (payload.coverage?.korea?.sourceTotal && payload.coverage.korea.included !== payload.coverage.korea.sourceTotal) {
-  errors.push(`Korea coverage mismatch: included ${payload.coverage.korea.included}, sourceTotal ${payload.coverage.korea.sourceTotal}`);
+if (
+  payload.coverage?.korea?.sourceTotal &&
+  payload.coverage.korea.included !== payload.coverage.korea.sourceTotal
+) {
+  errors.push(
+    `Korea coverage mismatch: included ${payload.coverage.korea.included}, sourceTotal ${payload.coverage.korea.sourceTotal}`,
+  );
 }
 
-for (const id of [...REQUIRED_KOREA_IDS, ...REQUIRED_US_IDS, ...REQUIRED_REGIONAL_IDS, ...REQUIRED_USER_REQUEST_IDS]) {
+for (const id of [
+  ...REQUIRED_KOREA_IDS,
+  ...REQUIRED_US_IDS,
+  ...REQUIRED_REGIONAL_IDS,
+  ...REQUIRED_USER_REQUEST_IDS,
+]) {
   if (!byId.has(id)) errors.push(`missing required ETF ${id}`);
 }
 
@@ -88,10 +99,12 @@ for (const etf of etfs) {
   }
 
   if (Object.hasOwn(etf, 'provider') === false) errors.push(`${etf.id}: provider field missing`);
-  if (Object.hasOwn(etf, 'assetClass') === false) errors.push(`${etf.id}: assetClass field missing`);
+  if (Object.hasOwn(etf, 'assetClass') === false)
+    errors.push(`${etf.id}: assetClass field missing`);
   if (Object.hasOwn(etf, 'theme') === false) errors.push(`${etf.id}: theme field missing`);
   if (Object.hasOwn(etf, 'category') === false) errors.push(`${etf.id}: category field missing`);
-  if (Object.hasOwn(etf, 'benchmarkIndex') === false) errors.push(`${etf.id}: benchmarkIndex field missing`);
+  if (Object.hasOwn(etf, 'benchmarkIndex') === false)
+    errors.push(`${etf.id}: benchmarkIndex field missing`);
   if (!isFiniteNumber(etf.price)) errors.push(`${etf.id}: price must be a number`);
   if (REQUIRED_REGIONAL_EXPENSE_MARKETS.includes(etf.market) && !isFiniteNumber(etf.expenseRatio)) {
     errors.push(`${etf.id}: regional ETF expenseRatio is required`);
@@ -101,8 +114,10 @@ for (const etf of etfs) {
   if (!Array.isArray(etf.dataQuality?.sources) || !etf.dataQuality.sources.length) {
     errors.push(`${etf.id}: dataQuality.sources must not be empty`);
   }
-  if (Object.hasOwn(etf.scoreBreakdown ?? {}, '수익성')) errors.push(`${etf.id}: legacy scoreBreakdown.수익성 must not be present`);
-  if (Object.hasOwn(etf.scoreBreakdown ?? {}, '총보수')) errors.push(`${etf.id}: scoreBreakdown.총보수 must not be present`);
+  if (Object.hasOwn(etf.scoreBreakdown ?? {}, '수익성'))
+    errors.push(`${etf.id}: legacy scoreBreakdown.수익성 must not be present`);
+  if (Object.hasOwn(etf.scoreBreakdown ?? {}, '총보수'))
+    errors.push(`${etf.id}: scoreBreakdown.총보수 must not be present`);
   for (const field of ['단기 수익', '장기 수익', '가치', '안정성', '분산', '효율성']) {
     if (Object.hasOwn(etf.scoreBreakdown ?? {}, field) === false) {
       errors.push(`${etf.id}: scoreBreakdown.${field} is required`);
@@ -140,7 +155,9 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`[check:data] OK: ${etfs.length} ETFs, markets=${JSON.stringify(marketCounts)}, generatedAt=${payload.generatedAt}`);
+console.log(
+  `[check:data] OK: ${etfs.length} ETFs, markets=${JSON.stringify(marketCounts)}, generatedAt=${payload.generatedAt}`,
+);
 
 function isFiniteNumber(value) {
   return typeof value === 'number' && Number.isFinite(value);

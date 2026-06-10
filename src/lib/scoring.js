@@ -17,7 +17,10 @@ export function scoreEtfs(etfs) {
     const available = Object.entries(components).filter(([, value]) => isFiniteNumber(value));
     const availableWeight = available.reduce((sum, [key]) => sum + COMPONENT_WEIGHTS[key], 0);
     const aiynScore = availableWeight
-      ? available.reduce((sum, [key, value]) => sum + value * (COMPONENT_WEIGHTS[key] / availableWeight), 0)
+      ? available.reduce(
+          (sum, [key, value]) => sum + value * (COMPONENT_WEIGHTS[key] / availableWeight),
+          0,
+        )
       : null;
 
     return {
@@ -44,20 +47,29 @@ export function scoreComponents(etf, context) {
   return {
     cost: normalizeLow(etf.expenseRatio, context.expenseRatio),
     scale: normalizeHigh(logOrNull(etf.aum), context.logAum),
-    shortReturn: weightedAverage([
-      percentileHigh(sparklineReturn(etf.sparkline), context.return30d),
-      percentileHigh(etf.returns?.m3, context.m3Returns),
-    ], [0.5, 0.5]),
-    longReturn: weightedAverage([
-      percentileHigh(etf.returns?.y1, context.y1Returns),
-      percentileHigh(etf.returns?.y3Annualized, context.y3AnnualizedReturns),
-      percentileHigh(etf.returns?.y5Annualized, context.y5AnnualizedReturns),
-    ], [0.45, 0.3, 0.25]),
-    riskAdjusted: weightedAverage([
-      normalizeHigh(etf.risk?.sharpe3y, context.sharpe3y),
-      normalizeLow(etf.risk?.volatility3yAnnualized, context.volatility3yAnnualized),
-      normalizeLow(Math.abs(etf.risk?.maxDrawdown3y ?? Number.NaN), context.maxDrawdownAbs),
-    ], [0.42, 0.3, 0.28]),
+    shortReturn: weightedAverage(
+      [
+        percentileHigh(sparklineReturn(etf.sparkline), context.return30d),
+        percentileHigh(etf.returns?.m3, context.m3Returns),
+      ],
+      [0.5, 0.5],
+    ),
+    longReturn: weightedAverage(
+      [
+        percentileHigh(etf.returns?.y1, context.y1Returns),
+        percentileHigh(etf.returns?.y3Annualized, context.y3AnnualizedReturns),
+        percentileHigh(etf.returns?.y5Annualized, context.y5AnnualizedReturns),
+      ],
+      [0.45, 0.3, 0.25],
+    ),
+    riskAdjusted: weightedAverage(
+      [
+        normalizeHigh(etf.risk?.sharpe3y, context.sharpe3y),
+        normalizeLow(etf.risk?.volatility3yAnnualized, context.volatility3yAnnualized),
+        normalizeLow(Math.abs(etf.risk?.maxDrawdown3y ?? Number.NaN), context.maxDrawdownAbs),
+      ],
+      [0.42, 0.3, 0.28],
+    ),
     tracking: weightedAverage([
       normalizeLow(etf.risk?.trackingError3y, context.trackingError3y),
       normalizeHigh(etf.risk?.informationRatio3y, context.informationRatio3y),
@@ -80,11 +92,13 @@ export function buildScoringContext(etfs) {
     sharpe3y: extent(etfs.map((etf) => etf.risk?.sharpe3y)),
     trackingError3y: extent(etfs.map((etf) => etf.risk?.trackingError3y)),
     informationRatio3y: extent(etfs.map((etf) => etf.risk?.informationRatio3y)),
-    topHoldingConcentration: extent(etfs.map((etf) => (
-      etf.holdings?.length
-        ? etf.holdings.slice(0, 10).reduce((sum, holding) => sum + (holding.weight ?? 0), 0)
-        : null
-    ))),
+    topHoldingConcentration: extent(
+      etfs.map((etf) =>
+        etf.holdings?.length
+          ? etf.holdings.slice(0, 10).reduce((sum, holding) => sum + (holding.weight ?? 0), 0)
+          : null,
+      ),
+    ),
   };
 }
 
@@ -144,7 +158,7 @@ function sparklineReturn(values) {
   const start = cleanValues[0];
   const end = cleanValues.at(-1);
   if (!isFiniteNumber(start) || start <= 0 || !isFiniteNumber(end)) return null;
-  return ((end / start) - 1) * 100;
+  return (end / start - 1) * 100;
 }
 
 function clamp(value) {

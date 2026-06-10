@@ -12,11 +12,13 @@ export function DetailedSparkline({ values, currency }) {
     );
   }
 
-  const points = stats.values.map((value, index) => {
-    const x = 4 + (index / (stats.values.length - 1)) * 92;
-    const y = 42 - ((value - stats.min) / stats.spread) * 34;
-    return `${x.toFixed(2)},${y.toFixed(2)}`;
-  }).join(' ');
+  const points = stats.values
+    .map((value, index) => {
+      const x = 4 + (index / (stats.values.length - 1)) * 92;
+      const y = 42 - ((value - stats.min) / stats.spread) * 34;
+      return `${x.toFixed(2)},${y.toFixed(2)}`;
+    })
+    .join(' ');
 
   return (
     <div className="detailed-chart-block">
@@ -38,8 +40,16 @@ export function DetailedSparkline({ values, currency }) {
       <div className="chart-stat-grid">
         <MetricTile label="기간" value="최근 30일" />
         <MetricTile label="시작" value={formatPrice(stats.start, currency)} />
-        <MetricTile label="최근" value={formatPrice(stats.end, currency)} tone={returnTone(stats.changePercent)} />
-        <MetricTile label="구간 변화" value={formatPercent(stats.changePercent)} tone={returnTone(stats.changePercent)} />
+        <MetricTile
+          label="최근"
+          value={formatPrice(stats.end, currency)}
+          tone={returnTone(stats.changePercent)}
+        />
+        <MetricTile
+          label="구간 변화"
+          value={formatPercent(stats.changePercent)}
+          tone={returnTone(stats.changePercent)}
+        />
       </div>
     </div>
   );
@@ -61,6 +71,6 @@ function sparklineStats(values) {
     spread: max - min || 1,
     start,
     end,
-    changePercent: start > 0 ? ((end / start) - 1) * 100 : null,
+    changePercent: start > 0 ? (end / start - 1) * 100 : null,
   };
 }

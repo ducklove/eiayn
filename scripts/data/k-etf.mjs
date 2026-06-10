@@ -63,7 +63,9 @@ export async function fetchKoreanCompare(codes) {
   const batches = chunk(codes, 200);
   const entries = await mapLimit(batches, 2, async (batch, index) => {
     const url = `${ROOT}/instrument/compare/?range=1Y&lang=${LANG}&codes=${batch.join(',')}`;
-    console.log(`[data:update] K-ETF compare batch ${index + 1}/${batches.length} (${batch.length} ETFs)`);
+    console.log(
+      `[data:update] K-ETF compare batch ${index + 1}/${batches.length} (${batch.length} ETFs)`,
+    );
     const json = await fetchJson(url, { timeoutMs: 90_000 });
     return Object.entries(json.data ?? {});
   });

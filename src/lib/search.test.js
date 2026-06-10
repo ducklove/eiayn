@@ -65,7 +65,11 @@ describe('search utilities', () => {
   });
 
   it('builds dynamic filter options', () => {
-    expect(uniqueOptions(etfs, 'provider', '운용사 전체')).toEqual(['운용사 전체', '삼성자산운용', 'Invesco']);
+    expect(uniqueOptions(etfs, 'provider', '운용사 전체')).toEqual([
+      '운용사 전체',
+      '삼성자산운용',
+      'Invesco',
+    ]);
   });
 
   it('matches via a precomputed search index identically to direct search', () => {
@@ -78,7 +82,8 @@ describe('search utilities', () => {
     };
 
     expect(index.get('QQQ')).toContain('nvidia');
-    expect(filterEtfs(etfs, 'nvidia', filters, index).map((etf) => etf.id))
-      .toEqual(filterEtfs(etfs, 'nvidia', filters).map((etf) => etf.id));
+    expect(filterEtfs(etfs, 'nvidia', filters, index).map((etf) => etf.id)).toEqual(
+      filterEtfs(etfs, 'nvidia', filters).map((etf) => etf.id),
+    );
   });
 });

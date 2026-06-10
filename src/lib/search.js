@@ -5,32 +5,42 @@ export function buildSearchIndex(etfs) {
 export function filterEtfs(etfs, query, filters, index) {
   const normalizedQuery = normalizeText(query);
   return etfs.filter((etf) => {
-    const matchesQuery = !normalizedQuery
-      || (index?.get(etf.id) ?? searchableText(etf)).includes(normalizedQuery);
-    const matchesMarket = !filters.market || filters.market === '시장 전체' || etf.market === filters.market;
-    const matchesTheme = !filters.theme || filters.theme === '테마 전체' || etf.theme === filters.theme;
-    const matchesProvider = !filters.provider || filters.provider === '운용사 전체' || etf.provider === filters.provider;
-    const matchesRisk = !filters.risk || filters.risk === '리스크 전체' || getRiskBand(etf) === filters.risk;
+    const matchesQuery =
+      !normalizedQuery || (index?.get(etf.id) ?? searchableText(etf)).includes(normalizedQuery);
+    const matchesMarket =
+      !filters.market || filters.market === '시장 전체' || etf.market === filters.market;
+    const matchesTheme =
+      !filters.theme || filters.theme === '테마 전체' || etf.theme === filters.theme;
+    const matchesProvider =
+      !filters.provider || filters.provider === '운용사 전체' || etf.provider === filters.provider;
+    const matchesRisk =
+      !filters.risk || filters.risk === '리스크 전체' || getRiskBand(etf) === filters.risk;
     return matchesQuery && matchesMarket && matchesTheme && matchesProvider && matchesRisk;
   });
 }
 
 export function searchableText(etf) {
-  const holdings = (etf.holdings ?? []).map((holding) => `${holding.name} ${holding.ticker ?? ''}`).join(' ');
-  return normalizeText([
-    etf.id,
-    etf.ticker,
-    ...(etf.aliases ?? []),
-    etf.name,
-    etf.shortName,
-    etf.provider,
-    etf.market,
-    etf.assetClass,
-    etf.theme,
-    etf.category,
-    etf.benchmarkIndex,
-    holdings,
-  ].filter(Boolean).join(' '));
+  const holdings = (etf.holdings ?? [])
+    .map((holding) => `${holding.name} ${holding.ticker ?? ''}`)
+    .join(' ');
+  return normalizeText(
+    [
+      etf.id,
+      etf.ticker,
+      ...(etf.aliases ?? []),
+      etf.name,
+      etf.shortName,
+      etf.provider,
+      etf.market,
+      etf.assetClass,
+      etf.theme,
+      etf.category,
+      etf.benchmarkIndex,
+      holdings,
+    ]
+      .filter(Boolean)
+      .join(' '),
+  );
 }
 
 export function getRiskBand(etf) {
@@ -42,10 +52,15 @@ export function getRiskBand(etf) {
 }
 
 export function uniqueOptions(etfs, key, allLabel) {
-  const values = Array.from(new Set(etfs.map((etf) => etf[key]).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'ko'));
+  const values = Array.from(new Set(etfs.map((etf) => etf[key]).filter(Boolean))).sort((a, b) =>
+    a.localeCompare(b, 'ko'),
+  );
   return [allLabel, ...values];
 }
 
 function normalizeText(value) {
-  return String(value ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
+  return String(value ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
 }
