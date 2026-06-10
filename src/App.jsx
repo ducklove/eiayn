@@ -9,9 +9,12 @@ import { buildSearchIndex, filterEtfs, uniqueOptions } from './lib/search.js';
 import { AnalysisPanel } from './components/analysis/AnalysisPanel.jsx';
 import { EtfAnalysisDashboard } from './components/analysis/EtfAnalysisDashboard.jsx';
 import { ComparisonGrid } from './components/compare/ComparisonGrid.jsx';
+import { CostCalculator } from './components/compare/CostCalculator.jsx';
+import { PerformanceOverlay } from './components/compare/PerformanceOverlay.jsx';
 import { UniverseStrip } from './components/compare/UniverseStrip.jsx';
 import { WorkspaceHeader } from './components/compare/WorkspaceHeader.jsx';
 import { EtfTable } from './components/list/EtfTable.jsx';
+import { PresetBar } from './components/common/PresetBar.jsx';
 import { RankingPanel } from './components/common/RankingPanel.jsx';
 import { SimpleListPanel } from './components/common/SimpleListPanel.jsx';
 import { GuideModal } from './components/layout/GuideModal.jsx';
@@ -172,6 +175,14 @@ function App() {
     if (!next || selectedIds.includes(id)) return;
     setSelectedIds((current) => [...current, id].slice(-4));
     setActionNote(`${next.shortName}을 비교 바구니에 추가했습니다.`);
+  };
+
+  const applyPreset = (preset) => {
+    setQuery('');
+    setFilters({ ...DEFAULT_FILTERS, ...preset.filters });
+    setViewMode('list');
+    writeListUrl();
+    setActionNote(`'${preset.label}' 프리셋을 적용해 전체 목록으로 전환했습니다.`);
   };
 
   const selectFirstResult = () => {
@@ -345,6 +356,7 @@ function App() {
               onShare={shareState}
               onGuide={() => setShowGuide(true)}
             />
+            <PresetBar onApply={applyPreset} />
             {isAnalysisView ? (
               <EtfAnalysisDashboard
                 selectedEtf={selectedEtf}
@@ -370,6 +382,12 @@ function App() {
                 toggleFavorite={toggleFavorite}
                 onAddNext={addNext}
               />
+            )}
+            {!isAnalysisView && !isListView && (
+              <div className="compare-tools">
+                <PerformanceOverlay selectedEtfs={selectedEtfs} />
+                <CostCalculator selectedEtfs={selectedEtfs} />
+              </div>
             )}
             {!isListView && (
               <UniverseStrip
