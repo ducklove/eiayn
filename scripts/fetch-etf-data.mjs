@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
   calculateAnnualizedReturn,
@@ -11,6 +11,9 @@ import {
 } from '../src/lib/metrics.js';
 import { collectMissingFields } from '../src/lib/normalize.js';
 import { scoreEtfs } from '../src/lib/scoring.js';
+import { diffSnapshots } from './data/changes.mjs';
+import { buildFeedXml, changeSummaryLabel } from './data/feed.mjs';
+import { appendHistoryEntry, historyFromSnapshot } from './data/history.mjs';
 import { fetchKoreanEtfBaseData, KETF_SOURCES } from './data/k-etf.mjs';
 import { enrichKoreanEtfsWithYahoo, KOREA_YAHOO_SOURCE_NAME } from './data/korea-enrich.mjs';
 import { buildPerformance1y, estimatePerformance1ySize } from './data/performance.mjs';
@@ -38,6 +41,9 @@ import { GLOBAL_REPRESENTATIVE_ETFS, US_CORE_SUPPLEMENTS } from './data/universe
 const ROOT = process.cwd();
 const OUT_DIR = path.join(ROOT, 'public', 'data');
 const OUT_FILE = path.join(OUT_DIR, 'etfs.json');
+const HISTORY_FILE = path.join(OUT_DIR, 'history.json');
+const CHANGES_FILE = path.join(OUT_DIR, 'changes.json');
+const FEED_FILE = path.join(OUT_DIR, 'feed.xml');
 const GENERATED_AT = new Date().toISOString();
 const US_MOST_ACTIVE_COUNT = Number(process.env.US_MOST_ACTIVE_COUNT ?? 150);
 const US_STOCKANALYSIS_LIMIT = Number(process.env.US_STOCKANALYSIS_LIMIT ?? 40);
@@ -183,9 +189,103 @@ async function main() {
     etfs: etfsWithRefs,
   };
 
+  // History & changes artifacts: read the previous snapshot and sidecar files
+  // BEFORE overwriting anything, then derive the rolling score history, the
+  // day-over-day diff, and the RSS feed. Every step is non-fatal: a missing or
+  // corrupt previous file logs a warning and degrades (diff against null,
+  // fresh history/feed) but never aborts the refresh.
+  const previousSnapshot = await readJsonOrNull(OUT_FILE);
+  const previousHistory = await readJsonOrNull(HISTORY_FILE);
+  const previousFeedXml = await readTextOrNull(FEED_FILE);
+  let sidecarFiles = [];
+  try {
+    sidecarFiles = buildSidecarFiles({
+      previousSnapshot,
+      previousHistory,
+      previousFeedXml,
+      payload,
+    });
+  } catch (error) {
+    console.warn(`[data:update] history/changes artifacts skipped: ${error.message}`);
+  }
+
   await mkdir(OUT_DIR, { recursive: true });
   await writeFile(OUT_FILE, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
   console.log(`[data:update] Wrote ${path.relative(ROOT, OUT_FILE)} (${scoredEtfs.length} ETFs)`);
+
+  for (const sidecar of sidecarFiles) {
+    try {
+      await writeFile(sidecar.file, sidecar.contents, 'utf8');
+      console.log(`[data:update] Wrote ${path.relative(ROOT, sidecar.file)} (${sidecar.label})`);
+    } catch (error) {
+      console.warn(`[data:update] Skipped ${path.relative(ROOT, sidecar.file)}: ${error.message}`);
+    }
+  }
+}
+
+// Derives the three sidecar artifacts for a refresh run. Each artifact is
+// computed independently so one failure (which would indicate a bug, not bad
+// upstream data) only costs that artifact, never the snapshot itself.
+function buildSidecarFiles({ previousSnapshot, previousHistory, previousFeedXml, payload }) {
+  const files = [];
+
+  try {
+    const history = appendHistoryEntry(previousHistory, historyFromSnapshot(payload));
+    const today = history.entries.at(-1);
+    files.push({
+      file: HISTORY_FILE,
+      contents: `${JSON.stringify(history)}\n`,
+      label: `${history.entries.length} days, ${Object.keys(today.scores).length} scores on ${today.date}`,
+    });
+  } catch (error) {
+    console.warn(`[data:update] history.json skipped: ${error.message}`);
+  }
+
+  try {
+    const changes = diffSnapshots(previousSnapshot, payload);
+    files.push({
+      file: CHANGES_FILE,
+      contents: `${JSON.stringify(changes, null, 2)}\n`,
+      label: changeSummaryLabel(changes),
+    });
+    try {
+      files.push({
+        file: FEED_FILE,
+        contents: buildFeedXml(previousFeedXml, changes),
+        label: 'RSS',
+      });
+    } catch (error) {
+      console.warn(`[data:update] feed.xml skipped: ${error.message}`);
+    }
+  } catch (error) {
+    console.warn(`[data:update] changes.json and feed.xml skipped: ${error.message}`);
+  }
+
+  return files;
+}
+
+async function readJsonOrNull(file) {
+  const raw = await readTextOrNull(file);
+  if (raw === null) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    console.warn(`[data:update] Ignoring corrupt ${path.relative(ROOT, file)}: ${error.message}`);
+    return null;
+  }
+}
+
+async function readTextOrNull(file) {
+  try {
+    return await readFile(file, 'utf8');
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.warn(
+        `[data:update] Ignoring unreadable ${path.relative(ROOT, file)}: ${error.message}`,
+      );
+    }
+    return null;
+  }
 }
 
 function buildKoreanEtfs(base) {

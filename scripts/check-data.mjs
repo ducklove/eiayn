@@ -1,7 +1,13 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-const DATA_FILE = path.join(process.cwd(), 'public', 'data', 'etfs.json');
+const DATA_DIR = path.join(process.cwd(), 'public', 'data');
+const DATA_FILE = path.join(DATA_DIR, 'etfs.json');
+const HISTORY_FILE = path.join(DATA_DIR, 'history.json');
+const CHANGES_FILE = path.join(DATA_DIR, 'changes.json');
+const HISTORY_MAX_ENTRIES = 60;
+const CHANGES_ARRAY_CAPS = { newListings: 50, delisted: 50, feeChanges: null, scoreMoves: 20 };
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const MINIMUMS = {
   국내: 1000,
   미국: 100,
@@ -184,6 +190,15 @@ for (const forbidden of [/\bdemo\b/i, /\bexample\b/i, /\bmock\b/i, /예시/, /�
   }
 }
 
+// history.json and changes.json are optional sidecar files (they appear with
+// the first data refresh after the history/changes pipeline shipped) and are
+// validated only when present; a missing file is never an error.
+const history = await readOptionalJson(HISTORY_FILE, 'history.json');
+if (history !== null) validateHistory(history);
+
+const changes = await readOptionalJson(CHANGES_FILE, 'changes.json');
+if (changes !== null) validateChanges(changes);
+
 if (errors.length) {
   console.error(errors.map((error) => `- ${error}`).join('\n'));
   process.exit(1);
@@ -192,6 +207,102 @@ if (errors.length) {
 console.log(
   `[check:data] OK: ${etfs.length} ETFs, markets=${JSON.stringify(marketCounts)}, generatedAt=${payload.generatedAt}`,
 );
+console.log(
+  `[check:data] history.json: ${history ? `${history.entries.length} entries` : 'absent (ok)'}, changes.json: ${changes ? 'present' : 'absent (ok)'}`,
+);
+
+// Returns the parsed JSON, or null when the file does not exist. Unreadable
+// or unparseable committed files are validation errors, not crashes.
+async function readOptionalJson(file, label) {
+  let raw;
+  try {
+    raw = await readFile(file, 'utf8');
+  } catch (error) {
+    if (error.code === 'ENOENT') return null;
+    errors.push(`${label}: unreadable (${error.message})`);
+    return null;
+  }
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    errors.push(`${label}: invalid JSON (${error.message})`);
+    return null;
+  }
+}
+
+function validateHistory(history) {
+  if (history.schemaVersion !== 1) errors.push('history.json: schemaVersion must be 1');
+  if (!isNonEmptyString(history.updatedAt)) {
+    errors.push('history.json: updatedAt must be an ISO datetime string');
+  }
+  if (!Array.isArray(history.entries)) {
+    errors.push('history.json: entries must be an array');
+    return;
+  }
+  if (history.entries.length > HISTORY_MAX_ENTRIES) {
+    errors.push(`history.json: entries must be pruned to ${HISTORY_MAX_ENTRIES}`);
+  }
+  let previousDate = '';
+  history.entries.forEach((entry, index) => {
+    const where = `history.json entries[${index}]`;
+    if (!DATE_PATTERN.test(entry?.date ?? '')) {
+      errors.push(`${where}: date must be a YYYY-MM-DD string`);
+      return;
+    }
+    if (entry.date <= previousDate) {
+      errors.push(`${where}: dates must be unique and sorted ascending (${entry.date})`);
+    }
+    previousDate = entry.date;
+    if (!isNonEmptyString(entry.generatedAt)) {
+      errors.push(`${where}: generatedAt must be an ISO datetime string`);
+    }
+    if (!isPlainObject(entry.scores)) {
+      errors.push(`${where}: scores must be an object`);
+      return;
+    }
+    for (const [id, score] of Object.entries(entry.scores)) {
+      if (!Number.isInteger(score)) {
+        errors.push(`${where}: scores.${id} must be a finite integer`);
+        break;
+      }
+    }
+  });
+}
+
+function validateChanges(changes) {
+  if (changes.schemaVersion !== 1) errors.push('changes.json: schemaVersion must be 1');
+  if (!isNonEmptyString(changes.generatedAt)) {
+    errors.push('changes.json: generatedAt must be an ISO datetime string');
+  }
+  if (changes.previousGeneratedAt !== null && !isNonEmptyString(changes.previousGeneratedAt)) {
+    errors.push('changes.json: previousGeneratedAt must be an ISO datetime string or null');
+  }
+  for (const [key, cap] of Object.entries(CHANGES_ARRAY_CAPS)) {
+    const list = changes[key];
+    if (!Array.isArray(list)) {
+      errors.push(`changes.json: ${key} must be an array`);
+      continue;
+    }
+    if (cap !== null && list.length > cap) {
+      errors.push(`changes.json: ${key} must be capped at ${cap}`);
+    }
+    list.forEach((entry, index) => {
+      if (!isNonEmptyString(entry?.id)) {
+        errors.push(`changes.json: ${key}[${index}].id must be a non-empty string`);
+      }
+      if (
+        (key === 'feeChanges' || key === 'scoreMoves') &&
+        (!isFiniteNumber(entry?.from) || !isFiniteNumber(entry?.to))
+      ) {
+        errors.push(`changes.json: ${key}[${index}] must carry numeric from/to values`);
+      }
+    });
+  }
+}
+
+function isPlainObject(value) {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
 function isFiniteNumber(value) {
   return typeof value === 'number' && Number.isFinite(value);

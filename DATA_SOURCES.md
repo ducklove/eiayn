@@ -77,6 +77,38 @@ Regional holdings are still unavailable from these public profile sources and re
 
 Each ETF carries an optional `performance1y` object — `{ start: 'YYYY-MM-DD', freq: 'weekly', values: [100, ...] }` — that the comparison overlay chart uses to draw normalized 1-year performance lines. `scripts/data/performance.mjs` derives it from the same price history as the other metrics: the K-ETF 1-year batch series for Korean ETFs, the Yahoo Finance 5-year chart series for US and regional ETFs, and the Yahoo KRX `.KS` chart as a fill-only-null fallback for Korean ETFs whose K-ETF history was too sparse. Sampling rule: take the trailing one year from the latest available point (inclusive boundary), keep the last available trading point of each ISO week (Monday-Sunday) ending at the most recent point, then normalize so `values[0]` is exactly `100` and later values are `(price / start price) × 100` rounded to 2 decimals. ETFs with fewer than 8 weekly points get `performance1y: null`. At roughly 53 numbers plus one date per ETF the field adds about 0.5 MB raw across ~1,348 ETFs; each run logs the serialized byte total. The field is optional in `npm run check:data` (shape is validated only when present and non-null), because the committed snapshot predates it: `performance1y` appears from the first data refresh after this change.
 
+## History & Changes Artifacts
+
+Besides `etfs.json`, every refresh run writes three derived files into `public/data/` (modules: `scripts/data/history.mjs`, `scripts/data/changes.mjs`, `scripts/data/feed.mjs`). They power the "점수 추이" (score history) and "오늘의 변화" (today's changes) features and are committed by the scheduled workflow together with the snapshot.
+
+### `public/data/history.json` (schemaVersion 1)
+
+Rolling AIYN score history: `{ schemaVersion: 1, updatedAt, entries: [{ date, generatedAt, scores }] }`.
+
+- One entry per Asia/Seoul calendar date of `generatedAt`; re-running the pipeline on the same Seoul day replaces that day's entry.
+- `scores` maps each ETF id to its integer `aiynScore`; ETFs with a `null` score are omitted.
+- Entries are sorted ascending by date and pruned to the most recent 60.
+- The file is seeded from the committed snapshot (one entry) so the UI can fetch it before the first scheduled refresh.
+
+### `public/data/changes.json` (schemaVersion 1)
+
+Diff of the new snapshot against the previously committed one: `{ schemaVersion: 1, generatedAt, previousGeneratedAt, newListings, delisted, feeChanges, scoreMoves }`.
+
+- `newListings`/`delisted`: ETF id presence diff as `{ id, name, market }`, capped at 50 each, in snapshot display order.
+- `feeChanges`: `{ id, name, from, to }` where both expense ratios are non-null and `|Δ| >= 0.0001` after a rounding-noise guard at 4 decimals.
+- `scoreMoves`: `{ id, name, from, to }` where both scores exist and `|Δ aiynScore| >= 5`, sorted by `|Δ|` descending, capped at 20.
+- On the first run (no previous snapshot) all arrays are empty and `previousGeneratedAt` is `null`. The file is intentionally not committed until the first CI refresh produces it (it needs two snapshots); the UI tolerates its absence.
+
+### `public/data/feed.xml` (RSS 2.0)
+
+Channel `ETF is All You Need — 데이터 업데이트` at `https://ducklove.github.io/eiayn/`. Each refresh run prepends one item titled with the change counts (e.g. `신규 상장 3종, 보수 변동 2종, 점수 급변 5종`) whose HTML-escaped description lists every changed ETF with a deep link (`https://ducklove.github.io/eiayn/?code=ID`). The latest 20 items are retained: previous items are recovered from the existing file and the feed is regenerated cleanly when it is missing or corrupt. Like `changes.json`, it first appears with the first CI refresh.
+
+### Cadence and degradation
+
+- All three files are written by every `npm run data:update` run: the scheduled workflow (`.github/workflows/fetch-data.yml`, cron `30 21 * * 0-5` UTC = 06:30 KST Mon–Sat) and manual `workflow_dispatch` runs.
+- The artifacts are strictly non-fatal: a missing or corrupt previous snapshot/history/feed logs a warning and degrades (diff against `null`, fresh history/feed) but never aborts the refresh, and a failed artifact never blocks writing `etfs.json`.
+- `npm run check:data` validates `history.json` and `changes.json` only when the files exist (schema version, sorted unique dates, integer scores, array shapes and caps); a missing file is never an error.
+
 ## Update Behavior
 
 - Required source failures cause `npm run data:update` to fail.

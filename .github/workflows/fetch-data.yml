@@ -46,16 +46,24 @@ jobs:
       - name: Run tests
         run: npm test
 
+      # The refresh writes the snapshot plus three sidecar artifacts (rolling
+      # score history, day-over-day changes, RSS feed). Sidecars are staged
+      # only if the run produced them (add-if-exists), and the changed-files
+      # guard looks at the staged set so a sidecar-only change still commits.
       - name: Commit refreshed snapshot
         id: commit
         run: |
-          if git diff --quiet -- public/data/etfs.json; then
+          for file in public/data/etfs.json public/data/history.json public/data/changes.json public/data/feed.xml; do
+            if [ -f "$file" ]; then
+              git add -- "$file"
+            fi
+          done
+          if git diff --cached --quiet; then
             echo "No data changes; skipping commit."
             echo "pushed=false" >> "$GITHUB_OUTPUT"
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add public/data/etfs.json
             git commit -m "Refresh ETF data snapshot (auto)"
             git push origin main
             echo "pushed=true" >> "$GITHUB_OUTPUT"
