@@ -44,7 +44,8 @@ export function formatDateTime(value) {
   if (!value) return '-';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '-';
-  return new Intl.DateTimeFormat('ko-KR', {
+  const parts = {};
+  for (const part of new Intl.DateTimeFormat('ko-KR', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
     month: '2-digit',
@@ -52,7 +53,10 @@ export function formatDateTime(value) {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
-  }).format(date).replace(/\\. /g, '-').replace('.', '');
+  }).formatToParts(date)) {
+    parts[part.type] = part.value;
+  }
+  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
 }
 
 export function scoreLabel(score) {
@@ -79,6 +83,6 @@ function localeForCurrency(currency) {
   })[currency] ?? 'en-US';
 }
 
-function zeroDecimalCurrency(currency) {
+export function zeroDecimalCurrency(currency) {
   return ['KRW', 'JPY', 'VND'].includes(currency);
 }

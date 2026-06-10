@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function usePersistentState(key, initialValue) {
   const [value, setValue] = useState(() => {
@@ -9,8 +9,13 @@ export function usePersistentState(key, initialValue) {
       return initialValue;
     }
   });
+  const skipFirstWrite = useRef(true);
 
   useEffect(() => {
+    if (skipFirstWrite.current) {
+      skipFirstWrite.current = false;
+      return;
+    }
     try {
       window.localStorage.setItem(key, JSON.stringify(value));
     } catch {

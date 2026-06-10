@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useEtfData } from './hooks/useEtfData.js';
 import { usePersistentState } from './hooks/usePersistentState.js';
+import { buildCsv, downloadFile } from './lib/csv.js';
 import { resolveInitialSelection } from './lib/deepLink.js';
 import {
   formatAum,
@@ -212,12 +213,8 @@ function App() {
       sharpe3y: etf.risk.sharpe3y,
       quoteAsOf: etf.dataQuality.quoteAsOf,
     }));
-    const headers = Object.keys(rows[0] ?? {});
-    if (!headers.length) return;
-    const csv = [
-      headers.join(','),
-      ...rows.map((row) => headers.map((header) => csvCell(row[header])).join(',')),
-    ].join('\n');
+    const csv = buildCsv(rows);
+    if (!csv) return;
     const prefix = isAnalysisView ? selectedEtf.id : 'compare';
     downloadFile(`eiayn-${prefix}-${new Date().toISOString().slice(0, 10)}.csv`, csv, 'text/csv;charset=utf-8');
     setActionNote(isAnalysisView ? `${selectedEtf.shortName} 분석 데이터를 CSV로 내보냈습니다.` : '현재 비교 바구니를 CSV로 내보냈습니다.');
@@ -1216,24 +1213,6 @@ function formatMetric(etf, key, type) {
 
 function getPath(object, path) {
   return path.split('.').reduce((value, key) => value?.[key], object) ?? null;
-}
-
-function csvCell(value) {
-  if (value === null || value === undefined) return '';
-  const text = String(value);
-  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-}
-
-function downloadFile(filename, content, type) {
-  const blob = new Blob([content], { type });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  document.body.append(anchor);
-  anchor.click();
-  anchor.remove();
-  URL.revokeObjectURL(url);
 }
 
 function buildHoldingChart(holdings) {

@@ -11,7 +11,9 @@ export function useEtfData() {
     setState((current) => ({ ...current, loading: true, error: null }));
     try {
       const response = await fetch(`${import.meta.env.BASE_URL}data/etfs.json`, {
-        cache: 'no-store',
+        // no-cache still revalidates with the server (ETag/304) instead of
+        // re-downloading the full snapshot on every visit like no-store did.
+        cache: 'no-cache',
       });
       if (!response.ok) {
         throw new Error(`데이터 스냅샷을 불러오지 못했습니다. (${response.status})`);
