@@ -28,6 +28,10 @@
   --amber-border: #f1d18a;
   --amber-bg: #fff7df;
   --amber-bg-soft: #fffaf0;
+  --ink-strong: #18263a;
+  --ink: #26364a;
+  --ink-soft: #344256;
+  --topbar-bg: rgba(255, 255, 255, 0.94);
   --shadow: 0 14px 30px rgba(10, 43, 70, 0.08);
   --radius: 8px;
 }
@@ -60,6 +64,10 @@
   --amber-border: #5d4a1c;
   --amber-bg: #2a2210;
   --amber-bg-soft: #241e10;
+  --ink-strong: #dde8f2;
+  --ink: #c3d2e0;
+  --ink-soft: #a9bccd;
+  --topbar-bg: rgba(13, 23, 36, 0.92);
   --shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
 }
 
@@ -350,7 +358,7 @@ a {
   align-items: center;
   gap: 16px;
   padding: 0 22px;
-  background: rgba(255, 255, 255, 0.94);
+  background: var(--topbar-bg);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(14px);
 }
@@ -362,7 +370,7 @@ a {
   place-items: center;
   border: 1px solid transparent;
   border-radius: 7px;
-  color: #26364a;
+  color: var(--ink);
   background: transparent;
 }
 
@@ -385,7 +393,7 @@ a {
   padding: 0 12px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
-  color: #18263a;
+  color: var(--ink-strong);
   background: var(--surface);
 }
 
@@ -424,7 +432,7 @@ a {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  color: #26364a;
+  color: var(--ink);
   font-size: 13px;
   white-space: nowrap;
 }
@@ -506,7 +514,7 @@ a {
   border: 1px solid var(--line-strong);
   border-radius: 7px;
   padding: 0 12px;
-  color: #18263a;
+  color: var(--ink-strong);
   background: var(--surface);
   font-size: 13px;
   font-weight: 800;
@@ -546,7 +554,7 @@ a {
   border: 1px solid var(--line-strong);
   border-radius: 7px;
   padding: 0 11px;
-  color: #26364a;
+  color: var(--ink);
   background: var(--surface);
   font-size: 13px;
   font-weight: 850;
@@ -631,7 +639,7 @@ a {
   border: 0;
   outline: 0;
   padding: 0 33px 0 12px;
-  color: #18263a;
+  color: var(--ink-strong);
   background: transparent;
   font-size: 13px;
   font-weight: 700;
@@ -897,7 +905,7 @@ a {
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
   padding: 12px;
-  color: #243247;
+  color: var(--ink);
   background: var(--surface);
   box-shadow: 0 18px 36px rgba(10, 43, 70, 0.18);
   font-size: 13px;
@@ -1039,7 +1047,7 @@ a {
 }
 
 .factor-row span {
-  color: #344256;
+  color: var(--ink-soft);
   font-weight: 850;
 }
 
@@ -1201,7 +1209,7 @@ a {
   border: 1px solid var(--line-strong);
   border-radius: 7px;
   padding: 0 11px;
-  color: #243247;
+  color: var(--ink);
   background: var(--surface);
   font-size: 13px;
   font-weight: 800;
@@ -1383,7 +1391,7 @@ a {
   gap: 7px;
   border: 1px solid var(--line-strong);
   border-radius: 7px;
-  color: #243247;
+  color: var(--ink);
   background: var(--surface);
   font-size: 13px;
   font-weight: 800;
@@ -1405,7 +1413,7 @@ a {
   gap: 8px;
   border: 0;
   border-right: 1px solid var(--line);
-  color: #26364a;
+  color: var(--ink);
   background:
     linear-gradient(#f7fafc 0 0) padding-box,
     repeating-linear-gradient(45deg, #d8e1e8 0 10px, transparent 10px 18px) border-box;
@@ -1721,7 +1729,7 @@ a {
   border: 1px solid var(--line);
   border-radius: 7px;
   padding: 9px 10px;
-  color: #18263a;
+  color: var(--ink-strong);
   background: var(--surface-tint);
   text-align: left;
 }
@@ -1797,7 +1805,7 @@ a {
   border: 0;
   border-right: 1px solid var(--line);
   background: var(--surface-soft);
-  color: #344256;
+  color: var(--ink-soft);
   font-size: 13px;
   font-weight: 800;
 }
@@ -1980,7 +1988,7 @@ a {
 
 .guide-content p {
   margin: 0;
-  color: #26364a;
+  color: var(--ink);
   font-size: 14px;
   line-height: 1.65;
 }
