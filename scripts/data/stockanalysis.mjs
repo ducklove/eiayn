@@ -1,5 +1,5 @@
 import { load } from 'cheerio';
-import { parseCompactMoney, parsePercent } from '../../src/lib/metrics.js';
+import { parseCompactMoney, toFiniteNumber } from '../../src/lib/metrics.js';
 import { optionalText } from './http.mjs';
 import { cleanText, emptyProfile } from './shared.mjs';
 
@@ -16,9 +16,9 @@ export async function fetchStockAnalysisProfile(path, currency) {
       url,
       fields: ['expenseRatio', 'aum', 'dividendYield', 'inceptionDate'],
     },
-    expenseRatio: parsePercent(summaryValue($, 'Expense Ratio')),
+    expenseRatio: toFiniteNumber(summaryValue($, 'Expense Ratio')),
     aum: aum?.value ?? null,
-    dividendYield: parsePercent(summaryValue($, 'Dividend Yield')),
+    dividendYield: toFiniteNumber(summaryValue($, 'Dividend Yield')),
     inceptionDate: parseDate(summaryValue($, 'Inception Date')),
   };
 }
@@ -44,7 +44,7 @@ export async function fetchStockAnalysisHoldings(path) {
     $(table).find('tbody tr').each((__, row) => {
       const cells = $(row).find('td').map((___, td) => cleanText($(td).text())).get();
       if (cells.length <= Math.max(nameIndex, weightIndex)) return;
-      const weight = parsePercent(cells[weightIndex]);
+      const weight = toFiniteNumber(cells[weightIndex]);
       if (weight === null) return;
       rows.push({
         name: cells[nameIndex],
@@ -76,9 +76,9 @@ export async function fetchStockAnalysisQuoteProfile(ticker, currency) {
       url,
       fields: ['expenseRatio', 'aum', 'dividendYield', 'inceptionDate'],
     },
-    expenseRatio: parsePercent(summaryValue($, 'Expense Ratio')),
+    expenseRatio: toFiniteNumber(summaryValue($, 'Expense Ratio')),
     aum: aum?.value ?? null,
-    dividendYield: parsePercent(summaryValue($, 'Dividend Yield')),
+    dividendYield: toFiniteNumber(summaryValue($, 'Dividend Yield')),
     inceptionDate: parseDate(summaryValue($, 'Inception Date')),
   };
 }

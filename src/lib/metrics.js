@@ -13,10 +13,6 @@ export function toFiniteNumber(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-export function parsePercent(value) {
-  return toFiniteNumber(value);
-}
-
 export function parseCompactMoney(value, fallbackCurrency) {
   if (typeof value !== 'string') return null;
   const trimmed = value.replace(/,/g, '').trim();
