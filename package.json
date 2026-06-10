@@ -7,7 +7,7 @@
     "data:update": "node scripts/fetch-etf-data.mjs",
     "check:data": "node scripts/check-data.mjs",
     "dev": "vite --host 127.0.0.1",
-    "build": "npm run data:update && npm run check:data && vite build",
+    "build": "npm run check:data && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "lint": "eslint .",
     "format": "prettier --write .",

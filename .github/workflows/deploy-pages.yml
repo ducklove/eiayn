@@ -3,13 +3,15 @@ name: Deploy GitHub Pages
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+# Deploys are hermetic: they build from the committed data snapshot in
+# public/data/etfs.json and never call external finance APIs. The scheduled
+# data refresh lives in fetch-data.yml, which commits a new snapshot and then
+# dispatches this workflow.
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-  schedule:
-    - cron: "30 21 * * 0-5"
 
 permissions:
   contents: read
@@ -36,8 +38,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify and build
-        run: npm run verify
+      - name: Run tests
+        run: npm test
+
+      # npm run build validates the committed snapshot (check:data) and then
+      # runs vite build. No data:update here — deploys must not depend on
+      # external API availability.
+      - name: Build
+        run: npm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
