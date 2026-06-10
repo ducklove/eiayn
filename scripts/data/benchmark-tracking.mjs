@@ -188,7 +188,7 @@ export function computeTrackingMetrics(etfSeries, benchmarkSeries) {
 export function trackingSourceEntry(symbol) {
   return {
     name: 'Yahoo Finance chart (benchmark)',
-    url: `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`,
+    url: `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}`,
     fields: ['risk.trackingError3y', 'risk.informationRatio3y'],
   };
 }

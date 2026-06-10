@@ -446,3 +446,94 @@ describe('enrichKoreanEtfsWithYahoo', () => {
     expect(koreanYahooSymbol('069500')).toBe('069500.KS');
   });
 });
+
+describe('applyKoreanYahooEnrichment benchmark tracking', () => {
+  function dailyChartSeries() {
+    const points = [];
+    let value = 100;
+    for (let index = 0; index < 420; index += 1) {
+      const date = new Date(Date.UTC(2025, 0, 1 + index)).toISOString().slice(0, 10);
+      value *= 1 + 0.0004 + (index % 2 === 0 ? 0.002 : -0.002);
+      points.push({ date, close: value, adjustedClose: value, volume: 1 });
+    }
+    return points;
+  }
+
+  function flatBenchmark() {
+    const series = [];
+    let value = 100;
+    for (let index = 0; index < 420; index += 1) {
+      const date = new Date(Date.UTC(2025, 0, 1 + index)).toISOString().slice(0, 10);
+      value *= 1.0003;
+      series.push({ date, value });
+    }
+    return { symbol: '^KS200', series };
+  }
+
+  it('fills tracking metrics and appends a benchmark source entry', () => {
+    const etf = makeKoreanEtf();
+    const chart = makeChart({ series: dailyChartSeries() });
+
+    const result = applyKoreanYahooEnrichment(etf, chart, flatBenchmark());
+
+    expect(result.risk.trackingError3y).toBeGreaterThan(0);
+    expect(typeof result.risk.informationRatio3y).toBe('number');
+    const benchmarkSource = result.dataQuality.sources.find(
+      (source) => source.name === 'Yahoo Finance chart (benchmark)',
+    );
+    expect(benchmarkSource).toBeDefined();
+    expect(benchmarkSource.url).toContain('%5EKS200');
+    expect(benchmarkSource.fields).toContain('risk.trackingError3y');
+  });
+
+  it('leaves tracking metrics null without a benchmark', () => {
+    const etf = makeKoreanEtf();
+    const chart = makeChart({ series: dailyChartSeries() });
+
+    const result = applyKoreanYahooEnrichment(etf, chart, null);
+
+    expect(result.risk.trackingError3y).toBeNull();
+    expect(result.risk.informationRatio3y).toBeNull();
+    expect(
+      result.dataQuality.sources.some(
+        (source) => source.name === 'Yahoo Finance chart (benchmark)',
+      ),
+    ).toBe(false);
+  });
+
+  it('never overrides existing K-ETF tracking values', () => {
+    const etf = makeKoreanEtf({
+      risk: {
+        volatility3yAnnualized: 14.2,
+        maxDrawdown3y: -18.5,
+        sharpe3y: 0.6,
+        trackingError3y: 1.5,
+        informationRatio3y: 0.4,
+      },
+    });
+    const chart = makeChart({ series: dailyChartSeries() });
+
+    const result = applyKoreanYahooEnrichment(etf, chart, flatBenchmark());
+
+    expect(result.risk.trackingError3y).toBe(1.5);
+    expect(result.risk.informationRatio3y).toBe(0.4);
+    expect(
+      result.dataQuality.sources.some(
+        (source) => source.name === 'Yahoo Finance chart (benchmark)',
+      ),
+    ).toBe(false);
+  });
+
+  it('passes the benchmark from enrichKoreanEtfsWithYahoo into the merge', async () => {
+    const etf = makeKoreanEtf();
+    const chart = makeChart({ series: dailyChartSeries() });
+
+    const [result] = await enrichKoreanEtfsWithYahoo([etf], {
+      fetchChart: async () => chart,
+      fetchBenchmark: async () => flatBenchmark(),
+      log: () => {},
+    });
+
+    expect(result.risk.trackingError3y).toBeGreaterThan(0);
+  });
+});

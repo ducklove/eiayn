@@ -248,7 +248,7 @@ describe('trackingSourceEntry', () => {
   it('builds the dataQuality attribution entry for a benchmark symbol', () => {
     expect(trackingSourceEntry('^GSPC')).toEqual({
       name: 'Yahoo Finance chart (benchmark)',
-      url: 'https://query1.finance.yahoo.com/v8/finance/chart/^GSPC',
+      url: 'https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC',
       fields: ['risk.trackingError3y', 'risk.informationRatio3y'],
     });
     expect(trackingSourceEntry('000300.SS').url).toBe(

@@ -21,7 +21,7 @@ If there is not enough reliable history for a period, the metric is `null`.
 - Sharpe ratio: annualized mean daily return divided by annualized volatility.
 - Risk-free rate: `0%` for the current simplified calculation.
 
-Tracking error and information ratio remain `null` until reliable benchmark mappings and adjusted benchmark series are available for every supported ETF. Korean ETFs get 3-year risk metrics from the Yahoo KRX (`.KS`) chart enrichment where Yahoo history exists, computed with the same formulas as US and regional ETFs. The enrichment is best-effort: when Yahoo has no usable history for a symbol or the fetch fails, those fields stay `null` and the ETF is otherwise unchanged.
+Tracking error and information ratio are computed against mapped benchmark index series — see the [Tracking Metrics](#tracking-metrics) section below; ETFs whose `benchmarkIndex` has no mapped Yahoo symbol keep `null` rather than an estimate. Korean ETFs get 3-year risk metrics from the Yahoo KRX (`.KS`) chart enrichment where Yahoo history exists, computed with the same formulas as US and regional ETFs. The enrichment is best-effort: when Yahoo has no usable history for a symbol or the fetch fails, those fields stay `null` and the ETF is otherwise unchanged.
 
 ## Score Components
 

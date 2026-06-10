@@ -16,6 +16,11 @@ import { buildFeedXml, changeSummaryLabel } from './data/feed.mjs';
 import { appendHistoryEntry, historyFromSnapshot } from './data/history.mjs';
 import { fetchKoreanEtfBaseData, KETF_SOURCES } from './data/k-etf.mjs';
 import { enrichKoreanEtfsWithYahoo, KOREA_YAHOO_SOURCE_NAME } from './data/korea-enrich.mjs';
+import {
+  computeTrackingMetrics,
+  resolveBenchmarkSymbol,
+  trackingSourceEntry,
+} from './data/benchmark-tracking.mjs';
 import { buildPerformance1y, estimatePerformance1ySize } from './data/performance.mjs';
 import { mapLimit } from './data/http.mjs';
 import { emptyProfile, nullableNumber } from './data/shared.mjs';
@@ -51,6 +56,33 @@ const US_STOCKANALYSIS_LIMIT = Number(process.env.US_STOCKANALYSIS_LIMIT ?? 40);
 // value get the Yahoo KRX long-horizon enrichment. Default: all Korean ETFs.
 const KOREA_YAHOO_LIMIT = nullableNumber(process.env.KOREA_YAHOO_LIMIT);
 
+// Benchmark index series are fetched lazily and at most once per Yahoo symbol
+// (~21 symbols cover every mappable benchmarkIndex). A failed fetch caches
+// null so tracking metrics simply stay null for the affected ETFs.
+const benchmarkSeriesPromises = new Map();
+
+function benchmarkForIndex(benchmarkIndex) {
+  const symbol = resolveBenchmarkSymbol(benchmarkIndex);
+  if (!symbol) return Promise.resolve(null);
+  if (!benchmarkSeriesPromises.has(symbol)) {
+    benchmarkSeriesPromises.set(
+      symbol,
+      fetchYahooChart(symbol, '3y', { attempts: 2, warn: false })
+        .then((chart) =>
+          chart.series.map((point) => ({
+            date: point.date,
+            value: point.adjustedClose ?? point.close,
+          })),
+        )
+        .catch((error) => {
+          console.warn(`[data:update] Benchmark series unavailable ${symbol}: ${error.message}`);
+          return null;
+        }),
+    );
+  }
+  return benchmarkSeriesPromises.get(symbol).then((series) => (series ? { symbol, series } : null));
+}
+
 async function main() {
   const excluded = [];
 
@@ -65,6 +97,7 @@ async function main() {
   // fetch is optional: failures leave the ETF unchanged and never abort the run.
   const koreaEtfs = await enrichKoreanEtfsWithYahoo(koreaBaseEtfs, {
     fetchChart: (symbol) => fetchYahooChart(symbol, '5y', { attempts: 2, warn: false }),
+    fetchBenchmark: (etf) => benchmarkForIndex(etf.benchmarkIndex),
     limit: KOREA_YAHOO_LIMIT,
     concurrency: 6,
   });
@@ -530,6 +563,12 @@ async function fetchYahooBackedEtf(record, options) {
       (price && previousQuote?.close ? (price / previousQuote.close - 1) * 100 : null);
     const name = record.companyName ?? chart.meta.longName ?? chart.meta.shortName ?? ticker;
     const classification = classifyYahooEtf(name, record.category);
+    const benchmark = await benchmarkForIndex(
+      record.benchmarkIndex ?? classification.benchmarkIndex,
+    );
+    const tracking = benchmark
+      ? computeTrackingMetrics(series3y, benchmark.series)
+      : { trackingError3y: null, informationRatio3y: null };
 
     return {
       id: ticker,
@@ -580,8 +619,8 @@ async function fetchYahooBackedEtf(record, options) {
         volatility3yAnnualized: roundNullable(calculateAnnualizedVolatility(series3y)),
         maxDrawdown3y: roundNullable(calculateMaxDrawdown(series3y)),
         sharpe3y: roundNullable(calculateSharpeRatio(series3y)),
-        trackingError3y: null,
-        informationRatio3y: null,
+        trackingError3y: tracking.trackingError3y,
+        informationRatio3y: tracking.informationRatio3y,
       },
       holdings: holdings.holdings ?? [],
       sparkline: normalizeSparkline(series),
@@ -609,6 +648,7 @@ async function fetchYahooBackedEtf(record, options) {
             url: chart.url,
             fields: ['price', 'history', 'dividends', 'performance1y'],
           },
+          tracking.trackingError3y !== null ? trackingSourceEntry(benchmark.symbol) : null,
           ...(profile.sources ?? [profile.source]),
           holdings.source,
         ]),

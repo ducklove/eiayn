@@ -7,6 +7,7 @@ import {
   normalizeSparkline,
   sliceSeriesFrom,
 } from '../../src/lib/metrics.js';
+import { computeTrackingMetrics, trackingSourceEntry } from './benchmark-tracking.mjs';
 import { mapLimit } from './http.mjs';
 import { buildPerformance1y } from './performance.mjs';
 import { roundNullable, trailingDividendYield } from './yahoo.mjs';
@@ -21,7 +22,7 @@ export const KOREA_YAHOO_SOURCE_NAME = 'Yahoo Finance chart (KRX)';
  * unchanged (same reference) when there is nothing to fill, and never mutates
  * the input.
  */
-export function applyKoreanYahooEnrichment(etf, chart) {
+export function applyKoreanYahooEnrichment(etf, chart, benchmark = null) {
   if (!etf || !chart) return etf;
 
   const series = (chart.series ?? []).map((point) => ({
@@ -99,7 +100,22 @@ export function applyKoreanYahooEnrichment(etf, chart) {
     }
   }
 
-  if (!filledFields.length) return etf;
+  // Tracking metrics come from a separate benchmark index series, so they get
+  // their own source attribution instead of the KRX chart entry.
+  const trackingFilled = [];
+  if (benchmark?.series && enriched.risk.trackingError3y == null) {
+    const tracking = computeTrackingMetrics(series3y, benchmark.series);
+    if (tracking.trackingError3y !== null) {
+      enriched.risk.trackingError3y = tracking.trackingError3y;
+      trackingFilled.push('risk.trackingError3y');
+      if (tracking.informationRatio3y !== null && enriched.risk.informationRatio3y == null) {
+        enriched.risk.informationRatio3y = tracking.informationRatio3y;
+        trackingFilled.push('risk.informationRatio3y');
+      }
+    }
+  }
+
+  if (!filledFields.length && !trackingFilled.length) return etf;
 
   return {
     ...enriched,
@@ -108,7 +124,10 @@ export function applyKoreanYahooEnrichment(etf, chart) {
       ...etf.dataQuality,
       sources: [
         ...(etf.dataQuality?.sources ?? []),
-        { name: KOREA_YAHOO_SOURCE_NAME, url: chart.url, fields: filledFields },
+        ...(filledFields.length
+          ? [{ name: KOREA_YAHOO_SOURCE_NAME, url: chart.url, fields: filledFields }]
+          : []),
+        ...(trackingFilled.length ? [trackingSourceEntry(benchmark.symbol)] : []),
       ],
     },
   };
@@ -138,6 +157,7 @@ export function selectKoreanYahooTargets(etfs, limit) {
 export async function enrichKoreanEtfsWithYahoo(etfs, options) {
   const {
     fetchChart,
+    fetchBenchmark = null,
     limit = null,
     concurrency = 6,
     log = (message) => console.log(message),
@@ -152,7 +172,8 @@ export async function enrichKoreanEtfsWithYahoo(etfs, options) {
   await mapLimit(targets, concurrency, async (etf) => {
     try {
       const chart = await fetchChart(koreanYahooSymbol(etf.ticker));
-      const result = applyKoreanYahooEnrichment(etf, chart);
+      const benchmark = fetchBenchmark ? await fetchBenchmark(etf) : null;
+      const result = applyKoreanYahooEnrichment(etf, chart, benchmark);
       if (result !== etf) {
         enrichedById.set(etf.id, result);
         enrichedCount += 1;
