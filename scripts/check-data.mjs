@@ -39,11 +39,22 @@ const raw = await readFile(DATA_FILE, 'utf8');
 const payload = JSON.parse(raw);
 const errors = [];
 
+if (payload.schemaVersion !== 2) errors.push('schemaVersion must be 2');
 if (!payload.generatedAt) errors.push('generatedAt is required');
 if (!Array.isArray(payload.etfs)) errors.push('etfs must be an array');
 if (!payload.coverage?.korea) errors.push('coverage.korea is required');
 if (!Array.isArray(payload.sources) || !payload.sources.length)
   errors.push('sources must not be empty');
+
+const sourceCatalog = Array.isArray(payload.sourceCatalog) ? payload.sourceCatalog : [];
+if (!sourceCatalog.length) {
+  errors.push('sourceCatalog must be a non-empty array');
+}
+sourceCatalog.forEach((entry, index) => {
+  if (!isNonEmptyString(entry?.name) || !isNonEmptyString(entry?.url)) {
+    errors.push(`sourceCatalog[${index}]: name and url are required strings`);
+  }
+});
 
 const etfs = payload.etfs ?? [];
 const byId = new Map(etfs.map((etf) => [etf.id, etf]));
@@ -111,8 +122,13 @@ for (const etf of etfs) {
   }
   if (!Array.isArray(etf.holdings)) errors.push(`${etf.id}: holdings must be an array`);
   if (!Array.isArray(etf.sparkline)) errors.push(`${etf.id}: sparkline must be an array`);
-  if (!Array.isArray(etf.dataQuality?.sources) || !etf.dataQuality.sources.length) {
-    errors.push(`${etf.id}: dataQuality.sources must not be empty`);
+  const sourceRefs = etf.dataQuality?.sourceRefs;
+  if (!Array.isArray(sourceRefs) || !sourceRefs.length) {
+    errors.push(`${etf.id}: dataQuality.sourceRefs must not be empty`);
+  } else if (
+    !sourceRefs.every((ref) => Number.isInteger(ref) && ref >= 0 && ref < sourceCatalog.length)
+  ) {
+    errors.push(`${etf.id}: dataQuality.sourceRefs must be valid sourceCatalog indexes`);
   }
   if (Object.hasOwn(etf.scoreBreakdown ?? {}, '수익성'))
     errors.push(`${etf.id}: legacy scoreBreakdown.수익성 must not be present`);
@@ -161,6 +177,10 @@ console.log(
 
 function isFiniteNumber(value) {
   return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isNonEmptyString(value) {
+  return typeof value === 'string' && value.length > 0;
 }
 
 function isNumberOrNull(value) {
