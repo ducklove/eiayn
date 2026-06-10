@@ -16,6 +16,7 @@ import { buildFeedXml, changeSummaryLabel } from './data/feed.mjs';
 import { appendHistoryEntry, historyFromSnapshot } from './data/history.mjs';
 import { fetchKoreanEtfBaseData, KETF_SOURCES } from './data/k-etf.mjs';
 import { enrichKoreanEtfsWithYahoo, KOREA_YAHOO_SOURCE_NAME } from './data/korea-enrich.mjs';
+import { applyKrxNavEnrichment, fetchKrxNav } from './data/krx-nav.mjs';
 import {
   computeTrackingMetrics,
   resolveBenchmarkSymbol,
@@ -102,6 +103,27 @@ async function main() {
     concurrency: 6,
   });
 
+  // Strictly best-effort NAV / premium-discount data from the KRX information
+  // data system (one request covers every listed ETF). Any failure — blocked
+  // endpoint, changed schema, exhausted holiday walk-back — leaves the map
+  // empty so nav/premiumDiscount stay null, and never aborts the run.
+  let krxNav = { navMap: new Map(), tradeDate: null };
+  if (process.env.KRX_NAV_DISABLE === '1') {
+    console.log('[data:update] KRX NAV: skipped (KRX_NAV_DISABLE=1)');
+  } else {
+    try {
+      krxNav = await fetchKrxNav();
+      const matched = koreaEtfs.filter((etf) => krxNav.navMap.has(etf.ticker)).length;
+      console.log(
+        `[data:update] KRX NAV: matched ${matched}/${koreaEtfs.length} Korean ETFs (trdDd=${krxNav.trdDd})`,
+      );
+    } catch (error) {
+      console.warn(
+        `[data:update] KRX NAV unavailable: ${error.message} — nav/premiumDiscount remain null`,
+      );
+    }
+  }
+
   console.log(`[data:update] Collecting Yahoo most active US ETFs (${US_MOST_ACTIVE_COUNT})`);
   const usData = await fetchUsEtfs(excluded);
   console.log(`[data:update] US ETFs normalized: ${usData.etfs.length}`);
@@ -110,7 +132,13 @@ async function main() {
   const regionalEtfs = await fetchRegionalEtfs(excluded);
   console.log(`[data:update] Regional ETFs normalized: ${regionalEtfs.length}`);
 
-  const etfs = dedupeEtfs([...koreaEtfs, ...usData.etfs, ...regionalEtfs]).sort(sortEtfsForDisplay);
+  // The KRX application runs even when the fetch failed or was disabled (the
+  // map is just empty) so premiumDiscount: null exists on every ETF.
+  const etfs = applyKrxNavEnrichment(
+    dedupeEtfs([...koreaEtfs, ...usData.etfs, ...regionalEtfs]).sort(sortEtfsForDisplay),
+    krxNav.navMap,
+    { tradeDate: krxNav.tradeDate },
+  );
 
   const scoredEtfs = scoreEtfs(etfs).map((etf) => ({
     ...etf,
