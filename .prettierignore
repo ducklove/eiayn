@@ -1,0 +1,14 @@
+# Build output and dependencies
+dist
+node_modules
+
+# Generated data snapshot (machine-written JSON)
+public/data
+
+# Lockfile (npm-managed)
+package-lock.json
+
+# Vendored/static docs pages and prose
+docs/*.html
+CHANGELOG.md
+*.md
