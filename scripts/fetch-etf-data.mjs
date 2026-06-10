@@ -31,6 +31,7 @@ import {
   stockAnalysisPathForTicker,
 } from './data/stockanalysis.mjs';
 import { profileOverrideForTicker } from './data/profile-overrides.mjs';
+import { buildSourceCatalog } from './data/source-catalog.mjs';
 import { GLOBAL_REPRESENTATIVE_ETFS, US_CORE_SUPPLEMENTS } from './data/universe.mjs';
 
 const ROOT = process.cwd();
@@ -81,7 +82,12 @@ async function main() {
 
   const usdKrw = await fetchExchangeRate();
   const marketCounts = countBy(scoredEtfs, 'market');
+  // Schema v2: per-ETF code above keeps producing inline source objects;
+  // this single pass dedupes them into a top-level catalog and replaces each
+  // ETF's dataQuality.sources with dataQuality.sourceRefs (catalog indexes).
+  const { catalog: sourceCatalog, etfsWithRefs } = buildSourceCatalog(scoredEtfs);
   const payload = {
+    schemaVersion: 2,
     generatedAt: GENERATED_AT,
     timezone: 'Asia/Seoul',
     universe: scoredEtfs.map((etf) => etf.id),
@@ -164,10 +170,11 @@ async function main() {
         fields: ['regional representative ETF selection', 'market classification'],
       },
     ],
+    sourceCatalog,
     exchangeRates: {
       usdKrw,
     },
-    etfs: scoredEtfs,
+    etfs: etfsWithRefs,
   };
 
   await mkdir(OUT_DIR, { recursive: true });
