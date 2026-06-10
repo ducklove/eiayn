@@ -124,18 +124,33 @@ describe('parseStockAnalysisHoldings', () => {
     ]);
   });
 
-  it('caps parsed holdings at 10 rows', () => {
+  it('keeps rows beyond the top 10 and caps parsed holdings at 25', () => {
     const html = holdingsTable({
       headers: ['Symbol', 'Name', '% Weight'],
-      rows: Array.from({ length: 14 }, (_, index) => [
+      rows: Array.from({ length: 30 }, (_, index) => [
         `T${index + 1}`,
         `Holding ${index + 1}`,
-        `${(14 - index).toFixed(2)}%`,
+        `${(30 - index).toFixed(2)}%`,
       ]),
     });
     const rows = parseStockAnalysisHoldings(html);
-    expect(rows).toHaveLength(10);
-    expect(rows.at(-1)).toEqual({ name: 'Holding 10', ticker: 'T10', weight: 5 });
+    expect(rows).toHaveLength(25);
+    expect(rows[10]).toEqual({ name: 'Holding 11', ticker: 'T11', weight: 20 });
+    expect(rows.at(-1)).toEqual({ name: 'Holding 25', ticker: 'T25', weight: 6 });
+  });
+
+  it('keeps every parsed row when the page exposes fewer than 25', () => {
+    const html = holdingsTable({
+      headers: ['Symbol', 'Name', '% Weight'],
+      rows: Array.from({ length: 12 }, (_, index) => [
+        `T${index + 1}`,
+        `Holding ${index + 1}`,
+        `${(12 - index).toFixed(2)}%`,
+      ]),
+    });
+    const rows = parseStockAnalysisHoldings(html);
+    expect(rows).toHaveLength(12);
+    expect(rows.at(-1)).toEqual({ name: 'Holding 12', ticker: 'T12', weight: 1 });
   });
 
   it('skips rows without a numeric weight', () => {

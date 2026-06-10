@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { AlertTriangle, Star } from 'lucide-react';
 import {
   formatAum,
@@ -32,9 +33,6 @@ const FACTOR_DESCRIPTIONS = {
 };
 
 export function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite }) {
-  const holdings = selectedEtf.holdings ?? [];
-  const topHoldings = holdings.slice(0, 10);
-  const holdingChart = buildHoldingChart(topHoldings);
   const factorEntries = Object.entries(selectedEtf.scoreBreakdown ?? {}).filter(
     ([label, value]) => label !== '총보수' && typeof value === 'number',
   );
@@ -191,44 +189,7 @@ export function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite })
 
         <ScoreTrend etfId={selectedEtf.id} />
 
-        <section className="analysis-card holdings-card" id="holdings">
-          <div className="section-heading">
-            <h3>포트폴리오 구성</h3>
-            <span>상위 {Math.min(topHoldings.length, 10)}개</span>
-          </div>
-          {topHoldings.length ? (
-            <div className="portfolio-wide-layout">
-              <div
-                className="donut large"
-                style={{ '--donut': holdingChart.stops.join(', ') }}
-                aria-label="상위 보유종목 비중 도넛 차트"
-              />
-              <div className="wide-holdings">
-                {topHoldings.map((holding, index) => (
-                  <div
-                    className="wide-holding-row"
-                    key={`${holding.ticker}-${holding.name}-${index}`}
-                  >
-                    <span style={{ '--dot-color': HOLDING_COLORS[index % HOLDING_COLORS.length] }}>
-                      {index + 1}
-                    </span>
-                    <strong>{holding.name}</strong>
-                    <em>{holding.ticker ?? '-'}</em>
-                    <b>{formatPlainPercent(holding.weight)}</b>
-                  </div>
-                ))}
-                <div className="wide-holding-row muted">
-                  <span style={{ '--dot-color': OTHER_HOLDING_COLOR }} />
-                  <strong>기타</strong>
-                  <em />
-                  <b>{formatPlainPercent(holdingChart.otherWeight)}</b>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <p className="empty-state">보유종목 데이터 없음</p>
-          )}
-        </section>
+        <HoldingsCard key={selectedEtf.id} holdings={selectedEtf.holdings ?? []} />
 
         <section className="analysis-card risk-note single-risk-note" id="risk">
           <AlertTriangle size={18} />
@@ -252,6 +213,76 @@ export function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite })
         <Star size={16} />
         관심상품
       </button>
+    </section>
+  );
+}
+
+function HoldingsCard({ holdings }) {
+  const [showAll, setShowAll] = useState(false);
+  const topHoldings = holdings.slice(0, 10);
+  // The donut always reflects the top 10 + 기타; only the list expands.
+  const holdingChart = buildHoldingChart(topHoldings);
+  const visibleHoldings = showAll ? holdings : topHoldings;
+  const visibleWeight = visibleHoldings.reduce((sum, holding) => sum + (holding.weight ?? 0), 0);
+  const otherWeight = Math.max(0, 100 - visibleWeight);
+
+  return (
+    <section className="analysis-card holdings-card" id="holdings">
+      <div className="section-heading">
+        <h3>포트폴리오 구성</h3>
+        <span>
+          {showAll ? `전체 ${holdings.length}개` : `상위 ${Math.min(topHoldings.length, 10)}개`}
+        </span>
+      </div>
+      {topHoldings.length ? (
+        <>
+          <div className="portfolio-wide-layout">
+            <div
+              className="donut large"
+              style={{ '--donut': holdingChart.stops.join(', ') }}
+              aria-label="상위 보유종목 비중 도넛 차트"
+            />
+            <div className="wide-holdings">
+              {visibleHoldings.map((holding, index) => (
+                <div
+                  className="wide-holding-row"
+                  key={`${holding.ticker}-${holding.name}-${index}`}
+                >
+                  <span
+                    style={{
+                      '--dot-color':
+                        index < HOLDING_COLORS.length ? HOLDING_COLORS[index] : OTHER_HOLDING_COLOR,
+                    }}
+                  >
+                    {index + 1}
+                  </span>
+                  <strong>{holding.name}</strong>
+                  <em>{holding.ticker ?? '-'}</em>
+                  <b>{formatPlainPercent(holding.weight)}</b>
+                </div>
+              ))}
+              <div className="wide-holding-row muted">
+                <span style={{ '--dot-color': OTHER_HOLDING_COLOR }} />
+                <strong>기타</strong>
+                <em />
+                <b>{formatPlainPercent(otherWeight)}</b>
+              </div>
+            </div>
+          </div>
+          {holdings.length > 10 ? (
+            <button
+              className="ghost-button slim holdings-toggle"
+              type="button"
+              aria-expanded={showAll}
+              onClick={() => setShowAll((value) => !value)}
+            >
+              {showAll ? '상위 10개만 보기' : `전체 보유종목 보기 (${holdings.length})`}
+            </button>
+          ) : null}
+        </>
+      ) : (
+        <p className="empty-state">보유종목 데이터 없음</p>
+      )}
     </section>
   );
 }

@@ -1180,6 +1180,10 @@ a {
   color: var(--muted);
 }
 
+.holdings-toggle {
+  margin-top: 12px;
+}
+
 .source-pills {
   margin-top: 12px;
   display: flex;
