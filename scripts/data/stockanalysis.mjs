@@ -7,12 +7,33 @@ export async function fetchStockAnalysisProfile(path, currency) {
   const url = stockAnalysisUrl(path);
   const html = await optionalText(url);
   if (!html) return emptyProfile();
+  return parseStockAnalysisProfile(html, currency, url);
+}
 
+export async function fetchStockAnalysisHoldings(path) {
+  const url = `${stockAnalysisUrl(path).replace(/\/$/, '')}/holdings/`;
+  const html = await optionalText(url);
+  const source = { name: 'StockAnalysis holdings', url, fields: ['holdings'] };
+  if (!html) return { holdings: [], source };
+  return { holdings: parseStockAnalysisHoldings(html), source };
+}
+
+export async function fetchStockAnalysisQuoteProfile(ticker, currency) {
+  const path = stockAnalysisQuotePathForTicker(ticker);
+  if (!path) return emptyProfile();
+
+  const url = stockAnalysisUrl(path);
+  const html = await optionalText(url);
+  if (!html) return emptyProfile();
+  return parseStockAnalysisProfile(html, currency, url, 'StockAnalysis quote profile');
+}
+
+export function parseStockAnalysisProfile(html, currency, url, sourceName = 'StockAnalysis profile') {
   const $ = load(html);
   const aum = parseCompactMoney(summaryValue($, 'Assets'), currency);
   return {
     source: {
-      name: 'StockAnalysis profile',
+      name: sourceName,
       url,
       fields: ['expenseRatio', 'aum', 'dividendYield', 'inceptionDate'],
     },
@@ -23,16 +44,7 @@ export async function fetchStockAnalysisProfile(path, currency) {
   };
 }
 
-export async function fetchStockAnalysisHoldings(path) {
-  const url = `${stockAnalysisUrl(path).replace(/\/$/, '')}/holdings/`;
-  const html = await optionalText(url);
-  if (!html) {
-    return {
-      holdings: [],
-      source: { name: 'StockAnalysis holdings', url, fields: ['holdings'] },
-    };
-  }
-
+export function parseStockAnalysisHoldings(html) {
   const $ = load(html);
   const rows = [];
   $('table').each((_, table) => {
@@ -54,33 +66,7 @@ export async function fetchStockAnalysisHoldings(path) {
     });
   });
 
-  return {
-    holdings: rows.slice(0, 10),
-    source: { name: 'StockAnalysis holdings', url, fields: ['holdings'] },
-  };
-}
-
-export async function fetchStockAnalysisQuoteProfile(ticker, currency) {
-  const path = stockAnalysisQuotePathForTicker(ticker);
-  if (!path) return emptyProfile();
-
-  const url = stockAnalysisUrl(path);
-  const html = await optionalText(url);
-  if (!html) return emptyProfile();
-
-  const $ = load(html);
-  const aum = parseCompactMoney(summaryValue($, 'Assets'), currency);
-  return {
-    source: {
-      name: 'StockAnalysis quote profile',
-      url,
-      fields: ['expenseRatio', 'aum', 'dividendYield', 'inceptionDate'],
-    },
-    expenseRatio: toFiniteNumber(summaryValue($, 'Expense Ratio')),
-    aum: aum?.value ?? null,
-    dividendYield: toFiniteNumber(summaryValue($, 'Dividend Yield')),
-    inceptionDate: parseDate(summaryValue($, 'Inception Date')),
-  };
+  return rows.slice(0, 10);
 }
 
 export function stockAnalysisPathForTicker(ticker) {
