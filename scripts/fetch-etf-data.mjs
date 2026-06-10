@@ -424,7 +424,7 @@ async function fetchYahooBackedEtf(record, options) {
       },
     };
   } catch (error) {
-    excluded.push({ ticker, market: options.market, reason: error.message });
+    options.excluded.push({ ticker, market: options.market, reason: error.message });
     console.warn(`[data:update] Excluding ${ticker}: ${error.message}`);
     return null;
   }

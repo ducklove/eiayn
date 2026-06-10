@@ -3,7 +3,6 @@ import { cleanText, nullableNumber } from './shared.mjs';
 
 const ROOT = 'https://anchor.k-etf.com/api';
 const LANG = 'ko';
-const TYPE = 'etf';
 
 export const KETF_SOURCES = {
   lineup: {
