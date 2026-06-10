@@ -120,9 +120,18 @@ for (const etf of etfs) {
   }
 }
 
+// Forbidden-token scan covers only self-authored text (ETF labels and source
+// names), not the raw JSON, so a real upstream holding named e.g. "Demo Corp"
+// cannot fail the build.
+const selfAuthoredText = [
+  ...etfs.flatMap((etf) => [etf.name, etf.shortName, etf.provider, etf.theme, etf.category]),
+  ...(payload.sources ?? []).map((source) => source?.name),
+].filter((value) => typeof value === 'string');
+
 for (const forbidden of [/\bdemo\b/i, /\bexample\b/i, /\bmock\b/i, /예시/, /데모/]) {
-  if (forbidden.test(raw)) {
-    errors.push(`production data contains forbidden token: ${forbidden}`);
+  const match = selfAuthoredText.find((text) => forbidden.test(text));
+  if (match !== undefined) {
+    errors.push(`production data contains forbidden token: ${forbidden} in "${match}"`);
   }
 }
 
