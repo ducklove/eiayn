@@ -1,4 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { useDocumentTitle } from './hooks/useDocumentTitle.js';
 import { useEtfData } from './hooks/useEtfData.js';
 import { usePersistentState } from './hooks/usePersistentState.js';
 import { useTheme } from './hooks/useTheme.js';
@@ -123,6 +124,8 @@ function App() {
   const recentEtfs = recentIds.map((id) => etfs.find((etf) => etf.id === id)).filter(Boolean);
   const isAnalysisView = viewMode === 'analysis';
   const isListView = viewMode === 'list';
+
+  useDocumentTitle(viewMode, selectedEtf);
 
   const filterOptions = useMemo(
     () => ({
