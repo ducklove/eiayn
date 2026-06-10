@@ -1,7 +1,8 @@
-import { Menu, Moon, Search } from 'lucide-react';
+import { Menu, Moon, Search, Sun } from 'lucide-react';
 import { formatPercent, formatPrice } from '../../lib/format.js';
 
-export function TopBar({ query, onQueryChange, exchangeRate, searchRef }) {
+export function TopBar({ query, onQueryChange, exchangeRate, searchRef, theme, onToggleTheme }) {
+  const isDark = theme === 'dark';
   return (
     <header className="topbar">
       <button
@@ -40,12 +41,13 @@ export function TopBar({ query, onQueryChange, exchangeRate, searchRef }) {
       <div className="top-actions">
         <button
           className="icon-button"
-          aria-label="다크 모드"
+          aria-label={isDark ? '라이트 모드로 전환' : '다크 모드로 전환'}
+          aria-pressed={isDark}
           type="button"
-          disabled
-          title="다크 모드는 아직 지원하지 않습니다."
+          title={isDark ? '라이트 모드로 전환' : '다크 모드로 전환'}
+          onClick={onToggleTheme}
         >
-          <Moon size={18} />
+          {isDark ? <Sun size={18} /> : <Moon size={18} />}
         </button>
       </div>
     </header>

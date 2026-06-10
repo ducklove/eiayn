@@ -21,6 +21,18 @@
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23061b2e'/%3E%3Ctext x='32' y='42' font-family='Arial,sans-serif' font-size='28' font-weight='bold' fill='%23009b7d' text-anchor='middle'%3EAI%3C/text%3E%3C/svg%3E"
     />
     <title>ETF is All You Need</title>
+    <script>
+      // Apply the saved (or system) theme before first paint to avoid a light flash.
+      try {
+        var eiaynTheme = JSON.parse(localStorage.getItem('eiayn:theme:v1'));
+        if (eiaynTheme !== 'dark' && eiaynTheme !== 'light') {
+          eiaynTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.dataset.theme = eiaynTheme;
+      } catch (error) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

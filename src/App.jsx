@@ -1,6 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useEtfData } from './hooks/useEtfData.js';
 import { usePersistentState } from './hooks/usePersistentState.js';
+import { useTheme } from './hooks/useTheme.js';
 import { buildCsv, downloadFile } from './lib/csv.js';
 import { resolveInitialSelection } from './lib/deepLink.js';
 import { formatDateTime } from './lib/format.js';
@@ -26,6 +27,7 @@ const DEFAULT_FILTERS = {
 
 function App() {
   const { data, loading, error, reload } = useEtfData();
+  const [theme, toggleTheme] = useTheme();
   const etfs = useMemo(() => data?.etfs ?? [], [data]);
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
@@ -295,6 +297,8 @@ function App() {
           onQueryChange={setQuery}
           exchangeRate={data.exchangeRates?.usdKrw}
           searchRef={searchRef}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
         <main className={`content-grid ${isAnalysisView ? 'single-analysis' : ''}`}>
           <div className={`workspace ${isAnalysisView ? 'analysis-workspace' : ''}`}>
