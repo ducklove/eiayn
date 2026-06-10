@@ -80,18 +80,19 @@ describe('normalizeKoreanHoldings', () => {
     expect(result.holdings).toEqual([{ name: 'KODEX 200 구성', ticker: null, weight: 0 }]);
   });
 
-  it('caps holdings at 10 rows', () => {
+  it('keeps rows beyond the top 10 and caps holdings at 25', () => {
     const result = normalizeKoreanHoldings(
       {
-        holdings: Array.from({ length: 13 }, (_, index) => ({
+        holdings: Array.from({ length: 30 }, (_, index) => ({
           name: `종목 ${index + 1}`,
-          weight: 13 - index,
+          weight: 30 - index,
         })),
       },
       URL,
     );
-    expect(result.holdings).toHaveLength(10);
-    expect(result.holdings.at(-1)).toEqual({ name: '종목 10', ticker: null, weight: 4 });
+    expect(result.holdings).toHaveLength(25);
+    expect(result.holdings[10]).toEqual({ name: '종목 11', ticker: null, weight: 20 });
+    expect(result.holdings.at(-1)).toEqual({ name: '종목 25', ticker: null, weight: 6 });
   });
 
   it('handles a missing payload without throwing', () => {

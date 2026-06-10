@@ -4,6 +4,11 @@ import { cleanText, nullableNumber } from './shared.mjs';
 const ROOT = 'https://anchor.k-etf.com/api';
 const LANG = 'ko';
 
+// Snapshot keeps up to 25 holdings per ETF for the UI. The AIYN diversification
+// score still uses only the top 10 (src/lib/scoring.js slices holdings to 10),
+// so scores are unaffected by this limit.
+export const HOLDINGS_LIMIT = 25;
+
 export const KETF_SOURCES = {
   lineup: {
     name: 'K-ETF active ETF lineup',
@@ -94,7 +99,7 @@ export function normalizeKoreanHoldings(json, url) {
       weight: nullableNumber(holding.weight),
     }))
     .filter((holding) => holding.name && holding.weight !== null)
-    .slice(0, 10);
+    .slice(0, HOLDINGS_LIMIT);
 
   return {
     holdings: rows,
