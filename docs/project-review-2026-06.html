@@ -1,0 +1,895 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EIAYN 프로젝트 리뷰 — 구조·품질 평가와 개선 로드맵 (2026-06)</title>
+<style>
+  :root {
+    --navy: #061b2e;
+    --navy-2: #0a2b46;
+    --teal: #009b7d;
+    --teal-soft: #e6f6f2;
+    --bg: #f5f8fb;
+    --surface: #ffffff;
+    --line: #dce4eb;
+    --text: #0d1b2a;
+    --muted: #617083;
+    --red: #d44949;
+    --red-soft: #fdecec;
+    --amber: #e7a10d;
+    --amber-soft: #fdf5e3;
+    --blue: #1e6fd9;
+    --blue-soft: #e9f1fc;
+    --green: #00866b;
+    --green-soft: #e6f6f2;
+    --radius: 10px;
+    --shadow: 0 10px 26px rgba(10, 43, 70, 0.07);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: Inter, Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    font-size: 15.5px;
+  }
+  code, pre {
+    font-family: "JetBrains Mono", "D2Coding", Consolas, "Courier New", monospace;
+    font-size: 0.88em;
+  }
+  code {
+    background: #eef3f8;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 5px;
+    white-space: nowrap;
+  }
+  pre {
+    background: var(--navy);
+    color: #d7e3ee;
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    overflow-x: auto;
+    line-height: 1.5;
+  }
+  pre code { background: none; border: none; color: inherit; padding: 0; white-space: pre; }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .hero {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 70%, #0e3a5c 100%);
+    color: #fff;
+    padding: 52px 24px 44px;
+  }
+  .hero-inner { max-width: 1060px; margin: 0 auto; }
+  .hero .eyebrow {
+    display: inline-block;
+    background: rgba(0, 155, 125, 0.25);
+    border: 1px solid rgba(0, 155, 125, 0.6);
+    color: #7fe0cb;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin-bottom: 14px;
+  }
+  .hero h1 { margin: 0 0 10px; font-size: 30px; line-height: 1.3; }
+  .hero p.sub { margin: 0; color: #aebfd0; max-width: 760px; }
+  .hero-meta {
+    display: flex; flex-wrap: wrap; gap: 10px 26px;
+    margin-top: 22px; font-size: 13.5px; color: #8fa6ba;
+  }
+  .hero-meta strong { color: #dbe7f1; font-weight: 600; }
+
+  .layout {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 30px 24px 80px;
+  }
+  nav.toc {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 22px;
+    margin-bottom: 34px;
+  }
+  nav.toc strong { display: block; margin-bottom: 8px; font-size: 14px; color: var(--muted); letter-spacing: 0.05em; }
+  nav.toc ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 40px; }
+  nav.toc li { margin: 3px 0; }
+
+  section.block { margin-bottom: 52px; }
+  h2 {
+    font-size: 23px;
+    margin: 0 0 6px;
+    padding-top: 8px;
+    border-top: 3px solid var(--teal);
+    display: block;
+  }
+  h2 .num { color: var(--teal); margin-right: 8px; }
+  .h2-sub { color: var(--muted); margin: 0 0 20px; font-size: 14.5px; }
+  h3 { font-size: 17.5px; margin: 30px 0 10px; }
+  h4 { font-size: 15.5px; margin: 22px 0 8px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px 24px;
+  }
+  .card + .card { margin-top: 16px; }
+
+  .grade-banner {
+    display: flex; align-items: center; gap: 24px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 6px solid var(--teal);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 22px 26px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .grade-circle {
+    width: 86px; height: 86px; border-radius: 50%;
+    background: var(--teal-soft);
+    border: 3px solid var(--teal);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .grade-circle strong { font-size: 30px; color: var(--teal); line-height: 1; }
+  .grade-circle span { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .grade-banner p { margin: 4px 0 0; }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+    gap: 12px;
+    margin: 18px 0;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+  .stat span { display: block; font-size: 12.5px; color: var(--muted); }
+  .stat strong { font-size: 21px; }
+  .stat small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    font-size: 14px;
+    margin: 14px 0;
+  }
+  th, td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: #eef3f8; font-size: 13px; color: var(--navy-2); white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  td.center, th.center { text-align: center; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .badge {
+    display: inline-block;
+    font-size: 11.5px;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 2px 10px;
+    white-space: nowrap;
+    line-height: 1.7;
+  }
+  .badge.p1 { background: var(--red-soft); color: var(--red); border: 1px solid #f3c1c1; }
+  .badge.p2 { background: var(--amber-soft); color: #a87508; border: 1px solid #efd9a4; }
+  .badge.p3 { background: var(--blue-soft); color: var(--blue); border: 1px solid #c4d9f5; }
+  .badge.good { background: var(--green-soft); color: var(--green); border: 1px solid #b5e3d6; }
+  .badge.neutral { background: #eef1f5; color: var(--muted); border: 1px solid var(--line); }
+
+  .score-row { display: flex; align-items: center; gap: 14px; margin: 7px 0; }
+  .score-row .label { width: 150px; font-size: 14px; flex-shrink: 0; }
+  .score-row .bar {
+    flex: 1; height: 12px; border-radius: 999px; background: #e7edf3; overflow: hidden;
+  }
+  .score-row .bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--teal), #34c79f); }
+  .score-row .bar i.warn { background: linear-gradient(90deg, var(--amber), #f2c14e); }
+  .score-row .bar i.bad { background: linear-gradient(90deg, var(--red), #e88080); }
+  .score-row .grade { width: 42px; font-weight: 700; text-align: right; font-size: 14.5px; }
+
+  .cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) {
+    .cols-2 { grid-template-columns: 1fr; }
+    nav.toc ol { columns: 1; }
+    .score-row .label { width: 110px; }
+  }
+
+  ul.tight { margin: 8px 0; padding-left: 22px; }
+  ul.tight li { margin: 5px 0; }
+  .good-list li::marker { color: var(--green); }
+  .bad-list li::marker { color: var(--red); }
+
+  .callout {
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin: 16px 0;
+    border: 1px solid;
+    font-size: 14.5px;
+  }
+  .callout.info { background: var(--blue-soft); border-color: #c4d9f5; }
+  .callout.warn { background: var(--amber-soft); border-color: #efd9a4; }
+  .callout.danger { background: var(--red-soft); border-color: #f3c1c1; }
+  .callout.success { background: var(--green-soft); border-color: #b5e3d6; }
+  .callout strong:first-child { display: block; margin-bottom: 4px; }
+
+  .arch { width: 100%; height: auto; display: block; margin: 8px 0 4px; }
+  .arch-caption { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 8px; }
+
+  .phase {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    margin: 18px 0;
+    overflow: hidden;
+  }
+  .phase-head {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    background: var(--navy);
+    color: #fff;
+    padding: 12px 20px;
+  }
+  .phase-head .phase-no {
+    background: var(--teal); color: #fff; font-weight: 700; font-size: 12.5px;
+    border-radius: 999px; padding: 2px 12px;
+  }
+  .phase-head h3 { margin: 0; font-size: 16px; color: #fff; }
+  .phase-head .effort { margin-left: auto; font-size: 12.5px; color: #9fb3c4; }
+  .phase-body { padding: 14px 20px 18px; }
+  .phase-body table { margin: 8px 0 0; }
+
+  footer.report-footer {
+    border-top: 1px solid var(--line);
+    margin-top: 60px;
+    padding-top: 18px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  @media print {
+    .hero { padding: 28px 16px; }
+    body { background: #fff; font-size: 12.5px; }
+    .card, table, .phase, nav.toc { box-shadow: none; }
+    section.block { break-inside: avoid-page; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="eyebrow">PROJECT REVIEW &amp; ROADMAP</span>
+    <h1>ETF is All You Need (EIAYN)<br />전체 구조·품질 평가와 리팩토링·기능 로드맵</h1>
+    <p class="sub">
+      정적 GitHub Pages 기반 ETF 비교·평가 대시보드의 전체 코드베이스를 정적 분석, 테스트 실행,
+      데이터 스냅샷 통계로 검토하고, 단계별 리팩토링 계획과 향후 기능 방향을 제안합니다.
+    </p>
+    <div class="hero-meta">
+      <span>작성일 <strong>2026-06-10</strong></span>
+      <span>분석 대상 커밋 <strong>99dd092</strong> (main 최신)</span>
+      <span>소스 규모 <strong>약 6,300줄</strong> (CSS 2,238줄 포함)</span>
+      <span>단위 테스트 <strong>5개 파일 / 23개 전부 통과</strong></span>
+      <span>데이터 스냅샷 <strong>1,348개 ETF / 6.7MB (gzip 0.64MB)</strong></span>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+
+<nav class="toc">
+  <strong>목차</strong>
+  <ol>
+    <li><a href="#summary">요약 (Executive Summary)</a></li>
+    <li><a href="#structure">프로젝트 구조 분석</a></li>
+    <li><a href="#quality">코드 품질 평가</a></li>
+    <li><a href="#issues">발견된 문제점 (심각도별)</a></li>
+    <li><a href="#data-quality">데이터 품질·커버리지 진단</a></li>
+    <li><a href="#refactor">리팩토링 로드맵 (4단계)</a></li>
+    <li><a href="#features">추가 기능 제언</a></li>
+    <li><a href="#direction">향후 방향 제언</a></li>
+    <li><a href="#appendix">부록: 측정 수치</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<section class="block" id="summary">
+  <h2><span class="num">1.</span>요약 (Executive Summary)</h2>
+  <p class="h2-sub">전체 평가와 핵심 결론을 한 페이지로 정리합니다.</p>
+
+  <div class="grade-banner">
+    <div class="grade-circle"><strong>B</strong><span>종합 등급</span></div>
+    <div>
+      <p><strong>“설계 철학은 A급, 프론트엔드 구조와 도구 체계가 따라오지 못한 상태.”</strong></p>
+      <p style="color: var(--muted); font-size: 14.5px;">
+        데이터 정직성(누락 필드 추적, 출처 표기, 가짜 데이터 금지 게이트)과 순수 함수 기반 스코어링 라이브러리는
+        개인 프로젝트 수준을 넘는 완성도입니다. 반면 UI 전체가 단일 1,272줄 파일에 들어 있고, 린트/타입 체계가 없으며,
+        실사용자에게 보이는 버그(날짜 표기, CSV 한글 깨짐, 매 방문 전체 데이터 재다운로드)가 몇 건 확인되었습니다.
+      </p>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat"><span>ETF 커버리지</span><strong>1,348개</strong><small>국내 1,133 · 미국 157 · 기타 58</small></div>
+    <div class="stat"><span>데이터 페이로드</span><strong>6.7MB</strong><small>gzip 0.64MB · 매 방문 재다운로드</small></div>
+    <div class="stat"><span>App.jsx</span><strong>1,272줄</strong><small>19개 컴포넌트 단일 파일</small></div>
+    <div class="stat"><span>styles.css</span><strong>2,238줄</strong><small>302개 클래스 전역 1파일</small></div>
+    <div class="stat"><span>단위 테스트</span><strong>23개 통과</strong><small>lib만 커버 · UI/파서/E2E 없음</small></div>
+    <div class="stat"><span>확인된 P1 버그</span><strong>5건</strong><small>모두 반나절 내 수정 가능</small></div>
+  </div>
+
+  <h3>핵심 결론 5줄</h3>
+  <ul class="tight">
+    <li><strong>지금 당장:</strong> 사용자에게 보이는 P1 버그 5건(날짜 포맷, CSV BOM, <code>cache: 'no-store'</code>, 뒤로가기, CSV 수식 인젝션)을 먼저 수정해야 합니다. 모두 국지적 수정입니다.</li>
+    <li><strong>구조:</strong> 리팩토링의 최우선 대상은 <code>src/App.jsx</code>(1,272줄)와 <code>src/styles.css</code>(2,238줄)의 분해입니다. 도메인 로직(<code>src/lib</code>)은 이미 잘 분리되어 있어 손댈 필요가 거의 없습니다.</li>
+    <li><strong>데이터:</strong> 한국 ETF 1,133개(84%)가 3·5년 수익률과 리스크 지표가 전부 비어 있어 AIYN 점수의 시장 간 비교성이 깨져 있습니다. Yahoo <code>.KS</code> 심볼로 보강하는 것이 가장 투자 대비 효과가 큰 단일 개선입니다.</li>
+    <li><strong>도구:</strong> ESLint/Prettier/TypeScript(또는 JSDoc) 부재가 향후 회귀 버그의 주요 위험원입니다. 이번에 확인된 날짜 포맷 버그도 린트가 있었다면 잡혔을 유형(이중 이스케이프된 정규식)입니다.</li>
+    <li><strong>방향:</strong> 백엔드 없는 정적 구조는 이 제품의 강점이므로 유지를 권장합니다. 차별화 포인트는 “데이터 정직성”이며, 이를 UI 전면(점수 신뢰도 배지)으로 끌어올리는 것이 제품 전략의 핵심입니다.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ -->
+<section class="block" id="structure">
+  <h2><span class="num">2.</span>프로젝트 구조 분석</h2>
+  <p class="h2-sub">아키텍처, 데이터 흐름, 모듈 구성을 정리합니다.</p>
+
+  <h3>2.1 아키텍처 개요</h3>
+  <p>
+    EIAYN은 <strong>“빌드 타임 데이터 스냅샷 + 정적 SPA”</strong> 아키텍처입니다. 브라우저는 외부 금융 API를 직접 호출하지 않고,
+    GitHub Actions가 빌드 시점에 공개 데이터를 수집해 <code>public/data/etfs.json</code>으로 굽고, React 앱은 이 파일 하나만 읽습니다.
+    서버·DB·API 키가 전혀 없어 운영 비용이 0원이며, 평일 아침 스케줄(<code>cron 30 21 * * 0-5</code>)로 자동 갱신됩니다.
+  </p>
+
+  <svg class="arch" viewBox="0 0 980 360" role="img" aria-label="EIAYN 아키텍처 다이어그램">
+    <defs>
+      <marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+        <path d="M0,0 L8,4.5 L0,9 z" fill="#617083"/>
+      </marker>
+    </defs>
+    <style>
+      .box { fill: #ffffff; stroke: #c8d4de; stroke-width: 1.4; rx: 8; }
+      .box-ext { fill: #eef3f8; }
+      .box-accent { fill: #e6f6f2; stroke: #009b7d; }
+      .box-dark { fill: #061b2e; stroke: #061b2e; }
+      .t { font: 600 13px Inter, "Noto Sans KR", sans-serif; fill: #0d1b2a; }
+      .t-small { font: 400 11px Inter, "Noto Sans KR", sans-serif; fill: #617083; }
+      .t-white { font: 600 13px Inter, "Noto Sans KR", sans-serif; fill: #ffffff; }
+      .t-white-small { font: 400 11px Inter, "Noto Sans KR", sans-serif; fill: #9fb3c4; }
+      .flow { stroke: #617083; stroke-width: 1.4; fill: none; marker-end: url(#arrow); }
+      .grp { fill: none; stroke: #dce4eb; stroke-dasharray: 5 4; rx: 12; }
+      .grp-label { font: 700 11px Inter, sans-serif; fill: #8b98a8; letter-spacing: 0.06em; }
+    </style>
+
+    <!-- external sources group -->
+    <rect class="grp" x="14" y="30" width="200" height="280"/>
+    <text class="grp-label" x="24" y="22">외부 공개 데이터 소스</text>
+    <rect class="box box-ext" x="28" y="44" width="172" height="48" rx="8"/>
+    <text class="t" x="40" y="64">K-ETF API</text>
+    <text class="t-small" x="40" y="80">국내 전 종목·시세·보유종목</text>
+    <rect class="box box-ext" x="28" y="104" width="172" height="48" rx="8"/>
+    <text class="t" x="40" y="124">Yahoo Finance</text>
+    <text class="t-small" x="40" y="140">차트·스크리너·환율 (비공식)</text>
+    <rect class="box box-ext" x="28" y="164" width="172" height="48" rx="8"/>
+    <text class="t" x="40" y="184">StockAnalysis</text>
+    <text class="t-small" x="40" y="200">프로필·보유종목 (HTML 스크랩)</text>
+    <rect class="box box-ext" x="28" y="224" width="172" height="48" rx="8"/>
+    <text class="t" x="40" y="244">profile-overrides.mjs</text>
+    <text class="t-small" x="40" y="260">운용사 공시값 수동 보정</text>
+
+    <!-- pipeline group -->
+    <rect class="grp" x="248" y="30" width="240" height="280"/>
+    <text class="grp-label" x="258" y="22">빌드 타임 파이프라인 (Node)</text>
+    <rect class="box" x="262" y="52" width="212" height="58" rx="8"/>
+    <text class="t" x="274" y="74">scripts/fetch-etf-data.mjs</text>
+    <text class="t-small" x="274" y="90">수집·병합·분류 (617줄)</text>
+    <rect class="box box-accent" x="262" y="128" width="212" height="58" rx="8"/>
+    <text class="t" x="274" y="150">src/lib (공유 도메인 로직)</text>
+    <text class="t-small" x="274" y="166">metrics · scoring · normalize</text>
+    <rect class="box" x="262" y="204" width="212" height="58" rx="8"/>
+    <text class="t" x="274" y="226">scripts/check-data.mjs</text>
+    <text class="t-small" x="274" y="242">커버리지·필수 필드 검증 게이트</text>
+
+    <!-- snapshot -->
+    <rect class="box box-dark" x="528" y="118" width="180" height="76" rx="8"/>
+    <text class="t-white" x="542" y="146">public/data/etfs.json</text>
+    <text class="t-white-small" x="542" y="164">1,348 ETF · 6.7MB</text>
+    <text class="t-white-small" x="542" y="180">gzip 0.64MB</text>
+
+    <!-- frontend group -->
+    <rect class="grp" x="748" y="30" width="218" height="280"/>
+    <text class="grp-label" x="758" y="22">정적 프론트엔드 (React 18 + Vite 6)</text>
+    <rect class="box" x="762" y="52" width="190" height="52" rx="8"/>
+    <text class="t" x="774" y="72">useEtfData 훅</text>
+    <text class="t-small" x="774" y="88">fetch + 상태 관리</text>
+    <rect class="box" x="762" y="120" width="190" height="64" rx="8"/>
+    <text class="t" x="774" y="142">App.jsx (1,272줄)</text>
+    <text class="t-small" x="774" y="158">비교·개별분석·검색·랭킹</text>
+    <text class="t-small" x="774" y="172">19개 컴포넌트 단일 파일</text>
+    <rect class="box" x="762" y="200" width="190" height="52" rx="8"/>
+    <text class="t" x="774" y="220">GitHub Pages 배포</text>
+    <text class="t-small" x="774" y="236">평일 06:30 KST 자동 갱신</text>
+
+    <!-- flows -->
+    <path class="flow" d="M200,68 C 230,68 235,76 262,80"/>
+    <path class="flow" d="M200,128 L 262,108"/>
+    <path class="flow" d="M200,188 C 230,188 235,120 262,104"/>
+    <path class="flow" d="M200,248 C 235,248 240,130 262,110"/>
+    <path class="flow" d="M368,110 L 368,128"/>
+    <path class="flow" d="M368,186 L 368,204"/>
+    <path class="flow" d="M474,233 C 505,233 510,180 528,166"/>
+    <path class="flow" d="M708,156 C 735,156 740,98 762,84"/>
+    <path class="flow" d="M474,156 L 528,156" stroke-dasharray="4 3"/>
+    <path class="flow" d="M857,104 L 857,120"/>
+    <path class="flow" d="M857,184 L 857,200"/>
+  </svg>
+  <p class="arch-caption">그림 1. 빌드 타임 데이터 파이프라인과 정적 SPA의 분리 구조. <code>src/lib</code>는 파이프라인과 UI가 공유합니다.</p>
+
+  <div class="callout success">
+    <strong>구조적으로 잘 한 점</strong>
+    스코어링·지표 계산을 <code>src/lib</code> 순수 함수로 분리해 Node 파이프라인과 브라우저가 같은 코드를 쓰고, 같은 단위 테스트로 검증됩니다.
+    “점수가 UI에 하드코딩되지 않고 스냅샷에서 결정된다”는 원칙이 <code>check-data.mjs</code>의 금지어 검사(demo/mock/예시)로 강제됩니다.
+  </div>
+
+  <h3>2.2 디렉터리·모듈 맵</h3>
+  <table>
+    <thead><tr><th>경로</th><th class="num">줄 수</th><th>역할</th><th>평가</th></tr></thead>
+    <tbody>
+      <tr><td><code>src/App.jsx</code></td><td class="num">1,272</td><td>전체 UI — 19개 컴포넌트 + 12개 헬퍼가 한 파일</td><td><span class="badge p2">분해 필요</span></td></tr>
+      <tr><td><code>src/styles.css</code></td><td class="num">2,238</td><td>전역 CSS 1파일 — 302개 클래스, 미디어쿼리 4개</td><td><span class="badge p2">분해 필요</span></td></tr>
+      <tr><td><code>src/lib/scoring.js</code></td><td class="num">174</td><td>AIYN 점수 — 7개 팩터 가중 평균, 가중치 재배분</td><td><span class="badge good">우수</span></td></tr>
+      <tr><td><code>src/lib/metrics.js</code></td><td class="num">147</td><td>수익률·변동성·MDD·샤프 등 금융 지표 계산</td><td><span class="badge good">우수</span></td></tr>
+      <tr><td><code>src/lib/search.js · deepLink.js · format.js · normalize.js</code></td><td class="num">247</td><td>검색/필터, URL 딥링크, 포맷터, 입력 정규화</td><td><span class="badge neutral">양호 (버그 1건)</span></td></tr>
+      <tr><td><code>src/hooks/</code></td><td class="num">53</td><td>데이터 로딩, localStorage 상태</td><td><span class="badge good">양호</span></td></tr>
+      <tr><td><code>scripts/fetch-etf-data.mjs</code></td><td class="num">617</td><td>수집 오케스트레이션 + 국가별 정규화</td><td><span class="badge neutral">양호 (비대화 조짐)</span></td></tr>
+      <tr><td><code>scripts/data/</code> (5개 모듈)</td><td class="num">702</td><td>소스별 어댑터 (K-ETF/Yahoo/StockAnalysis/유니버스/보정)</td><td><span class="badge good">우수한 분리</span></td></tr>
+      <tr><td><code>scripts/check-data.mjs</code></td><td class="num">150</td><td>배포 전 데이터 검증 게이트</td><td><span class="badge good">우수</span></td></tr>
+      <tr><td><code>src/lib/*.test.js</code> (5개)</td><td class="num">339</td><td>단위 테스트 23개 (전부 통과 확인)</td><td><span class="badge neutral">lib만 커버</span></td></tr>
+      <tr><td><code>docs/ · *.md</code></td><td class="num">223</td><td>README, DATA_SOURCES, scoring, CHANGELOG</td><td><span class="badge good">충실</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.3 상태·URL 관리 방식</h3>
+  <p>
+    라우팅 라이브러리 없이 <code>URLSearchParams</code>를 직접 읽고(<code>deepLink.js</code>),
+    <code>history.replaceState</code>로만 URL을 갱신합니다. 딥링크(<code>?code=QQQ</code>) 진입은 잘 동작하지만
+    <strong><code>pushState</code>가 한 번도 없어 브라우저 뒤로가기로 화면 전환을 되돌릴 수 없고</strong>,
+    URL 동기화 시점도 화면마다 제각각입니다(분석 진입 시엔 갱신, 비교 추가 시엔 미갱신). 4절 P1-4에서 다룹니다.
+  </p>
+</section>
+
+<!-- ============================================================ -->
+<section class="block" id="quality">
+  <h2><span class="num">3.</span>코드 품질 평가</h2>
+  <p class="h2-sub">8개 영역으로 나눠 등급과 근거를 제시합니다. 등급은 “현 규모·목적 대비 적정성” 기준입니다.</p>
+
+  <div class="card">
+    <div class="score-row"><span class="label">도메인 로직 (lib)</span><div class="bar"><i style="width:90%"></i></div><span class="grade">A−</span></div>
+    <div class="score-row"><span class="label">문서화</span><div class="bar"><i style="width:90%"></i></div><span class="grade">A−</span></div>
+    <div class="score-row"><span class="label">아키텍처 설계</span><div class="bar"><i style="width:85%"></i></div><span class="grade">B+</span></div>
+    <div class="score-row"><span class="label">데이터 파이프라인</span><div class="bar"><i style="width:82%"></i></div><span class="grade">B+</span></div>
+    <div class="score-row"><span class="label">테스트</span><div class="bar"><i class="warn" style="width:65%"></i></div><span class="grade">B−</span></div>
+    <div class="score-row"><span class="label">프론트엔드 코드</span><div class="bar"><i class="warn" style="width:55%"></i></div><span class="grade">C+</span></div>
+    <div class="score-row"><span class="label">성능</span><div class="bar"><i class="warn" style="width:55%"></i></div><span class="grade">C+</span></div>
+    <div class="score-row"><span class="label">개발 도구·규약</span><div class="bar"><i class="bad" style="width:30%"></i></div><span class="grade">D+</span></div>
+  </div>
+
+  <div class="cols-2" style="margin-top:18px;">
+    <div class="card">
+      <h4 style="margin-top:0; color: var(--green);">강점 (유지·강화할 것)</h4>
+      <ul class="tight good-list">
+        <li><strong>null 규율:</strong> 누락 데이터를 0으로 조작하지 않고 <code>null</code>로 보존, <code>missingFields</code>로 추적. 점수 계산은 누락 팩터를 제외하고 가중치를 재배분 (<code>scoring.js:17-21</code>).</li>
+        <li><strong>아웃라이어 내성:</strong> 수익률 팩터는 백분위 정규화를 사용해 레버리지 ETF 1~2개가 전체 분포를 압축하지 못함 — 테스트로 검증됨 (<code>scoring.test.js:72-87</code>).</li>
+        <li><strong>출처 투명성:</strong> ETF마다 필드 단위 출처(<code>dataQuality.sources</code>)를 기록. 금융 정보 도구로서 드문 수준의 정직성.</li>
+        <li><strong>배포 게이트:</strong> <code>check-data.mjs</code>가 시장별 최소 개수·필수 필드·금지어를 검증해 불량 스냅샷 배포를 차단.</li>
+        <li><strong>견고한 수집 계층:</strong> 재시도+백오프, 타임아웃, 동시성 제한(<code>mapLimit</code>), 필수/선택 소스 구분 (<code>http.mjs</code>).</li>
+        <li><strong>접근성 기본기:</strong> aria-label, role=tablist, 시맨틱 태그, 보조 클릭(Cmd/Ctrl+클릭) 허용 링크 처리 (<code>App.jsx:1048-1061</code>).</li>
+        <li><strong>문서:</strong> 데이터 소스의 한계까지 명시한 <code>DATA_SOURCES.md</code>, 산식을 공개한 <code>docs/scoring.md</code>.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0; color: var(--red);">약점 (리팩토링 대상)</h4>
+      <ul class="tight bad-list">
+        <li><strong>UI 모놀리스:</strong> 19개 컴포넌트가 <code>App.jsx</code> 한 파일. 컴포넌트 단위 테스트·재사용·리뷰가 모두 어려움.</li>
+        <li><strong>CSS 모놀리스:</strong> 302개 클래스가 전역 1파일. 죽은 스타일 식별 불가, 이름 충돌 위험.</li>
+        <li><strong>도구 부재:</strong> ESLint·Prettier·타입 체계·lint CI가 전혀 없음. 이번에 발견된 정규식 버그(아래 P1-1)는 린터(<code>no-useless-escape</code>)가 잡는 유형.</li>
+        <li><strong>중복 유틸:</strong> <code>nullableNumber</code> 3곳, <code>emptyProfile</code> 4곳, <code>zeroDecimalCurrency</code> 2곳에 복제됨.</li>
+        <li><strong>죽은 코드/의존성:</strong> <code>normalizeEtfInput</code>은 테스트에서만 사용, <code>parsePercent</code>는 단순 별칭, <code>playwright</code>는 설치만 되고 미사용.</li>
+        <li><strong>placeholder UI:</strong> 비활성 버튼 8곳(다크모드·알림·도움말·편집·더보기·패널 접기 등), <code>/</code> 단축키 힌트는 표시만 되고 핸들러 없음.</li>
+        <li><strong>테스트 공백:</strong> React 컴포넌트 0%, 스크래핑 파서(HTML 구조 변경에 가장 취약한 부분) 픽스처 테스트 0%, E2E 0%.</li>
+        <li><strong>에러 격리 없음:</strong> ErrorBoundary 부재 — 단일 렌더 예외로 전체 화면이 백지화될 수 있음.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section class="block" id="issues">
+  <h2><span class="num">4.</span>발견된 문제점 (심각도별)</h2>
+  <p class="h2-sub">
+    <span class="badge p1">P1 — 사용자에게 보이는 결함</span>&nbsp;
+    <span class="badge p2">P2 — 구조·유지보수 부채</span>&nbsp;
+    <span class="badge p3">P3 — 사소/UX 다듬기</span>
+  </p>
+
+  <h3>P1 — 동작 결함 (즉시 수정 권장, 합계 반나절 분량)</h3>
+  <table>
+    <thead><tr><th style="width:36px;">#</th><th>문제</th><th>위치</th><th>상세 및 수정 방안</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="badge p1">P1-1</span></td>
+        <td><strong>날짜가 “2026 06. 05. 11:32”로 표시</strong></td>
+        <td><code>src/lib/format.js:55</code></td>
+        <td><code>.replace(/\\. /g, '-')</code>의 정규식이 이중 이스케이프되어 리터럴 백슬래시를 찾고 있어 치환이 전혀 일어나지 않습니다. 실제 출력을 재현해 확인했습니다(의도: <code>2026-06-05 11:32</code>). <code>/\. /g</code>로 수정하면 됩니다. 푸터·사이드바·시세 기준 표기 전부에 보이는 버그입니다.</td>
+      </tr>
+      <tr>
+        <td><span class="badge p1">P1-2</span></td>
+        <td><strong>CSV 내보내기 한글 깨짐</strong></td>
+        <td><code>src/App.jsx:217-222</code></td>
+        <td>UTF-8 BOM 없이 저장되어 Excel(Windows)에서 ETF명·시장 컬럼의 한글이 깨집니다. <code>'﻿' + csv</code> 한 줄로 해결됩니다.</td>
+      </tr>
+      <tr>
+        <td><span class="badge p1">P1-3</span></td>
+        <td><strong>매 방문 6.7MB 전체 재다운로드</strong></td>
+        <td><code>src/hooks/useEtfData.js:14</code></td>
+        <td><code>cache: 'no-store'</code>가 조건부 요청(ETag/304)까지 차단해 데이터가 그대로여도 매번 풀 다운로드(gzip 0.64MB)가 발생합니다. <code>'no-cache'</code>(재검증 허용)로 바꾸거나, 빌드 시 파일명에 콘텐츠 해시를 붙이고 장기 캐시하는 방식을 권장합니다.</td>
+      </tr>
+      <tr>
+        <td><span class="badge p1">P1-4</span></td>
+        <td><strong>브라우저 뒤로가기 미동작</strong></td>
+        <td><code>src/App.jsx:1258-1270</code></td>
+        <td>화면 전환(비교↔분석, ETF 변경) 시 <code>replaceState</code>만 사용해 히스토리가 쌓이지 않습니다. 분석 화면에서 뒤로가기를 누르면 사이트 이탈됩니다. <code>pushState</code> + <code>popstate</code> 리스너(또는 경량 라우터)로 전환해야 합니다.</td>
+      </tr>
+      <tr>
+        <td><span class="badge p1">P1-5</span></td>
+        <td><strong>CSV 수식 인젝션 미방어</strong></td>
+        <td><code>src/App.jsx:1221-1225</code></td>
+        <td>외부에서 스크랩된 문자열(ETF명·티커)이 <code>=</code>, <code>+</code>, <code>-</code>, <code>@</code>로 시작하면 Excel에서 수식으로 실행될 수 있습니다. <code>csvCell</code>에서 해당 접두 문자를 <code>'</code>로 이스케이프해야 합니다.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>P2 — 구조·유지보수 부채</h3>
+  <table>
+    <thead><tr><th style="width:36px;">#</th><th>문제</th><th>위치</th><th>상세</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="badge p2">P2-1</span></td>
+        <td><strong>App.jsx 모놀리스</strong></td>
+        <td><code>src/App.jsx</code> (1,272줄)</td>
+        <td>App, Sidebar, TopBar, WorkspaceHeader, ComparisonGrid, EtfAnalysisDashboard, AnalysisPanel, RankingPanel, Radar, Sparkline 등 19개 컴포넌트 + CSV/차트 헬퍼 12개가 한 파일. 변경 충돌·리뷰 비용이 크고 컴포넌트 테스트가 사실상 불가능합니다. 6절 Phase 1에서 분해안을 제시합니다.</td>
+      </tr>
+      <tr>
+        <td><span class="badge p2">P2-2</span></td>
+        <td><strong>AIYN 점수의 시장 간 비교성 깨짐</strong></td>
+        <td><code>scoring.js</code> + UI 전반</td>
+        <td>한국 ETF 1,133개는 3년 리스크 지표가 전부 null이어서 점수 커버리지가 0.68(가중치 68%만 반영)인 반면 미국 핵심 ETF는 0.90입니다. 즉 한국 ETF 점수에는 ‘안정성’ 팩터가 빠져 있는데, UI는 <code>scoreCoverage</code>를 전혀 표시하지 않아 동일 잣대 점수처럼 보입니다. 비교 화면에서 한·미 ETF를 나란히 두는 핵심 시나리오에서 오해를 유발합니다. → 데이터 보강(5절) + 신뢰도 배지(7절 F-3).</td>
+      </tr>
+      <tr>
+        <td><span class="badge p2">P2-3</span></td>
+        <td><strong>페이로드의 30%가 중복 메타데이터</strong></td>
+        <td><code>public/data/etfs.json</code></td>
+        <td>6.7MB 중 <code>dataQuality</code>(주로 ETF마다 반복되는 출처 객체)가 1.97MB를 차지합니다. 출처를 최상위 사전으로 정규화하고 ETF에는 인덱스만 두면 원본 기준 약 25~30% 감량이 가능합니다. 추가로 상세 필드(보유종목 0.7MB, 스파크라인 0.15MB)를 코어/디테일 파일로 분리하면 첫 화면 로딩이 더 가벼워집니다.</td>
+      </tr>
+      <tr>
+        <td><span class="badge p2">P2-4</span></td>
+        <td><strong>override가 사실상 fallback</strong></td>
+        <td><code>scripts/fetch-etf-data.mjs:326-331</code></td>
+        <td><code>mergeProfiles</code>는 먼저 온 값이 이기는 구조인데 <code>profileOverrideForTicker</code>가 배열의 마지막에 있어, 스크랩 소스가 잘못된 값을 주면 수동 보정값이 적용되지 않습니다. 이름(override)과 동작(fallback)이 어긋나 있어 우선순위를 명시적으로 분리해야 합니다.</td>
+      </tr>
+      <tr>
+        <td><span class="badge p2">P2-5</span></td>
+        <td><strong>빌드가 외부 네트워크에 결합</strong></td>
+        <td><code>package.json</code> build 스크립트</td>
+        <td><code>npm run build</code>가 항상 <code>data:update</code>(외부 API 수십~수천 호출)를 실행합니다. 코드만 고친 배포도 K-ETF/Yahoo 장애 시 실패하고, 로컬 빌드도 네트워크 필수입니다. 데이터 갱신 워크플로(스냅샷 커밋/아티팩트)와 사이트 빌드를 분리하는 것을 권장합니다.</td>
+      </tr>
+      <tr>
+        <td><span class="badge p2">P2-6</span></td>
+        <td><strong>검색이 키 입력마다 전체 재연산</strong></td>
+        <td><code>src/lib/search.js:13-29</code></td>
+        <td><code>searchableText</code>가 키 입력마다 1,348개 ETF × (이름+보유종목 연결 문자열)을 새로 만듭니다. 현재는 체감 가능한 경계 수준이지만, 유니버스 확대 시 바로 병목이 됩니다. 데이터 로딩 시 1회 사전 계산(인덱스) + 입력 디바운스로 해결됩니다.</td>
+      </tr>
+      <tr>
+        <td><span class="badge p2">P2-7</span></td>
+        <td><strong>중복 유틸·죽은 코드</strong></td>
+        <td>여러 파일</td>
+        <td><code>nullableNumber</code>(fetch-etf-data·normalize·k-etf), <code>emptyProfile</code>(4곳), <code>zeroDecimalCurrency</code>(format·fetch-etf-data) 중복. <code>normalizeEtfInput</code>은 앱에서 미사용, <code>parsePercent</code>는 <code>toFiniteNumber</code>의 별칭, <code>playwright</code>는 미사용 devDependency.</td>
+      </tr>
+      <tr>
+        <td><span class="badge p2">P2-8</span></td>
+        <td><strong>타입·린트 안전망 부재</strong></td>
+        <td>저장소 전체</td>
+        <td>깊은 중첩 nullable 구조(<code>etf.risk?.sharpe3y</code> 등)를 타입 없이 다루고 있습니다. 스냅샷 스키마가 곧 앱의 계약인데 이를 검증하는 타입/스키마가 없습니다. lib부터 TypeScript 점진 도입(또는 최소 JSDoc + <code>checkJs</code>)을 권장합니다.</td>
+      </tr>
+      <tr>
+        <td><span class="badge p2">P2-9</span></td>
+        <td><strong>스크래핑 파서 무테스트</strong></td>
+        <td><code>scripts/data/stockanalysis.mjs</code> 등</td>
+        <td>HTML 테이블 구조에 의존하는 파서(가장 깨지기 쉬운 코드)에 고정 픽스처 테스트가 없습니다. 소스 구조가 바뀌면 “조용히 null”이 되어 <code>check:data</code>의 필수 필드 검사에 걸리기 전까지 모릅니다.</td>
+      </tr>
+      <tr>
+        <td><span class="badge p2">P2-10</span></td>
+        <td><strong>ErrorBoundary 부재</strong></td>
+        <td><code>src/main.jsx</code></td>
+        <td>렌더 중 예외 1건이면 전체 화면이 빈 페이지가 됩니다. 데이터가 외부 수집물인 만큼 방어가 필요합니다.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>P3 — 사소/UX 다듬기</h3>
+  <table>
+    <thead><tr><th style="width:36px;">#</th><th>문제</th><th>상세</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge p3">P3-1</span></td><td>placeholder 비활성 버튼 8곳</td><td>다크모드·알림·도움말·메뉴·편집·더보기·패널 접기·랭킹 셀렉트가 <code>disabled</code> + title 안내로만 존재. 기능을 붙이거나 제거해 “죽은 UI” 인상을 없애야 합니다.</td></tr>
+      <tr><td><span class="badge p3">P3-2</span></td><td><code>/</code> 단축키 미구현</td><td>검색창에 <code>&lt;kbd&gt;/&lt;/kbd&gt;</code> 힌트가 있지만 keydown 핸들러가 없습니다 (<code>App.jsx:440</code>).</td></tr>
+      <tr><td><span class="badge p3">P3-3</span></td><td>모달 접근성</td><td><code>GuideModal</code>에 Escape 닫기·포커스 트랩이 없습니다 (<code>App.jsx:1177</code>).</td></tr>
+      <tr><td><span class="badge p3">P3-4</span></td><td>사이드바 장식 링크</td><td>‘ETF 분석·평가 모델·선택 ETF’ 3개 항목이 모두 <code>#model</code>을 가리키는 등 내비게이션 다수가 실질 기능 없이 중복 앵커입니다 (<code>App.jsx:369-379</code>).</td></tr>
+      <tr><td><span class="badge p3">P3-5</span></td><td>favicon·OG 메타 없음</td><td>공유 시 미리보기가 비어 보입니다. 정적 사이트 SEO 기본기(og:title/description/image, favicon) 추가 권장 (<code>index.html</code>).</td></tr>
+      <tr><td><span class="badge p3">P3-6</span></td><td>금지어 검사 오탐 가능성</td><td><code>check-data.mjs:123</code>의 <code>/\bdemo\b/i</code> 등이 스냅샷 원문 전체를 검사해, 실제 보유종목명에 “Demo/Example”이 포함되면 빌드가 실패할 수 있습니다. 검사 대상을 자체 생성 필드로 한정 권장.</td></tr>
+      <tr><td><span class="badge p3">P3-7</span></td><td>usePersistentState 초기 쓰기</td><td>마운트 직후 초기값을 즉시 localStorage에 기록합니다. 동작엔 문제없으나 불필요한 쓰기입니다.</td></tr>
+      <tr><td><span class="badge p3">P3-8</span></td><td>공유 취소 시에도 URL 변경</td><td><code>shareState</code>가 공유 다이얼로그 취소와 무관하게 <code>replaceState</code>를 먼저 수행합니다 (<code>App.jsx:238-239</code>).</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<section class="block" id="data-quality">
+  <h2><span class="num">5.</span>데이터 품질·커버리지 진단</h2>
+  <p class="h2-sub">2026-06-05 생성 스냅샷(1,348개 ETF) 기준 실측치입니다.</p>
+
+  <table>
+    <thead><tr><th>필드</th><th class="num">누락 수</th><th class="num">누락률</th><th>원인과 보강 방안</th></tr></thead>
+    <tbody>
+      <tr><td><code>returns.y3/y5</code>, <code>risk.*</code> (3년 지표)</td><td class="num">1,133</td><td class="num">84%</td><td>K-ETF가 1년치 히스토리만 제공 → <strong>국내 ETF도 Yahoo 차트(<code>069500.KS</code> 형식)로 5년 히스토리를 보강 가능.</strong> 파이프라인에 <code>fetchYahooChart</code>가 이미 있어 증분 작업량이 작습니다. (호출량 1,133건 → <code>mapLimit</code> 동시성 제한 + 거래대금 상위 우선 적용 권장)</td></tr>
+      <tr><td><code>risk.trackingError3y</code> · <code>informationRatio3y</code></td><td class="num">1,348</td><td class="num">100%</td><td>벤치마크 지수 시계열 매핑이 없음. ‘효율성’ 팩터가 사실상 총보수만으로 계산되는 원인. 대표 지수(S&amp;P500·KOSPI200·NASDAQ100 등) 10~20개만 매핑해도 주요 ETF의 추적 지표를 채울 수 있습니다.</td></tr>
+      <tr><td><code>nav</code> (괴리율 계산 불가)</td><td class="num">1,348</td><td class="num">100%</td><td>국내는 KRX 정보데이터시스템 공개 데이터로 NAV·괴리율 확보 가능. 장기 과제.</td></tr>
+      <tr><td><code>dividendYield</code></td><td class="num">281</td><td class="num">21%</td><td>K-ETF 배당 랭킹에 없는 종목. Yahoo 차트의 배당 이벤트(<code>trailingDividendYield</code>)로 보강 가능 — 미국에는 이미 적용된 로직입니다.</td></tr>
+      <tr><td><code>holdings</code></td><td class="num">191</td><td class="num">14%</td><td>지역 대표 ETF는 공개 소스에 보유종목이 없음(문서화됨). ‘분산’ 팩터가 제외되는 종목군.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <strong>점수 신뢰도가 시장별로 다르다는 사실이 핵심 리스크입니다</strong>
+    <code>scoreCoverage</code> 분포: 0.68 × 1,110개(국내 대부분) · 0.78 × 169개 · 0.90 × 46개 · 0.56 × 22개.
+    같은 “AIYN 75점”이라도 국내 ETF는 안정성 팩터가 빠진 75점입니다. 데이터 보강(위 1행)이 근본 해결이고,
+    그 전까지는 UI에 커버리지 배지를 노출하는 것(7절 F-3)이 정직한 임시 조치입니다.
+  </div>
+
+  <h3>점수 분포 참고</h3>
+  <p>
+    전체 점수 분포는 중앙값 69점, 5–95백분위 48~89점으로 비교적 건강하게 퍼져 있습니다. 다만 60점 미만에 부여되는
+    “주의” 라벨이 전체의 19%(260개)에 달하므로, 등급 경계(80/70/60)가 의도한 비율인지 한 번 점검할 가치가 있습니다
+    (예: 분포 기준 상대 등급화 — 상위 10% ‘우수’ 등).
+  </p>
+</section>
+
+<!-- ============================================================ -->
+<section class="block" id="refactor">
+  <h2><span class="num">6.</span>리팩토링 로드맵 (4단계)</h2>
+  <p class="h2-sub">의존 관계를 고려한 순서입니다. 각 단계는 독립적으로 배포 가능하며, 앞 단계가 뒷 단계의 작업 비용을 줄입니다.</p>
+
+  <div class="phase">
+    <div class="phase-head"><span class="phase-no">Phase 0</span><h3>퀵 윈 — P1 버그 일괄 수정</h3><span class="effort">예상 반나절~1일</span></div>
+    <div class="phase-body">
+      <ul class="tight">
+        <li>P1-1 날짜 포맷 정규식(<code>format.js:55</code>) — 1줄 수정 + 회귀 테스트 추가</li>
+        <li>P1-2 CSV에 UTF-8 BOM 추가, P1-5 수식 인젝션 이스케이프 — <code>csvCell</code> 강화 + 테스트</li>
+        <li>P1-3 <code>cache: 'no-store'</code> → <code>'no-cache'</code> (재검증 기반 캐싱)</li>
+        <li>P3-2 <code>/</code> 단축키 핸들러, P3-3 모달 Escape 닫기 — 작은 UX 부채 동시 해소</li>
+      </ul>
+      <p style="color:var(--muted); font-size:13.5px; margin-bottom:0;">효과: 사용자 체감 버그 제로화. 이후 리팩토링 중 “원래 있던 버그인지” 혼동을 제거.</p>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-head"><span class="phase-no">Phase 1</span><h3>기반 정비 — 도구 도입과 모놀리스 분해</h3><span class="effort">예상 1주</span></div>
+    <div class="phase-body">
+      <ul class="tight">
+        <li><strong>ESLint + Prettier 도입</strong> 후 CI에 <code>lint</code> 단계 추가 (react-hooks 규칙 포함). 기존 코드 일괄 정리 커밋은 1개로 격리.</li>
+        <li><strong>App.jsx 분해:</strong> 아래 구조로 19개 컴포넌트를 이동. 로직 변경 없이 파일 이동만 하는 커밋으로 한정해 리뷰 가능성 확보.</li>
+      </ul>
+<pre><code>src/
+  components/
+    layout/    Sidebar.jsx  TopBar.jsx  StatusScreen.jsx  GuideModal.jsx
+    compare/   ComparisonGrid.jsx  WorkspaceHeader.jsx  UniverseStrip.jsx
+    analysis/  EtfAnalysisDashboard.jsx  AnalysisPanel.jsx  RiskRows.jsx
+    charts/    Radar.jsx  Sparkline.jsx  DetailedSparkline.jsx  HoldingDonut.jsx
+    common/    MetricTile.jsx  FilterSelect.jsx  InfoPopover.jsx  SimpleListPanel.jsx  RankingPanel.jsx
+  lib/         (현행 유지) + csv.js (exportCsv/csvCell/downloadFile 이동)
+  hooks/       (현행 유지) + useUrlSync.js (P1-4 라우팅 정리와 함께)</code></pre>
+      <ul class="tight">
+        <li><strong>styles.css 분해:</strong> 컴포넌트 이동과 함께 CSS Modules(또는 파일 분할 + BEM)로 전환. 전환 과정에서 죽은 스타일 제거.</li>
+        <li><strong>중복 유틸 통합(P2-7):</strong> <code>nullableNumber</code>·<code>emptyProfile</code>·<code>zeroDecimalCurrency</code>를 단일 모듈로. <code>normalizeEtfInput</code>은 실제 사용(스냅샷 로딩 시 정규화)하거나 삭제. <code>playwright</code>는 Phase 3에서 E2E로 쓸 것이므로 유지 여부를 그때 결정.</li>
+        <li><strong>ErrorBoundary 추가(P2-10)</strong> — 데이터 이상 시 부분 실패로 격리.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-head"><span class="phase-no">Phase 2</span><h3>데이터·성능 — 페이로드와 파이프라인</h3><span class="effort">예상 1~2주</span></div>
+    <div class="phase-body">
+      <ul class="tight">
+        <li><strong>스냅샷 구조 개편(P2-3):</strong> ① 출처 사전화(<code>sources</code> 테이블 + 인덱스 참조)로 ~30% 감량 ② <code>etfs-core.json</code>(목록·점수·핵심 지표)과 <code>etfs-detail/*.json</code>(보유종목·스파크라인·dataQuality)으로 분리 ③ 파일명 콘텐츠 해시 + 장기 캐시.</li>
+        <li><strong>한국 ETF 3·5년 지표 보강:</strong> Yahoo <code>.KS</code> 차트로 1,133개 종목의 장기 수익률·변동성·MDD·샤프 채우기 (5절). <code>scoreCoverage</code> 상향이 곧 제품 신뢰도 상향입니다.</li>
+        <li><strong>검색 인덱스(P2-6):</strong> 데이터 로딩 시 <code>searchableText</code> 1회 사전 계산 + 입력 150ms 디바운스.</li>
+        <li><strong>URL/히스토리 정리(P1-4 마무리):</strong> <code>useUrlSync</code> 훅으로 화면 상태↔URL 동기화를 한 곳에 모으고 <code>pushState</code>/<code>popstate</code> 지원. (외부 라우터 없이 가능, 도입한다면 wouter 수준의 경량만)</li>
+        <li><strong>데이터 수집 워크플로 분리(P2-5):</strong> <code>fetch-data.yml</code>(스케줄·수동)이 스냅샷을 갱신해 커밋하고, <code>deploy-pages.yml</code>은 저장소의 스냅샷으로만 빌드. 코드 배포가 외부 API 장애와 분리되고, 스냅샷 변경 이력이 git에 남아 시계열 분석(7절 F-9)의 토대가 됩니다.</li>
+        <li><strong>override 우선순위 수정(P2-4):</strong> 수동 보정값이 스크랩 값을 항상 이기도록 <code>mergeProfiles</code> 순서/구조 변경.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-head"><span class="phase-no">Phase 3</span><h3>신뢰성 — 타입과 테스트</h3><span class="effort">예상 2~4주 (점진)</span></div>
+    <div class="phase-body">
+      <ul class="tight">
+        <li><strong>TypeScript 점진 도입(P2-8):</strong> <code>src/lib</code> → <code>scripts/data</code> → 컴포넌트 순. 핵심은 스냅샷 스키마를 단일 타입(<code>EtfSnapshot</code>)으로 정의해 파이프라인 출력과 UI 입력이 같은 계약을 공유하는 것. 전면 전환이 부담이면 JSDoc + <code>tsc --checkJs</code>부터.</li>
+        <li><strong>파서 픽스처 테스트(P2-9):</strong> StockAnalysis·K-ETF 응답 HTML/JSON을 고정 파일로 저장해 파싱 회귀 테스트. 소스 구조 변경 시 “어디가 깨졌는지”를 빌드 로그가 아닌 테스트가 알려주게 됩니다.</li>
+        <li><strong>컴포넌트 테스트:</strong> Phase 1 분해 산출물 중 로직이 있는 것(ComparisonGrid의 메트릭 렌더, Radar 좌표, CSV 모듈) 위주로 Testing Library 도입.</li>
+        <li><strong>E2E 스모크:</strong> 이미 설치된 playwright로 “로딩→검색→비교 추가→분석 전환→딥링크 진입” 1개 시나리오만이라도 CI에 추가.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <strong>리팩토링하지 않아도 되는 것</strong>
+    <code>src/lib</code>의 스코어링·지표 계산, <code>scripts/data</code>의 소스 어댑터 분리, <code>check-data.mjs</code> 게이트, 문서 체계는
+    현 상태가 이미 좋은 설계입니다. 구조 변경 대상이 아니라 보호 대상(테스트로 감싸기)입니다.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section class="block" id="features">
+  <h2><span class="num">7.</span>추가 기능 제언</h2>
+  <p class="h2-sub">임팩트 대비 구현 난이도 순. 모두 현 정적 아키텍처(백엔드 없음) 안에서 구현 가능합니다.</p>
+
+  <h3>단기 — 낮은 노력, 즉시 체감</h3>
+  <table>
+    <thead><tr><th style="width:46px;">#</th><th>기능</th><th>설명</th><th class="center">임팩트</th><th class="center">난이도</th></tr></thead>
+    <tbody>
+      <tr><td>F-1</td><td><strong>다크 모드</strong></td><td>CSS 변수 체계(<code>:root</code> 25개 토큰)가 이미 갖춰져 있고 토글 버튼도 자리만 잡혀 있습니다(현재 disabled). 다크 팔레트 정의 + <code>usePersistentState</code> 재사용이면 됩니다.</td><td class="center">●●●</td><td class="center">하</td></tr>
+      <tr><td>F-2</td><td><strong>정렬 가능한 전체 목록 뷰</strong></td><td>현재 탐색 수단이 ‘TOP5 랭킹 + 8개 스트립’뿐이라 1,348개 유니버스를 활용하지 못합니다. 총보수·수익률·AUM·점수로 정렬/페이징되는 테이블 뷰는 스크리너 도구의 본질 기능입니다.</td><td class="center">●●●</td><td class="center">중</td></tr>
+      <tr><td>F-3</td><td><strong>점수 신뢰도 배지</strong></td><td><code>scoreCoverage</code>를 “데이터 충족도 68%” 배지로 점수 옆에 표시하고, 누락 팩터를 툴팁으로 안내. P2-2의 정직한 단기 해법이며 데이터가 이미 있어 UI 작업만 필요합니다.</td><td class="center">●●●</td><td class="center">하</td></tr>
+      <tr><td>F-4</td><td><strong>전체 보유종목 보기</strong></td><td>파이프라인이 상위 10개로 잘라 저장 중(<code>slice(0, 10)</code>)이므로 수집 단계에서 전체(또는 25개)로 확대 + 상세 패널의 ‘더보기’ 활성화.</td><td class="center">●●</td><td class="center">하</td></tr>
+      <tr><td>F-5</td><td><strong>SEO·공유 카드</strong></td><td>favicon, OG 메타, ETF별 딥링크용 동적 타이틀(<code>document.title</code>), sitemap. 정적 사이트의 유입 경로 확보 기본기.</td><td class="center">●●</td><td class="center">하</td></tr>
+    </tbody>
+  </table>
+
+  <h3>중기 — 제품 차별화</h3>
+  <table>
+    <thead><tr><th style="width:46px;">#</th><th>기능</th><th>설명</th><th class="center">임팩트</th><th class="center">난이도</th></tr></thead>
+    <tbody>
+      <tr><td>F-6</td><td><strong>비교 수익률 오버레이 차트</strong></td><td>비교 바구니의 ETF들을 시작점 100으로 정규화한 수익률 곡선으로 겹쳐 보기. 현재 스파크라인이 30일치만 스냅샷에 있으므로, 디테일 파일 분리(Phase 2)와 함께 1년치 주간 시계열을 추가하면 가능합니다. “비교” 제품의 정체성을 완성하는 기능.</td><td class="center">●●●</td><td class="center">중</td></tr>
+      <tr><td>F-7</td><td><strong>스크리너 프리셋</strong></td><td>“S&amp;P500 추종 최저보수”, “고배당 저변동성”, “국내 반도체” 같은 원클릭 프리셋. 기존 필터 상태의 조합이라 구현이 가볍고 신규 사용자 진입 장벽을 크게 낮춥니다.</td><td class="center">●●●</td><td class="center">하</td></tr>
+      <tr><td>F-8</td><td><strong>비용 계산기</strong></td><td>투자금·기간 입력 → 비교 중인 ETF별 누적 총보수 차이를 금액으로 표시. 총보수 데이터만으로 가능하고, “총보수 0.1%p 차이”를 체감 금액으로 번역해주는 설득력 있는 기능.</td><td class="center">●●</td><td class="center">하</td></tr>
+      <tr><td>F-9</td><td><strong>점수·지표 추이 (스냅샷 아카이브)</strong></td><td>Phase 2에서 스냅샷을 git 커밋으로 남기면, 날짜별 점수/보수/AUM 변화를 추적하는 “이 ETF의 AIYN 점수 추이” 차트가 가능해집니다. 다른 ETF 비교 사이트에 없는 차별화 포인트.</td><td class="center">●●●</td><td class="center">중</td></tr>
+      <tr><td>F-10</td><td><strong>포트폴리오 조합 시뮬레이터</strong></td><td>비교 바구니 ETF에 비중을 배분하면 합성 총보수·배당률·테마 분포·(데이터 보강 후) 합성 변동성을 즉시 계산. 모두 클라이언트 연산으로 가능합니다.</td><td class="center">●●●</td><td class="center">중</td></tr>
+      <tr><td>F-11</td><td><strong>PWA 오프라인 지원</strong></td><td>스냅샷 특성상 오프라인과 궁합이 좋습니다. 서비스 워커로 코어 데이터 캐싱 + “마지막 업데이트” 표기는 이미 있음.</td><td class="center">●</td><td class="center">중</td></tr>
+    </tbody>
+  </table>
+
+  <h3>장기 — 데이터 깊이 확장</h3>
+  <table>
+    <thead><tr><th style="width:46px;">#</th><th>기능</th><th>설명</th></tr></thead>
+    <tbody>
+      <tr><td>F-12</td><td><strong>벤치마크 추적 지표 실계산</strong></td><td>대표 지수 10~20개의 시계열을 매핑해 추적오차·정보비율을 실제 계산 — 현재 100% null인 두 지표를 살리고 ‘효율성’ 팩터를 완성합니다 (<code>docs/scoring.md</code>에 이미 계획으로 명시됨).</td></tr>
+      <tr><td>F-13</td><td><strong>국내 NAV·괴리율</strong></td><td>KRX 정보데이터시스템 공개 데이터로 국내 ETF 괴리율 표시. 국내 투자자 대상 실용 가치가 큰 지표.</td></tr>
+      <tr><td>F-14</td><td><strong>RSS/Atom 피드 알림</strong></td><td>백엔드 없이 가능한 알림: 빌드 시 “관심 조건(신규 상장, 보수 인하, 점수 급변)” 피드를 정적 생성. 이메일/푸시는 백엔드가 필요하므로 정적 전략과 맞는 RSS가 적정선입니다.</td></tr>
+      <tr><td>F-15</td><td><strong>영어 UI (i18n)</strong></td><td>현재 한국어 문자열이 컴포넌트에 산재합니다. Phase 1 분해 시 문자열을 사전으로 모아두면 이후 영어판 비용이 크게 줄어듭니다. 글로벌 유니버스를 이미 갖춘 만큼 잠재 수요가 있습니다.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ -->
+<section class="block" id="direction">
+  <h2><span class="num">8.</span>향후 방향 제언</h2>
+  <p class="h2-sub">기술 선택을 넘어, 이 제품이 무엇으로 차별화될지에 대한 제언입니다.</p>
+
+  <div class="card">
+    <h4 style="margin-top:0;">① 정적 아키텍처를 유지하라 — 백엔드는 ‘필요해질 때’가 아니라 ‘피할 수 없을 때’</h4>
+    <p>
+      운영비 0원, 장애 지점 없음, 키 관리 없음은 개인이 지속 가능하게 운영할 수 있는 결정적 조건입니다.
+      검토한 기능 제언(F-1~F-15) 전부가 정적 구조 안에서 구현 가능합니다. 계정·실시간 알림·커뮤니티가 정말 필요해지는 시점까지
+      백엔드 도입을 미루고, 그때도 서버리스 함수 1~2개 수준에서 시작하길 권합니다.
+    </p>
+    <h4>② 차별화 축은 “데이터 정직성” — 이미 가진 강점을 전면에</h4>
+    <p>
+      누락 필드 추적, 필드 단위 출처 표기, 가짜 데이터 금지 게이트는 이 프로젝트가 이미 갖춘, 흔치 않은 자산입니다.
+      그러나 현재 UI에서는 이 정직성이 거의 보이지 않습니다. 점수 신뢰도 배지(F-3), 출처 툴팁, “이 값은 어디서 왔나” 패널로
+      신뢰성을 사용자 경험으로 끌어올리면 “출처가 투명한 ETF 스크리너”라는 명확한 포지셔닝이 됩니다.
+    </p>
+    <h4>③ 가장 가치 있는 단일 투자: 한국 ETF 장기 데이터 보강</h4>
+    <p>
+      유니버스의 84%인 국내 ETF가 장기 수익률·리스크 지표 없이 평가되고 있다는 것이 현재 제품의 가장 큰 약점입니다.
+      Yahoo <code>.KS</code> 보강(Phase 2)은 기존 파이프라인 재사용으로 비용이 작은 반면, 점수 비교성·랭킹 품질·F-6/F-10 같은
+      후속 기능의 토대가 되는 가장 레버리지 높은 작업입니다.
+    </p>
+    <h4>④ 의존 리스크는 “감지”로 관리</h4>
+    <p>
+      Yahoo 비공식 엔드포인트와 StockAnalysis 스크래핑은 언제든 깨질 수 있는 외부 의존입니다. 이를 없앨 수는 없으므로
+      (무료 공개 소스의 본질), 파서 픽스처 테스트(Phase 3)와 수집 실패 시 “이전 스냅샷 유지 + 경고” 전략(Phase 2의 워크플로 분리로 자연 확보)으로
+      깨짐을 빨리 알고 우아하게 버티는 체계를 갖추는 것이 현실적인 답입니다.
+    </p>
+    <h4 style="margin-bottom:6px;">⑤ 권장 실행 순서 요약</h4>
+    <p style="margin-bottom:0;">
+      <span class="badge p1">지금</span> Phase 0 버그 수정 →
+      <span class="badge p2">2주 내</span> Phase 1 구조 정비 + F-3·F-7 같은 저비용 기능 →
+      <span class="badge p3">1~2개월</span> Phase 2 데이터 보강·성능 + F-2·F-6 →
+      <span class="badge neutral">분기 단위</span> Phase 3 타입·테스트와 장기 기능(F-9, F-12).
+    </p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section class="block" id="appendix">
+  <h2><span class="num">9.</span>부록: 측정 수치</h2>
+  <p class="h2-sub">본 보고서의 판단 근거가 된 실측 데이터입니다 (2026-06-10 측정, 커밋 99dd092).</p>
+
+  <div class="cols-2">
+    <div class="card">
+      <h4 style="margin-top:0;">코드 규모</h4>
+      <table style="margin:0;">
+        <tbody>
+          <tr><td>전체 소스(테스트·문서 포함)</td><td class="num">6,318줄</td></tr>
+          <tr><td>src/App.jsx</td><td class="num">1,272줄 / 컴포넌트 19개</td></tr>
+          <tr><td>src/styles.css</td><td class="num">2,238줄 / 클래스 302개</td></tr>
+          <tr><td>src/lib (테스트 제외)</td><td class="num">614줄</td></tr>
+          <tr><td>scripts (파이프라인 전체)</td><td class="num">1,469줄</td></tr>
+          <tr><td>단위 테스트</td><td class="num">5파일 / 23개 / 전부 통과 (535ms)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0;">데이터 스냅샷 (2026-06-05 생성분)</h4>
+      <table style="margin:0;">
+        <tbody>
+          <tr><td>ETF 수</td><td class="num">1,348개</td></tr>
+          <tr><td>시장 구성</td><td class="num">국내 1,133 · 미국 157 · 홍콩 13 · 호주 11 · 독일 10 · 일본 10 · 프랑스 8 · 베트남 6</td></tr>
+          <tr><td>파일 크기</td><td class="num">6.7MB (gzip 0.64MB)</td></tr>
+          <tr><td>구성 비중</td><td class="num">dataQuality 1.97MB · holdings 0.70MB · sparkline 0.15MB</td></tr>
+          <tr><td>점수 분포 (p5/50/95)</td><td class="num">48 / 69 / 89점</td></tr>
+          <tr><td>scoreCoverage 분포</td><td class="num">0.68×1,110 · 0.78×169 · 0.90×46 · 0.56×22 · 0.50×1</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h4 style="margin-top:0;">분석 방법</h4>
+    <ul class="tight" style="margin-bottom:0;">
+      <li>전체 소스 파일 정독(주요 30개 파일) + 패턴 검색으로 중복·죽은 코드 식별.</li>
+      <li><code>vitest run</code> 실행으로 테스트 통과 확인, Node 스크립트로 스냅샷 통계(누락 필드·점수 분포·페이로드 구성) 산출.</li>
+      <li>P1-1(날짜 포맷)은 동일 코드를 Node에서 실행해 실제 출력으로 재현·검증.</li>
+      <li>빌드 파이프라인은 외부 API 의존이므로 본 환경에서 미실행 — 워크플로 정의와 스크립트 정적 검토로 평가.</li>
+    </ul>
+  </div>
+</section>
+
+<footer class="report-footer">
+  <p>
+    EIAYN 프로젝트 리뷰 보고서 · 2026-06-10 · 분석 대상: <code>ducklove/eiayn@99dd092</code><br />
+    본 문서는 코드 구조·품질 분석 자료이며, 문서 내 ETF 관련 수치는 프로젝트 데이터 스냅샷의 기술적 통계일 뿐 투자 판단 자료가 아닙니다.
+  </p>
+</footer>
+
+</div>
+</body>
+</html>
