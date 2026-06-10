@@ -11,3 +11,9 @@ createRoot(document.getElementById('root')).render(
     </ErrorBoundary>
   </React.StrictMode>,
 );
+
+// Offline support is a progressive enhancement: register the service worker only
+// in production builds and fail silently if registration is not possible.
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {});
+}
