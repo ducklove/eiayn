@@ -14,6 +14,16 @@ EIAYN is designed for GitHub Pages static hosting. The browser does not call ext
 | Issuer or exchange profile override | `scripts/data/profile-overrides.mjs` | narrowly scoped, manually curated expense ratio values for regional ETFs, applied with highest precedence over scraped values |
 | EIAYN regional representative universe | `https://github.com/ducklove/eiayn` | regional representative ETF selection and market classification |
 
+## Snapshot Schema v2 (source catalog)
+
+`public/data/etfs.json` carries `schemaVersion: 2`. In schema v1 every ETF embedded its own `dataQuality.sources` array of `{ name, url, fields }` attribution objects; because most of those objects are identical across ETFs, roughly 30% of the payload was repeated attribution data (8,359 inline entries for 1,348 ETFs, only 1,578 distinct). Schema v2 normalizes them:
+
+- A top-level `sourceCatalog` array lists each distinct source once as `{ name, url, fields }` (dedupe key: name + url + fields, with field order significant), in first-seen order.
+- Each ETF's `dataQuality.sourceRefs` is an array of integer indexes into `sourceCatalog`, replacing the v1 `dataQuality.sources` array. `quoteAsOf`, `profileAsOf`, `holdingsAsOf`, and `missingFields` are unchanged.
+- The small human-readable top-level `sources` array describing the overall pipeline is unchanged.
+
+The pipeline still produces inline source objects per ETF internally; `scripts/data/source-catalog.mjs` dedupes them in a single pass right before the payload is written. `node scripts/migrate-snapshot.mjs` exists for the one-time migration of a v1 snapshot to v2 (idempotent: a v2 file is left untouched), and `npm run check:data` enforces `schemaVersion === 2`, the catalog shape, and that every `sourceRefs` entry is a valid catalog index.
+
 ## Korea Collection
 
 Korean ETF coverage starts from K-ETF active instruments:
@@ -39,7 +49,7 @@ K-ETF batch history covers only one year, so after the K-ETF build each Korean E
 - `risk.volatility3yAnnualized`, `risk.maxDrawdown3y`, and `risk.sharpe3y` computed over the latest 3-year window, using the same formulas as US/regional ETFs.
 - `returns.m3`, `returns.y1`, `dividendYield`, and `sparkline` only as fallbacks when K-ETF left them empty.
 
-When an ETF is enriched, `yahooSymbol` is set to the `.KS` symbol and a `Yahoo Finance chart (KRX)` entry is appended to `dataQuality.sources` listing exactly the fields that were filled. The `KOREA_YAHOO_LIMIT` environment variable restricts enrichment to the top-N Korean ETFs by trading value for partial CI or local runs; by default all Korean ETFs are attempted.
+When an ETF is enriched, `yahooSymbol` is set to the `.KS` symbol and a `Yahoo Finance chart (KRX)` source entry is appended listing exactly the fields that were filled (stored in the written snapshot as a `dataQuality.sourceRefs` index into `sourceCatalog`). The `KOREA_YAHOO_LIMIT` environment variable restricts enrichment to the top-N Korean ETFs by trading value for partial CI or local runs; by default all Korean ETFs are attempted.
 
 ## US Collection
 
