@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-06-10 (round 2)
+
+- Added dark mode: the topbar toggle persists the theme (system preference is the default), repeated literal colors were promoted to semantic tokens with a full dark palette, and an inline head script applies the saved theme before first paint.
+- Added a sortable full-universe list view (`?view=list`): the filtered universe in a paginated table sortable by expense ratio, dividend, 1y/3y returns, AIYN score, and data coverage (nulls always last; mixed-currency price/AUM columns stay display-only). Rows open the analysis view with per-row favorite/compare actions, and CSV export in this mode exports the entire filtered result.
+- Snapshot schema v2: per-ETF source attribution is normalized into a top-level `sourceCatalog` with integer `sourceRefs`, shrinking `public/data/etfs.json` from 6.99MB to 4.73MB (-32.4%). The pipeline emits v2 natively, `check:data` enforces it, and `scripts/migrate-snapshot.mjs` migrates v1 snapshots idempotently.
+- Added a Playwright E2E smoke suite (12 tests: load, KST timestamp format, search-to-analysis, deep links, history back, `/` shortcut, guide modal Escape, CSV download, coverage badge, dark mode persistence, list view sorting/deep-linking) with a parallel CI job.
+
 ## 2026-06-10
 
 - Fixed user-visible defects: timestamps rendering as `2026 06. 05.` (double-escaped regex), CSV exports missing the UTF-8 BOM (broken Korean text in Excel) and formula-injection guards, the full snapshot re-downloading on every visit (`cache: 'no-store'`), and share rewriting the URL even when the share dialog was dismissed.
