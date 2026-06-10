@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-06-10 (round 3)
+
+- Added screener presets: one-click chips (국내 시장대표, 고배당, 반도체, 커버드콜, 채권, 낮은 변동성) that apply validated filter combinations and switch to the sortable list view.
+- Added a holding-cost calculator to the compare view: investment amount and holding period translate each compared ETF's expense ratio into annual and cumulative figures, with the no-returns/no-compounding assumption stated inline.
+- Added a normalized performance overlay (start=100) to the compare view, backed by a new optional per-ETF `performance1y` weekly series (trailing 1 year, last point per ISO week) emitted by the pipeline for all markets with a Korea Yahoo-KRX fallback; the UI shows an honest placeholder until the first data refresh ships the field (~0.5MB compact across the snapshot).
+- Added 78 Testing Library component/hook tests (EtfTable sorting/pagination/event isolation, theme and storage hooks, ErrorBoundary fallback, charts, modal) and 13 pipeline tests for the new series; unit suite now 183 tests plus 15 Playwright E2E scenarios.
+
 ## 2026-06-10 (round 2)
 
 - Added dark mode: the topbar toggle persists the theme (system preference is the default), repeated literal colors were promoted to semantic tokens with a full dark palette, and an inline head script applies the saved theme before first paint.
