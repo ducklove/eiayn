@@ -122,6 +122,24 @@ for (const etf of etfs) {
   }
   if (!Array.isArray(etf.holdings)) errors.push(`${etf.id}: holdings must be an array`);
   if (!Array.isArray(etf.sparkline)) errors.push(`${etf.id}: sparkline must be an array`);
+
+  // performance1y is optional (snapshots written before the field keep
+  // validating); when present and non-null its shape is enforced.
+  const performance = etf.performance1y;
+  if (performance !== undefined && performance !== null) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(performance?.start ?? '')) {
+      errors.push(`${etf.id}: performance1y.start must be a YYYY-MM-DD string`);
+    }
+    if (performance?.freq !== 'weekly') {
+      errors.push(`${etf.id}: performance1y.freq must be "weekly"`);
+    }
+    const values = performance?.values;
+    if (!Array.isArray(values) || !values.length || !values.every(isFiniteNumber)) {
+      errors.push(`${etf.id}: performance1y.values must be a non-empty array of finite numbers`);
+    } else if (values[0] !== 100) {
+      errors.push(`${etf.id}: performance1y.values[0] must be exactly 100`);
+    }
+  }
   const sourceRefs = etf.dataQuality?.sourceRefs;
   if (!Array.isArray(sourceRefs) || !sourceRefs.length) {
     errors.push(`${etf.id}: dataQuality.sourceRefs must not be empty`);

@@ -47,7 +47,7 @@ K-ETF batch history covers only one year, so after the K-ETF build each Korean E
 
 - `returns.y3Annualized` and `returns.y5Annualized` computed from the Yahoo adjusted-close series.
 - `risk.volatility3yAnnualized`, `risk.maxDrawdown3y`, and `risk.sharpe3y` computed over the latest 3-year window, using the same formulas as US/regional ETFs.
-- `returns.m3`, `returns.y1`, `dividendYield`, and `sparkline` only as fallbacks when K-ETF left them empty.
+- `returns.m3`, `returns.y1`, `dividendYield`, `sparkline`, and `performance1y` only as fallbacks when K-ETF left them empty.
 
 When an ETF is enriched, `yahooSymbol` is set to the `.KS` symbol and a `Yahoo Finance chart (KRX)` source entry is appended listing exactly the fields that were filled (stored in the written snapshot as a `dataQuality.sourceRefs` index into `sourceCatalog`). The `KOREA_YAHOO_LIMIT` environment variable restricts enrichment to the top-N Korean ETFs by trading value for partial CI or local runs; by default all Korean ETFs are attempted.
 
@@ -72,6 +72,10 @@ Regional profile fields are enriched in this order (first non-null value wins):
 3. Yahoo Finance quoteSummary, using a build-time public Yahoo session cookie/crumb, for profile fallback fields.
 
 Regional holdings are still unavailable from these public profile sources and remain empty arrays unless a future source is added.
+
+## 1-Year Performance Series (`performance1y`)
+
+Each ETF carries an optional `performance1y` object — `{ start: 'YYYY-MM-DD', freq: 'weekly', values: [100, ...] }` — that the comparison overlay chart uses to draw normalized 1-year performance lines. `scripts/data/performance.mjs` derives it from the same price history as the other metrics: the K-ETF 1-year batch series for Korean ETFs, the Yahoo Finance 5-year chart series for US and regional ETFs, and the Yahoo KRX `.KS` chart as a fill-only-null fallback for Korean ETFs whose K-ETF history was too sparse. Sampling rule: take the trailing one year from the latest available point (inclusive boundary), keep the last available trading point of each ISO week (Monday-Sunday) ending at the most recent point, then normalize so `values[0]` is exactly `100` and later values are `(price / start price) × 100` rounded to 2 decimals. ETFs with fewer than 8 weekly points get `performance1y: null`. At roughly 53 numbers plus one date per ETF the field adds about 0.5 MB raw across ~1,348 ETFs; each run logs the serialized byte total. The field is optional in `npm run check:data` (shape is validated only when present and non-null), because the committed snapshot predates it: `performance1y` appears from the first data refresh after this change.
 
 ## Update Behavior
 

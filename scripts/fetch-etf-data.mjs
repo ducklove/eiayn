@@ -13,6 +13,7 @@ import { collectMissingFields } from '../src/lib/normalize.js';
 import { scoreEtfs } from '../src/lib/scoring.js';
 import { fetchKoreanEtfBaseData, KETF_SOURCES } from './data/k-etf.mjs';
 import { enrichKoreanEtfsWithYahoo, KOREA_YAHOO_SOURCE_NAME } from './data/korea-enrich.mjs';
+import { buildPerformance1y, estimatePerformance1ySize } from './data/performance.mjs';
 import { mapLimit } from './data/http.mjs';
 import { emptyProfile, nullableNumber } from './data/shared.mjs';
 import {
@@ -80,6 +81,11 @@ async function main() {
     },
   }));
 
+  const performanceSize = estimatePerformance1ySize(scoredEtfs);
+  console.log(
+    `[data:update] performance1y: ${performanceSize.etfsWithSeries}/${scoredEtfs.length} ETFs, ~${(performanceSize.bytes / 1024).toFixed(1)} KiB serialized`,
+  );
+
   const usdKrw = await fetchExchangeRate();
   const marketCounts = countBy(scoredEtfs, 'market');
   // Schema v2: per-ETF code above keeps producing inline source objects;
@@ -137,7 +143,7 @@ async function main() {
         fields: [
           'Korea ETF 3y/5y returns',
           'Korea ETF 3y risk metrics',
-          'dividendYield and sparkline fallback',
+          'dividendYield, sparkline, and performance1y fallback',
         ],
       },
       {
@@ -242,6 +248,7 @@ function buildKoreanEtfs(base) {
       },
       holdings: holdingsData.holdings,
       sparkline: normalizeSparkline(series),
+      performance1y: buildPerformance1y(series),
       liquidity: {
         volume: nullableNumber(quote?.volume),
         tradingValue: nullableNumber(quote?.trading_value),
@@ -263,7 +270,10 @@ function buildKoreanEtfs(base) {
             ...KETF_SOURCES.quotes,
             fields: ['price', 'changePercent', 'aum', 'volume', 'tradingValue'],
           },
-          { ...KETF_SOURCES.compare, fields: ['expenseRatio', 'benchmarkIndex', '1Y history'] },
+          {
+            ...KETF_SOURCES.compare,
+            fields: ['expenseRatio', 'benchmarkIndex', '1Y history', 'performance1y'],
+          },
           { ...KETF_SOURCES.priceRanking3m, fields: ['returns.m3', 'issuer', 'category'] },
           { ...KETF_SOURCES.priceRanking1y, fields: ['returns.y1', 'issuer', 'category'] },
           dividend ? { ...KETF_SOURCES.dividendRanking, fields: ['dividendYield'] } : null,
@@ -475,6 +485,7 @@ async function fetchYahooBackedEtf(record, options) {
       },
       holdings: holdings.holdings ?? [],
       sparkline: normalizeSparkline(series),
+      performance1y: buildPerformance1y(series),
       liquidity: {
         volume: nullableNumber(record.regularMarketVolume) ?? latestQuote?.volume ?? null,
         tradingValue:
@@ -496,7 +507,7 @@ async function fetchYahooBackedEtf(record, options) {
           {
             name: 'Yahoo Finance chart',
             url: chart.url,
-            fields: ['price', 'history', 'dividends'],
+            fields: ['price', 'history', 'dividends', 'performance1y'],
           },
           ...(profile.sources ?? [profile.source]),
           holdings.source,

@@ -8,16 +8,18 @@ import {
   sliceSeriesFrom,
 } from '../../src/lib/metrics.js';
 import { mapLimit } from './http.mjs';
+import { buildPerformance1y } from './performance.mjs';
 import { roundNullable, trailingDividendYield } from './yahoo.mjs';
 
 export const KOREA_YAHOO_SOURCE_NAME = 'Yahoo Finance chart (KRX)';
 
 /**
- * Enriches a built Korean ETF object with long-horizon metrics computed from a
- * Yahoo chart result for the `${code}.KS` KRX symbol. K-ETF values always keep
- * priority: only fields that are currently null are filled. Returns the input
- * object unchanged (same reference) when there is nothing to fill, and never
- * mutates the input.
+ * Enriches a built Korean ETF object with long-horizon metrics (and the 1y
+ * weekly `performance1y` series as a fallback) computed from a Yahoo chart
+ * result for the `${code}.KS` KRX symbol. K-ETF values always keep priority:
+ * only fields that are currently null are filled. Returns the input object
+ * unchanged (same reference) when there is nothing to fill, and never mutates
+ * the input.
  */
 export function applyKoreanYahooEnrichment(etf, chart) {
   if (!etf || !chart) return etf;
@@ -85,6 +87,9 @@ export function applyKoreanYahooEnrichment(etf, chart) {
     'dividendYield',
     roundNullable(trailingDividendYield(chart.dividends ?? [], etf.price)),
   );
+  // K-ETF data keeps priority: the 1y weekly performance series is filled
+  // from the Yahoo chart only when the K-ETF build left it null.
+  fill(enriched, 'performance1y', 'performance1y', buildPerformance1y(series));
 
   if (!etf.sparkline?.length) {
     const sparkline = normalizeSparkline(series);

@@ -9,6 +9,7 @@ import {
   sliceSeriesFrom,
 } from '../../src/lib/metrics.js';
 import { roundNullable, trailingDividendYield } from './yahoo.mjs';
+import { buildPerformance1y } from './performance.mjs';
 import {
   applyKoreanYahooEnrichment,
   enrichKoreanEtfsWithYahoo,
@@ -77,6 +78,11 @@ function makeKoreanEtf(overrides = {}) {
     },
     holdings: [],
     sparkline: [36000, 36500],
+    performance1y: {
+      start: '2025-06-13',
+      freq: 'weekly',
+      values: [100, 101.2, 99.85, 102.4, 103.1, 102.75, 104.3, 105.62],
+    },
     liquidity: {
       volume: 5_000_000,
       tradingValue: 180_000_000_000,
@@ -238,6 +244,62 @@ describe('applyKoreanYahooEnrichment', () => {
       ],
     });
     expect(applyKoreanYahooEnrichment(etf, chart).sparkline).toEqual([100, 102]);
+  });
+
+  it('fills a null performance1y from the Yahoo series and lists it in the source entry', () => {
+    const etf = makeKoreanEtf({ performance1y: null });
+    const chart = makeChart();
+    const expected = buildPerformance1y(mappedSeries(chart.series));
+    expect(expected).not.toBeNull();
+
+    const result = applyKoreanYahooEnrichment(etf, chart);
+
+    expect(result.performance1y).toEqual(expected);
+    expect(result.performance1y.freq).toBe('weekly');
+    expect(result.performance1y.start).toBe('2025-01-02');
+    expect(result.performance1y.values).toHaveLength(13);
+    expect(result.performance1y.values[0]).toBe(100);
+    expect(result.dataQuality.sources.at(-1).fields).toEqual([
+      'returns.y3Annualized',
+      'returns.y5Annualized',
+      'risk.volatility3yAnnualized',
+      'risk.maxDrawdown3y',
+      'risk.sharpe3y',
+      'performance1y',
+    ]);
+  });
+
+  it('keeps an existing K-ETF performance1y untouched', () => {
+    const etf = makeKoreanEtf();
+    const result = applyKoreanYahooEnrichment(etf, makeChart());
+    expect(result.performance1y).toBe(etf.performance1y);
+    expect(result.dataQuality.sources.at(-1).fields).not.toContain('performance1y');
+  });
+
+  it('leaves performance1y null when the Yahoo series has fewer than 8 weekly points', () => {
+    const etf = makeKoreanEtf({
+      returns: { m3: 1, y1: 2, y3Annualized: 3, y5Annualized: 4 },
+      risk: {
+        volatility3yAnnualized: 10,
+        maxDrawdown3y: -5,
+        sharpe3y: 0.5,
+        trackingError3y: null,
+        informationRatio3y: null,
+      },
+      dividendYield: 1.8,
+      performance1y: null,
+    });
+    const chart = makeChart({
+      series: [
+        { date: '2026-01-01', close: 100, adjustedClose: 100 },
+        { date: '2026-01-02', close: 101, adjustedClose: 101 },
+      ],
+    });
+
+    const result = applyKoreanYahooEnrichment(etf, chart);
+
+    expect(result).toBe(etf);
+    expect(result.performance1y).toBeNull();
   });
 
   it('returns the input object unchanged when there is nothing to fill', () => {
