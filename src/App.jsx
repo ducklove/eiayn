@@ -1,4 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { useDocumentTitle } from './hooks/useDocumentTitle.js';
 import { useEtfData } from './hooks/useEtfData.js';
 import { usePersistentState } from './hooks/usePersistentState.js';
 import { useTheme } from './hooks/useTheme.js';
@@ -11,6 +12,7 @@ import { EtfAnalysisDashboard } from './components/analysis/EtfAnalysisDashboard
 import { ComparisonGrid } from './components/compare/ComparisonGrid.jsx';
 import { CostCalculator } from './components/compare/CostCalculator.jsx';
 import { PerformanceOverlay } from './components/compare/PerformanceOverlay.jsx';
+import { PortfolioSimulator } from './components/compare/PortfolioSimulator.jsx';
 import { UniverseStrip } from './components/compare/UniverseStrip.jsx';
 import { WorkspaceHeader } from './components/compare/WorkspaceHeader.jsx';
 import { EtfTable } from './components/list/EtfTable.jsx';
@@ -122,6 +124,8 @@ function App() {
   const recentEtfs = recentIds.map((id) => etfs.find((etf) => etf.id === id)).filter(Boolean);
   const isAnalysisView = viewMode === 'analysis';
   const isListView = viewMode === 'list';
+
+  useDocumentTitle(viewMode, selectedEtf);
 
   const filterOptions = useMemo(
     () => ({
@@ -388,6 +392,7 @@ function App() {
               <div className="compare-tools">
                 <PerformanceOverlay selectedEtfs={selectedEtfs} />
                 <CostCalculator selectedEtfs={selectedEtfs} />
+                <PortfolioSimulator selectedEtfs={selectedEtfs} />
               </div>
             )}
             {!isListView && (
