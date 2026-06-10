@@ -59,6 +59,11 @@ export function formatDateTime(value) {
   return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
 }
 
+export function returnTone(value) {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return undefined;
+  return value >= 0 ? 'positive' : 'negative';
+}
+
 export function scoreLabel(score) {
   if (!isNumber(score)) return '미제공';
   if (score >= 80) return '우수';
