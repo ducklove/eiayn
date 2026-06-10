@@ -31,7 +31,7 @@ describe('buildCsv', () => {
       { name: 'KODEX, 200', value: null },
     ]);
 
-    expect(csv.startsWith('﻿')).toBe(true);
+    expect(csv.startsWith('\uFEFF')).toBe(true);
     expect(csv).toContain('name,value');
     expect(csv).toContain('미국 ETF,1');
     expect(csv).toContain('"KODEX, 200",');

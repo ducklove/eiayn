@@ -5,9 +5,10 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 
 export default [
-  // Never lint build output, generated/static assets, vendored docs, or dependencies.
+  // Never lint build output, generated/static assets, vendored docs, dependencies,
+  // or nested agent worktrees under .claude/.
   {
-    ignores: ['dist/**', 'public/**', 'node_modules/**', 'docs/**'],
+    ignores: ['dist/**', 'public/**', 'node_modules/**', 'docs/**', '.claude/**'],
   },
 
   // Register .jsx alongside ESLint's default *.js/*.mjs/*.cjs set so `eslint .`

@@ -16,7 +16,7 @@ export function buildCsv(rows) {
     ...rows.map((row) => headers.map((header) => csvCell(row[header])).join(',')),
   ];
   // BOM keeps Korean text readable when the file is opened in Excel.
-  return `﻿${lines.join('\n')}`;
+  return `\uFEFF${lines.join('\n')}`;
 }
 
 export function downloadFile(filename, content, type) {

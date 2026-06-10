@@ -26,7 +26,7 @@ const DEFAULT_FILTERS = {
 
 function App() {
   const { data, loading, error, reload } = useEtfData();
-  const etfs = data?.etfs ?? [];
+  const etfs = useMemo(() => data?.etfs ?? [], [data]);
   const [query, setQuery] = useState('');
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [selectedIds, setSelectedIds] = useState([]);
