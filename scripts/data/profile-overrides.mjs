@@ -1,3 +1,5 @@
+import { emptyProfile } from './shared.mjs';
+
 export const PROFILE_OVERRIDES = {
   'STW.AX': {
     expenseRatio: 0.05,
@@ -23,15 +25,5 @@ export function profileOverrideForTicker(ticker) {
   return {
     ...emptyProfile(),
     ...override,
-  };
-}
-
-function emptyProfile() {
-  return {
-    source: null,
-    expenseRatio: null,
-    aum: null,
-    dividendYield: null,
-    inceptionDate: null,
   };
 }

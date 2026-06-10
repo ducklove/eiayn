@@ -1,4 +1,5 @@
 import { fetchJson, mapLimit, optionalJson } from './http.mjs';
+import { cleanText, nullableNumber } from './shared.mjs';
 
 const ROOT = 'https://anchor.k-etf.com/api';
 const LANG = 'ko';
@@ -107,14 +108,4 @@ function chunk(items, size) {
     chunks.push(items.slice(index, index + size));
   }
   return chunks;
-}
-
-function nullableNumber(value) {
-  if (value === null || value === undefined || value === '') return null;
-  const number = Number(value);
-  return Number.isFinite(number) ? number : null;
-}
-
-function cleanText(value) {
-  return String(value ?? '').replace(/\s+/g, ' ').trim();
 }

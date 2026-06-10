@@ -1,11 +1,12 @@
 import { load } from 'cheerio';
 import { parseCompactMoney, parsePercent } from '../../src/lib/metrics.js';
 import { optionalText } from './http.mjs';
+import { cleanText, emptyProfile } from './shared.mjs';
 
 export async function fetchStockAnalysisProfile(path, currency) {
   const url = stockAnalysisUrl(path);
   const html = await optionalText(url);
-  if (!html) return emptyProfile(url);
+  if (!html) return emptyProfile();
 
   const $ = load(html);
   const aum = parseCompactMoney(summaryValue($, 'Assets'), currency);
@@ -61,11 +62,11 @@ export async function fetchStockAnalysisHoldings(path) {
 
 export async function fetchStockAnalysisQuoteProfile(ticker, currency) {
   const path = stockAnalysisQuotePathForTicker(ticker);
-  if (!path) return emptyProfile(null);
+  if (!path) return emptyProfile();
 
   const url = stockAnalysisUrl(path);
   const html = await optionalText(url);
-  if (!html) return emptyProfile(url);
+  if (!html) return emptyProfile();
 
   const $ = load(html);
   const aum = parseCompactMoney(summaryValue($, 'Assets'), currency);
@@ -101,16 +102,6 @@ export function stockAnalysisQuotePathForTicker(ticker) {
   return null;
 }
 
-function emptyProfile(url) {
-  return {
-    source: null,
-    expenseRatio: null,
-    aum: null,
-    dividendYield: null,
-    inceptionDate: null,
-  };
-}
-
 function stockAnalysisUrl(path) {
   return `https://stockanalysis.com${path.startsWith('/') ? path : `/${path}`}`;
 }
@@ -139,10 +130,6 @@ function parseDate(value) {
   if (isoMatch) return isoMatch[0].slice(0, 10);
   const date = new Date(`${value} UTC`);
   return Number.isNaN(date.getTime()) ? null : date.toISOString().slice(0, 10);
-}
-
-function cleanText(value) {
-  return String(value ?? '').replace(/\s+/g, ' ').trim();
 }
 
 const MONTHS = {

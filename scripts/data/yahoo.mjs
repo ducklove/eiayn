@@ -1,4 +1,5 @@
 import { fetchJson, wait } from './http.mjs';
+import { emptyProfile } from './shared.mjs';
 
 export const YAHOO_CHART_ROOT = 'https://query1.finance.yahoo.com/v8/finance/chart';
 export const YAHOO_MOST_ACTIVE_ETFS =
@@ -139,7 +140,7 @@ export async function fetchYahooQuoteSummaryProfile(symbol) {
     };
   } catch (error) {
     console.warn(`[data:update] Optional source unavailable ${url}: ${error.message}`);
-    return emptyQuoteSummaryProfile();
+    return emptyProfile();
   }
 }
 
@@ -248,15 +249,5 @@ function yahooHeaders(cookies) {
     'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
     'user-agent': 'Mozilla/5.0 (compatible; EIAYNDataBot/1.0; +https://github.com/ducklove/eiayn)',
     ...(cookies ? { cookie: cookies } : {}),
-  };
-}
-
-function emptyQuoteSummaryProfile() {
-  return {
-    source: null,
-    expenseRatio: null,
-    aum: null,
-    dividendYield: null,
-    inceptionDate: null,
   };
 }

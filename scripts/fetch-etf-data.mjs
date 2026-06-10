@@ -13,6 +13,7 @@ import { collectMissingFields } from '../src/lib/normalize.js';
 import { scoreEtfs } from '../src/lib/scoring.js';
 import { fetchKoreanEtfBaseData, KETF_SOURCES } from './data/k-etf.mjs';
 import { mapLimit } from './data/http.mjs';
+import { emptyProfile, nullableNumber } from './data/shared.mjs';
 import {
   fetchExchangeRate,
   fetchYahooChart,
@@ -522,22 +523,6 @@ function defaultCurrencyForMarket(market) {
 
 function zeroDecimalCurrency(currency) {
   return ['KRW', 'JPY', 'VND'].includes(currency);
-}
-
-function nullableNumber(value) {
-  if (value === null || value === undefined || value === '') return null;
-  const number = Number(value);
-  return Number.isFinite(number) ? number : null;
-}
-
-function emptyProfile() {
-  return {
-    source: null,
-    expenseRatio: null,
-    aum: null,
-    dividendYield: null,
-    inceptionDate: null,
-  };
 }
 
 function mergeProfiles(profiles) {
