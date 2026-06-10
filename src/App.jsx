@@ -11,6 +11,7 @@ import { EtfAnalysisDashboard } from './components/analysis/EtfAnalysisDashboard
 import { ComparisonGrid } from './components/compare/ComparisonGrid.jsx';
 import { UniverseStrip } from './components/compare/UniverseStrip.jsx';
 import { WorkspaceHeader } from './components/compare/WorkspaceHeader.jsx';
+import { EtfTable } from './components/list/EtfTable.jsx';
 import { RankingPanel } from './components/common/RankingPanel.jsx';
 import { SimpleListPanel } from './components/common/SimpleListPanel.jsx';
 import { GuideModal } from './components/layout/GuideModal.jsx';
@@ -78,6 +79,8 @@ function App() {
         setSelectedIds(selection.selectedIds);
         setActiveId(selection.activeId);
         setViewMode(selection.viewMode);
+      } else if (selection.viewMode === 'list') {
+        setViewMode('list');
       } else {
         // Bare URL (the entry point): return to compare but keep the current basket.
         setViewMode('compare');
@@ -114,6 +117,7 @@ function App() {
   const favoriteEtfs = etfs.filter((etf) => favorites.includes(etf.id));
   const recentEtfs = recentIds.map((id) => etfs.find((etf) => etf.id === id)).filter(Boolean);
   const isAnalysisView = viewMode === 'analysis';
+  const isListView = viewMode === 'list';
 
   const filterOptions = useMemo(
     () => ({
@@ -157,6 +161,19 @@ function App() {
     openAnalysis(selectedEtf.id);
   };
 
+  const showList = () => {
+    setViewMode('list');
+    setActionNote('전체 목록 화면을 열었습니다.');
+    writeListUrl();
+  };
+
+  const addCompareFromList = (id) => {
+    const next = etfs.find((etf) => etf.id === id);
+    if (!next || selectedIds.includes(id)) return;
+    setSelectedIds((current) => [...current, id].slice(-4));
+    setActionNote(`${next.shortName}을 비교 바구니에 추가했습니다.`);
+  };
+
   const selectFirstResult = () => {
     const next = filteredEtfs.find((etf) => etf.id !== activeId) ?? filteredEtfs[0];
     if (!next) {
@@ -189,7 +206,7 @@ function App() {
   };
 
   const exportCsv = () => {
-    const exportEtfs = isAnalysisView ? [selectedEtf] : selectedEtfs;
+    const exportEtfs = isListView ? filteredEtfs : isAnalysisView ? [selectedEtf] : selectedEtfs;
     const rows = exportEtfs.map((etf) => ({
       id: etf.id,
       ticker: etf.ticker,
@@ -210,16 +227,18 @@ function App() {
     }));
     const csv = buildCsv(rows);
     if (!csv) return;
-    const prefix = isAnalysisView ? selectedEtf.id : 'compare';
+    const prefix = isListView ? 'list' : isAnalysisView ? selectedEtf.id : 'compare';
     downloadFile(
       `eiayn-${prefix}-${new Date().toISOString().slice(0, 10)}.csv`,
       csv,
       'text/csv;charset=utf-8',
     );
     setActionNote(
-      isAnalysisView
-        ? `${selectedEtf.shortName} 분석 데이터를 CSV로 내보냈습니다.`
-        : '현재 비교 바구니를 CSV로 내보냈습니다.',
+      isListView
+        ? `검색 결과 ${rows.length}개 ETF를 CSV로 내보냈습니다.`
+        : isAnalysisView
+          ? `${selectedEtf.shortName} 분석 데이터를 CSV로 내보냈습니다.`
+          : '현재 비교 바구니를 CSV로 내보냈습니다.',
     );
   };
 
@@ -227,6 +246,8 @@ function App() {
     const params = new URLSearchParams();
     if (isAnalysisView && selectedEtf?.id) {
       params.set('code', selectedEtf.id);
+    } else if (isListView) {
+      params.set('view', 'list');
     } else {
       if (selectedIds.length) params.set('compare', selectedIds.join(','));
       if (activeId) params.set('active', activeId);
@@ -300,7 +321,7 @@ function App() {
           theme={theme}
           onToggleTheme={toggleTheme}
         />
-        <main className={`content-grid ${isAnalysisView ? 'single-analysis' : ''}`}>
+        <main className={`content-grid ${isAnalysisView || isListView ? 'single-analysis' : ''}`}>
           <div className={`workspace ${isAnalysisView ? 'analysis-workspace' : ''}`}>
             <WorkspaceHeader
               viewMode={viewMode}
@@ -310,6 +331,7 @@ function App() {
               toggleFavorite={toggleFavorite}
               onShowCompare={showCompare}
               onShowAnalysis={showActiveAnalysis}
+              onShowList={showList}
               onAddNext={addNext}
               onSelectFirstResult={selectFirstResult}
               onClearFilters={clearFilters}
@@ -329,6 +351,15 @@ function App() {
                 favorites={favorites}
                 toggleFavorite={toggleFavorite}
               />
+            ) : isListView ? (
+              <EtfTable
+                etfs={filteredEtfs}
+                favorites={favorites}
+                toggleFavorite={toggleFavorite}
+                onOpenEtf={openAnalysis}
+                onAddCompare={addCompareFromList}
+                selectedIds={selectedIds}
+              />
             ) : (
               <ComparisonGrid
                 selectedEtfs={selectedEtfs}
@@ -340,32 +371,36 @@ function App() {
                 onAddNext={addNext}
               />
             )}
-            <UniverseStrip
-              filteredEtfs={filteredEtfs}
-              activeEtf={selectedEtf}
-              activeId={selectedEtf.id}
-              onSelect={openAnalysis}
-            />
-            <div className="bottom-grid">
-              <RankingPanel
-                filteredEtfs={filteredEtfs.length ? filteredEtfs : etfs}
-                onOpenEtf={openAnalysis}
+            {!isListView && (
+              <UniverseStrip
+                filteredEtfs={filteredEtfs}
+                activeEtf={selectedEtf}
+                activeId={selectedEtf.id}
+                onSelect={openAnalysis}
               />
-              <SimpleListPanel
-                title="최근 조회"
-                items={recentEtfs}
-                emptyText="아직 조회한 ETF가 없습니다."
-                onOpenEtf={openAnalysis}
-              />
-              <SimpleListPanel
-                title="관심상품"
-                items={favoriteEtfs}
-                emptyText="별 버튼으로 관심상품을 추가하세요."
-                onOpenEtf={openAnalysis}
-              />
-            </div>
+            )}
+            {!isListView && (
+              <div className="bottom-grid">
+                <RankingPanel
+                  filteredEtfs={filteredEtfs.length ? filteredEtfs : etfs}
+                  onOpenEtf={openAnalysis}
+                />
+                <SimpleListPanel
+                  title="최근 조회"
+                  items={recentEtfs}
+                  emptyText="아직 조회한 ETF가 없습니다."
+                  onOpenEtf={openAnalysis}
+                />
+                <SimpleListPanel
+                  title="관심상품"
+                  items={favoriteEtfs}
+                  emptyText="별 버튼으로 관심상품을 추가하세요."
+                  onOpenEtf={openAnalysis}
+                />
+              </div>
+            )}
           </div>
-          {!isAnalysisView && (
+          {!isAnalysisView && !isListView && (
             <AnalysisPanel
               selectedEtf={selectedEtf}
               favorites={favorites}
@@ -402,6 +437,10 @@ function writeCompareUrl(selectedIds, activeId) {
   if (activeId) params.set('active', activeId);
   const query = params.toString();
   pushUrl(`${window.location.pathname}${query ? `?${query}` : ''}`);
+}
+
+function writeListUrl() {
+  pushUrl(`${window.location.pathname}?view=list`);
 }
 
 export default App;

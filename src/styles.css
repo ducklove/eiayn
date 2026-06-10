@@ -2308,3 +2308,102 @@ a {
   background: var(--amber-bg);
   color: var(--amber-text);
 }
+
+.etf-table-block {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.etf-table-block .section-heading span {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.etf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.etf-table th,
+.etf-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line-soft);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.etf-table th {
+  color: var(--muted);
+  font-size: 12px;
+  background: var(--surface);
+}
+
+.etf-table th button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.etf-table th button:hover {
+  color: var(--teal-dark);
+}
+
+.etf-table tbody tr {
+  cursor: pointer;
+}
+
+.etf-table tbody tr:hover {
+  background: var(--surface-soft);
+}
+
+.etf-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.etf-table .name-cell a {
+  display: grid;
+  gap: 1px;
+  min-width: 180px;
+}
+
+.etf-table .name-cell small {
+  color: var(--muted);
+}
+
+.etf-table .score-cell {
+  font-weight: 800;
+}
+
+.etf-table .action-cell {
+  white-space: nowrap;
+}
+
+.etf-table .action-cell .icon-button.selected-action {
+  color: var(--amber);
+}
+
+.table-pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}

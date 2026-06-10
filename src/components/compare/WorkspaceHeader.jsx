@@ -2,6 +2,7 @@ import {
   BookOpenCheck,
   Download,
   Filter,
+  List,
   Plus,
   RefreshCw,
   Share2,
@@ -20,6 +21,7 @@ export function WorkspaceHeader({
   toggleFavorite,
   onShowCompare,
   onShowAnalysis,
+  onShowList,
   onAddNext,
   onSelectFirstResult,
   onClearFilters,
@@ -34,16 +36,19 @@ export function WorkspaceHeader({
   onGuide,
 }) {
   const isAnalysisView = viewMode === 'analysis';
+  const isListView = viewMode === 'list';
 
   return (
     <div className="workspace-header" id="compare">
       <div className="title-block">
         <div>
-          <h2>{isAnalysisView ? 'ETF 개별 분석' : 'ETF 비교'}</h2>
+          <h2>{isAnalysisView ? 'ETF 개별 분석' : isListView ? 'ETF 전체 목록' : 'ETF 비교'}</h2>
           <p>
             {isAnalysisView
               ? `${selectedEtf.name}의 비용, 성과, 위험, 보유종목을 한 화면에서 확인합니다.`
-              : '총보수, 순자산, 추적오차, 배당, 변동성을 실제 스냅샷 기준으로 비교합니다.'}
+              : isListView
+                ? '검색·필터 결과 전체를 총보수, 수익률, AIYN 점수 기준으로 정렬해 탐색합니다.'
+                : '총보수, 순자산, 추적오차, 배당, 변동성을 실제 스냅샷 기준으로 비교합니다.'}
           </p>
         </div>
       </div>
@@ -70,6 +75,16 @@ export function WorkspaceHeader({
           >
             <ShieldCheck size={16} />
             개별 분석
+          </button>
+          <button
+            className={viewMode === 'list' ? 'active' : ''}
+            type="button"
+            role="tab"
+            aria-selected={viewMode === 'list'}
+            onClick={onShowList}
+          >
+            <List size={16} />
+            전체 목록
           </button>
         </div>
 

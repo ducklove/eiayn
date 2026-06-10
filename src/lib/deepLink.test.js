@@ -43,4 +43,14 @@ describe('deep link utilities', () => {
     expect(result.selectedIds).toEqual(['QQQ', 'DAX', 'SCHP']);
     expect(result.viewMode).toBe('compare');
   });
+
+  it('opens the list view via the view parameter', () => {
+    expect(resolveInitialSelection(etfs, new URLSearchParams('view=list')).viewMode).toBe('list');
+    expect(resolveInitialSelection(etfs, new URLSearchParams('view=analysis')).viewMode).toBe(
+      'analysis',
+    );
+    expect(resolveInitialSelection(etfs, new URLSearchParams('view=unknown')).viewMode).toBe(
+      'compare',
+    );
+  });
 });

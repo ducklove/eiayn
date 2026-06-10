@@ -26,7 +26,12 @@ export function resolveInitialSelection(etfs, params, maxSelected = 4) {
     (activeEtf && selectedIds.includes(activeEtf.id) ? activeEtf.id : selectedIds[0]) ??
     null;
   const requestedView = params.get('view')?.trim().toLowerCase();
-  const viewMode = params.get('code') || requestedView === 'analysis' ? 'analysis' : 'compare';
+  const viewMode =
+    params.get('code') || requestedView === 'analysis'
+      ? 'analysis'
+      : requestedView === 'list'
+        ? 'list'
+        : 'compare';
 
   return {
     selectedIds,
