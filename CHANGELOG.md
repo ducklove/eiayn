@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-06-10 (round 4)
+
+- Added an AIYN score trend card to the analysis view, fed by a new rolling `public/data/history.json` archive (one entry per day, 60-day retention, seeded from the current snapshot); shows an honest placeholder until at least two daily snapshots accumulate.
+- Added a "오늘의 변화" dashboard panel fed by `public/data/changes.json`: each refresh now diffs against the previous snapshot for new listings, delistings, expense-ratio changes, and AIYN score moves (|Δ| ≥ 5), with deep links; an RSS feed (`public/data/feed.xml`) summarizes each refresh for subscribers — a backend-free notification channel.
+- Benchmark tracking metrics: `benchmarkIndex` values now map to ~21 Yahoo index symbols (S&P 500, NASDAQ-100, KOSPI 200, Hang Seng, EURO STOXX 50, …) and tracking error / information ratio are computed for ~155 mappable ETFs across US, regional, and Korean markets — both fields were 100% null before. Unmapped benchmarks honestly stay null.
+- Unit suite grew to 251 tests (history/diff/feed modules, benchmark math, Korea enrichment wiring, score-series extraction).
+
 ## 2026-06-10 (round 3)
 
 - Added screener presets: one-click chips (국내 시장대표, 고배당, 반도체, 커버드콜, 채권, 낮은 변동성) that apply validated filter combinations and switch to the sortable list view.

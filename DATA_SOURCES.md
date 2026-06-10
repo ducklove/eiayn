@@ -109,6 +109,10 @@ Channel `ETF is All You Need — 데이터 업데이트` at `https://ducklove.gi
 - The artifacts are strictly non-fatal: a missing or corrupt previous snapshot/history/feed logs a warning and degrades (diff against `null`, fresh history/feed) but never aborts the refresh, and a failed artifact never blocks writing `etfs.json`.
 - `npm run check:data` validates `history.json` and `changes.json` only when the files exist (schema version, sorted unique dates, integer scores, array shapes and caps); a missing file is never an error.
 
+## Benchmark Tracking Metrics
+
+`risk.trackingError3y` and `risk.informationRatio3y` are computed when an ETF's `benchmarkIndex` maps to a known Yahoo index symbol (about 21 symbols covering ~155 ETFs; mapping table in `scripts/data/benchmark-tracking.mjs`). Benchmark chart series are fetched at most once per symbol per run and each fetch is optional: a failure leaves the affected ETFs' tracking fields `null`. ETFs with unmapped or missing benchmarks keep `null` — no estimation. Methodology details live in `docs/scoring.md`.
+
 ## Update Behavior
 
 - Required source failures cause `npm run data:update` to fail.
