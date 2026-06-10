@@ -1,6 +1,15 @@
+import { useEffect } from 'react';
 import { X } from 'lucide-react';
 
 export function GuideModal({ onClose }) {
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
+
   return (
     <div className="modal-backdrop" role="presentation" onClick={onClose}>
       <section className="modal" role="dialog" aria-modal="true" aria-labelledby="guide-title" onClick={(event) => event.stopPropagation()}>

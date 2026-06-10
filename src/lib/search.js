@@ -1,7 +1,12 @@
-export function filterEtfs(etfs, query, filters) {
+export function buildSearchIndex(etfs) {
+  return new Map(etfs.map((etf) => [etf.id, searchableText(etf)]));
+}
+
+export function filterEtfs(etfs, query, filters, index) {
   const normalizedQuery = normalizeText(query);
   return etfs.filter((etf) => {
-    const matchesQuery = !normalizedQuery || searchableText(etf).includes(normalizedQuery);
+    const matchesQuery = !normalizedQuery
+      || (index?.get(etf.id) ?? searchableText(etf)).includes(normalizedQuery);
     const matchesMarket = !filters.market || filters.market === '시장 전체' || etf.market === filters.market;
     const matchesTheme = !filters.theme || filters.theme === '테마 전체' || etf.theme === filters.theme;
     const matchesProvider = !filters.provider || filters.provider === '운용사 전체' || etf.provider === filters.provider;

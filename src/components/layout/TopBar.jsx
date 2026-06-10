@@ -1,7 +1,7 @@
-import { Bell, CircleHelp, Menu, Moon, Search } from 'lucide-react';
+import { Menu, Moon, Search } from 'lucide-react';
 import { formatPercent, formatPrice } from '../../lib/format.js';
 
-export function TopBar({ query, onQueryChange, exchangeRate }) {
+export function TopBar({ query, onQueryChange, exchangeRate, searchRef }) {
   return (
     <header className="topbar">
       <button className="icon-button" aria-label="메뉴" type="button" disabled title="모바일에서는 상단 브랜드 영역으로 메뉴가 축약됩니다.">
@@ -11,6 +11,7 @@ export function TopBar({ query, onQueryChange, exchangeRate }) {
         <Search size={20} />
         <strong>통합검색</strong>
         <input
+          ref={searchRef}
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
           placeholder="ETF, 지수, 테마, 종목, 운용사 검색"
@@ -32,8 +33,6 @@ export function TopBar({ query, onQueryChange, exchangeRate }) {
       </div>
       <div className="top-actions">
         <button className="icon-button" aria-label="다크 모드" type="button" disabled title="다크 모드는 아직 지원하지 않습니다."><Moon size={18} /></button>
-        <button className="icon-button" aria-label="알림" type="button" disabled title="알림은 로그인 기능이 없어 지원하지 않습니다."><Bell size={18} /></button>
-        <button className="icon-button" aria-label="도움말" type="button" disabled title="사용 가이드는 화면의 사용 가이드 버튼을 이용하세요."><CircleHelp size={18} /></button>
       </div>
     </header>
   );

@@ -9,6 +9,7 @@ import {
 import { buildHoldingChart, HOLDING_COLORS, OTHER_HOLDING_COLOR } from '../../lib/holdings.js';
 import { getRiskBand } from '../../lib/search.js';
 import { Radar } from '../charts/Radar.jsx';
+import { ScoreCoverageBadge } from '../common/ScoreCoverageBadge.jsx';
 import { RiskRow, riskMetricRows } from './riskRows.jsx';
 
 export function AnalysisPanel({ selectedEtf, favorites, toggleFavorite }) {
@@ -50,6 +51,7 @@ export function AnalysisPanel({ selectedEtf, favorites, toggleFavorite }) {
           <span>AIYN 점수</span>
           <strong>{selectedEtf.aiynScore ?? '-'}<small>/100</small></strong>
           <b>{scoreLabel(selectedEtf.aiynScore)}</b>
+          <ScoreCoverageBadge etf={selectedEtf} />
         </div>
         <Radar factors={selectedEtf.scoreBreakdown ?? {}} />
       </section>

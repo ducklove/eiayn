@@ -14,6 +14,7 @@ import { Radar } from '../charts/Radar.jsx';
 import { DetailedSparkline } from '../charts/DetailedSparkline.jsx';
 import { MetricTile } from '../common/MetricTile.jsx';
 import { InfoPopover } from '../common/InfoPopover.jsx';
+import { ScoreCoverageBadge } from '../common/ScoreCoverageBadge.jsx';
 import { RiskRow, riskMetricRows } from './riskRows.jsx';
 
 const FACTOR_DESCRIPTIONS = {
@@ -64,6 +65,7 @@ export function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite })
             <span>AIYN 점수</span>
             <strong>{selectedEtf.aiynScore ?? '-'}<small>/100</small></strong>
             <b>{scoreLabel(selectedEtf.aiynScore)}</b>
+            <ScoreCoverageBadge etf={selectedEtf} />
           </div>
           <Radar factors={selectedEtf.scoreBreakdown ?? {}} />
         </div>

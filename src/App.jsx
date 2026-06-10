@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useEtfData } from './hooks/useEtfData.js';
 import { usePersistentState } from './hooks/usePersistentState.js';
 import { buildCsv, downloadFile } from './lib/csv.js';
 import { resolveInitialSelection } from './lib/deepLink.js';
 import { formatDateTime } from './lib/format.js';
-import { filterEtfs, uniqueOptions } from './lib/search.js';
+import { buildSearchIndex, filterEtfs, uniqueOptions } from './lib/search.js';
 import { AnalysisPanel } from './components/analysis/AnalysisPanel.jsx';
 import { EtfAnalysisDashboard } from './components/analysis/EtfAnalysisDashboard.jsx';
 import { ComparisonGrid } from './components/compare/ComparisonGrid.jsx';
@@ -37,6 +37,8 @@ function App() {
   const [actionNote, setActionNote] = useState('');
   const [showGuide, setShowGuide] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const searchRef = useRef(null);
+  const deferredQuery = useDeferredValue(query);
 
   useEffect(() => {
     if (!etfs.length || initialized) return;
@@ -64,7 +66,43 @@ function App() {
     setRecentIds((current) => [activeId, ...current.filter((id) => id !== activeId)].slice(0, 8));
   }, [activeId, etfs, setRecentIds]);
 
-  const filteredEtfs = useMemo(() => filterEtfs(etfs, query, filters), [etfs, query, filters]);
+  // Browser back/forward restores the view encoded in the URL by openAnalysis/showCompare.
+  useEffect(() => {
+    if (!etfs.length) return undefined;
+    const onPopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const selection = resolveInitialSelection(etfs, params);
+      if (params.get('code') || params.get('compare') || params.get('active')) {
+        setSelectedIds(selection.selectedIds);
+        setActiveId(selection.activeId);
+        setViewMode(selection.viewMode);
+      } else {
+        // Bare URL (the entry point): return to compare but keep the current basket.
+        setViewMode('compare');
+      }
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, [etfs]);
+
+  // Focus search with "/" unless the user is already typing in a field.
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target;
+      if (target instanceof HTMLElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+      event.preventDefault();
+      searchRef.current?.focus();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  const searchIndex = useMemo(() => buildSearchIndex(etfs), [etfs]);
+  const filteredEtfs = useMemo(
+    () => filterEtfs(etfs, deferredQuery, filters, searchIndex),
+    [etfs, deferredQuery, filters, searchIndex],
+  );
   const selectedEtfs = useMemo(() => (
     selectedIds.map((id) => etfs.find((etf) => etf.id === id)).filter(Boolean)
   ), [selectedIds, etfs]);
@@ -185,7 +223,6 @@ function App() {
       if (value && value !== DEFAULT_FILTERS[key]) params.set(key, value);
     }
     const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
-    window.history.replaceState(null, '', url);
 
     try {
       if (navigator.share) {
@@ -195,9 +232,11 @@ function App() {
         await navigator.clipboard.writeText(url);
         setActionNote('공유 링크를 복사했습니다.');
       } else {
+        window.history.replaceState(null, '', url);
         setActionNote('공유 링크를 주소창에 반영했습니다.');
       }
     } catch {
+      window.history.replaceState(null, '', url);
       setActionNote('공유 링크를 주소창에 반영했습니다. 복사 권한은 브라우저에서 허용되지 않았습니다.');
     }
   };
@@ -229,7 +268,7 @@ function App() {
         onOpenEtf={openAnalysis}
       />
       <div className="main-shell">
-        <TopBar query={query} onQueryChange={setQuery} exchangeRate={data.exchangeRates?.usdKrw} />
+        <TopBar query={query} onQueryChange={setQuery} exchangeRate={data.exchangeRates?.usdKrw} searchRef={searchRef} />
         <main className={`content-grid ${isAnalysisView ? 'single-analysis' : ''}`}>
           <div className={`workspace ${isAnalysisView ? 'analysis-workspace' : ''}`}>
             <WorkspaceHeader
@@ -291,10 +330,16 @@ function App() {
   );
 }
 
+function pushUrl(url) {
+  const current = `${window.location.pathname}${window.location.search}`;
+  if (url === current) return;
+  window.history.pushState(null, '', url);
+}
+
 function writeAnalysisUrl(id) {
   const params = new URLSearchParams();
   params.set('code', id);
-  window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+  pushUrl(`${window.location.pathname}?${params.toString()}`);
 }
 
 function writeCompareUrl(selectedIds, activeId) {
@@ -302,7 +347,7 @@ function writeCompareUrl(selectedIds, activeId) {
   if (selectedIds.length) params.set('compare', selectedIds.join(','));
   if (activeId) params.set('active', activeId);
   const query = params.toString();
-  window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`);
+  pushUrl(`${window.location.pathname}${query ? `?${query}` : ''}`);
 }
 
 export default App;

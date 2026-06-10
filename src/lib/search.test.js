@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { filterEtfs, getRiskBand, uniqueOptions } from './search.js';
+import { buildSearchIndex, filterEtfs, getRiskBand, uniqueOptions } from './search.js';
 
 describe('search utilities', () => {
   const etfs = [
@@ -66,5 +66,19 @@ describe('search utilities', () => {
 
   it('builds dynamic filter options', () => {
     expect(uniqueOptions(etfs, 'provider', '운용사 전체')).toEqual(['운용사 전체', '삼성자산운용', 'Invesco']);
+  });
+
+  it('matches via a precomputed search index identically to direct search', () => {
+    const index = buildSearchIndex(etfs);
+    const filters = {
+      market: '시장 전체',
+      theme: '테마 전체',
+      provider: '운용사 전체',
+      risk: '리스크 전체',
+    };
+
+    expect(index.get('QQQ')).toContain('nvidia');
+    expect(filterEtfs(etfs, 'nvidia', filters, index).map((etf) => etf.id))
+      .toEqual(filterEtfs(etfs, 'nvidia', filters).map((etf) => etf.id));
   });
 });

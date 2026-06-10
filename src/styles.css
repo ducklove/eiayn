@@ -2236,3 +2236,29 @@ a {
     min-height: 108px;
   }
 }
+
+.coverage-badge {
+  display: inline-block;
+  width: fit-content;
+  margin-top: 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface-soft);
+  cursor: help;
+}
+
+.score-main .coverage-badge {
+  display: block;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.coverage-badge.partial {
+  border-color: #efd9a4;
+  background: #fdf5e3;
+  color: #a87508;
+}
