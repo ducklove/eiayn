@@ -32,6 +32,7 @@ npm run check:data
 npm run lint
 npm run format
 npm run test
+npm run test:e2e
 npm run build
 npm run verify
 ```
@@ -39,6 +40,8 @@ npm run verify
 - `npm run build` is hermetic: it validates the committed snapshot (`public/data/etfs.json`) and builds the app. It does not fetch external data.
 - `npm run data:update` refreshes the data snapshot from external sources; `npm run check:data` validates it.
 - `npm run lint` runs ESLint; `npm run format` / `npm run format:check` apply or check Prettier formatting.
+- `npm run test:e2e` runs the Playwright end-to-end suite (`e2e/`): it builds hermetically and tests the preview server at `http://127.0.0.1:4173/eiayn/`.
+- One-time E2E setup: `npx playwright install chromium` downloads the browser binary.
 - `npm run verify` remains the full chain: refreshes data, validates data, runs unit tests, and builds the static site.
 
 ## Data Snapshot
