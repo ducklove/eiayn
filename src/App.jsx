@@ -11,6 +11,7 @@ import { EtfAnalysisDashboard } from './components/analysis/EtfAnalysisDashboard
 import { ComparisonGrid } from './components/compare/ComparisonGrid.jsx';
 import { CostCalculator } from './components/compare/CostCalculator.jsx';
 import { PerformanceOverlay } from './components/compare/PerformanceOverlay.jsx';
+import { PortfolioSimulator } from './components/compare/PortfolioSimulator.jsx';
 import { UniverseStrip } from './components/compare/UniverseStrip.jsx';
 import { WorkspaceHeader } from './components/compare/WorkspaceHeader.jsx';
 import { EtfTable } from './components/list/EtfTable.jsx';
@@ -388,6 +389,7 @@ function App() {
               <div className="compare-tools">
                 <PerformanceOverlay selectedEtfs={selectedEtfs} />
                 <CostCalculator selectedEtfs={selectedEtfs} />
+                <PortfolioSimulator selectedEtfs={selectedEtfs} />
               </div>
             )}
             {!isListView && (
