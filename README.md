@@ -29,12 +29,17 @@ Exact counts are recorded in `public/data/etfs.json` under `coverage`.
 npm ci
 npm run data:update
 npm run check:data
+npm run lint
+npm run format
 npm run test
 npm run build
 npm run verify
 ```
 
-`npm run build` refreshes the data snapshot, validates it, then builds the app. `npm run verify` refreshes data, validates data, runs unit tests, and builds the static site.
+- `npm run build` is hermetic: it validates the committed snapshot (`public/data/etfs.json`) and builds the app. It does not fetch external data.
+- `npm run data:update` refreshes the data snapshot from external sources; `npm run check:data` validates it.
+- `npm run lint` runs ESLint; `npm run format` / `npm run format:check` apply or check Prettier formatting.
+- `npm run verify` remains the full chain: refreshes data, validates data, runs unit tests, and builds the static site.
 
 ## Data Snapshot
 
@@ -50,17 +55,16 @@ See [DATA_SOURCES.md](./DATA_SOURCES.md) and [docs/scoring.md](./docs/scoring.md
 
 ## Deployment
 
-GitHub Pages deployment is defined in:
+Deployment and data refresh are split into separate workflows:
 
 ```text
-.github/workflows/deploy-pages.yml
+.github/workflows/deploy-pages.yml   # build and deploy GitHub Pages
+.github/workflows/fetch-data.yml     # scheduled ETF data refresh
+.github/workflows/ci.yml             # lint, test, build on PRs and non-main branches
 ```
 
-The workflow runs on:
-
-- push to `main`
-- manual `workflow_dispatch`
-- scheduled weekday refresh at 21:30 UTC / 06:30 KST
+- `deploy-pages.yml` runs on push to `main` and manual `workflow_dispatch`. It tests and builds hermetically from the committed snapshot, so deploys no longer depend on external API availability.
+- `fetch-data.yml` runs the weekday refresh at 21:30 UTC / 06:30 KST (and manual dispatch). It fetches fresh data, validates it, and runs tests; only then does it commit the updated `public/data/etfs.json` to `main` — accumulating snapshot history in git — and trigger the Pages deployment. If fetching or validation fails, nothing is committed and the previously deployed snapshot keeps serving.
 
 ## Investment Notice
 
