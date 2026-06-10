@@ -2602,3 +2602,119 @@ a {
     grid-template-columns: 1fr auto;
   }
 }
+
+.score-trend .heading-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.score-trend-body {
+  display: grid;
+  gap: 10px;
+}
+
+.score-trend-chart {
+  width: 100%;
+  height: auto;
+  background: var(--surface-tint);
+  border: 1px solid var(--line-soft);
+  border-radius: 7px;
+}
+
+.score-trend-chart polyline {
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.score-trend-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.score-trend-stats b {
+  color: var(--text);
+}
+
+.score-trend-stats em {
+  font-style: normal;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.changes-panel {
+  margin-top: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.changes-panel .heading-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.changes-panel .section-heading span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.changes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 860px) {
+  .changes-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.change-group h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.change-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  font-size: 13px;
+}
+
+.change-row:hover {
+  background: var(--surface-soft);
+}
+
+.change-row strong {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+
+.change-row em {
+  font-style: normal;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

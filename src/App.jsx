@@ -17,6 +17,7 @@ import { EtfTable } from './components/list/EtfTable.jsx';
 import { PresetBar } from './components/common/PresetBar.jsx';
 import { RankingPanel } from './components/common/RankingPanel.jsx';
 import { SimpleListPanel } from './components/common/SimpleListPanel.jsx';
+import { ChangesPanel } from './components/common/ChangesPanel.jsx';
 import { GuideModal } from './components/layout/GuideModal.jsx';
 import { Sidebar } from './components/layout/Sidebar.jsx';
 import { StatusScreen } from './components/layout/StatusScreen.jsx';
@@ -397,6 +398,7 @@ function App() {
                 onSelect={openAnalysis}
               />
             )}
+            {!isListView && <ChangesPanel onOpenEtf={openAnalysis} />}
             {!isListView && (
               <div className="bottom-grid">
                 <RankingPanel

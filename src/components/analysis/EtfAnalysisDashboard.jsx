@@ -16,6 +16,7 @@ import { MetricTile } from '../common/MetricTile.jsx';
 import { InfoPopover } from '../common/InfoPopover.jsx';
 import { ScoreCoverageBadge } from '../common/ScoreCoverageBadge.jsx';
 import { RiskRow, riskMetricRows } from './riskRows.jsx';
+import { ScoreTrend } from './ScoreTrend.jsx';
 
 const FACTOR_DESCRIPTIONS = {
   '단기 수익':
@@ -187,6 +188,8 @@ export function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite })
             </dl>
           </section>
         ) : null}
+
+        <ScoreTrend etfId={selectedEtf.id} />
 
         <section className="analysis-card holdings-card" id="holdings">
           <div className="section-heading">
