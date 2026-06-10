@@ -11,7 +11,7 @@ EIAYN is designed for GitHub Pages static hosting. The browser does not call ext
 | Yahoo Finance chart | `https://query1.finance.yahoo.com/v8/finance/chart/` | price, adjusted-close history, dividend events, quote timestamp, listed-symbol currency, USD/KRW |
 | Yahoo Finance quoteSummary | `https://query2.finance.yahoo.com/v10/finance/quoteSummary/` | regional ETF profile fallback for expense ratio, AUM, dividend yield, inception date |
 | StockAnalysis | `https://stockanalysis.com/` | US ETF expense ratio, assets/AUM, dividend yield, inception date, top holdings where available; regional quote profile fields where available |
-| Issuer or exchange profile override | `scripts/data/profile-overrides.mjs` | narrowly scoped expense ratio values for regional ETFs when public aggregators return `n/a` |
+| Issuer or exchange profile override | `scripts/data/profile-overrides.mjs` | narrowly scoped, manually curated expense ratio values for regional ETFs, applied with highest precedence over scraped values |
 | EIAYN regional representative universe | `https://github.com/ducklove/eiayn` | regional representative ETF selection and market classification |
 
 ## Korea Collection
@@ -45,11 +45,11 @@ EIAYN requests the top high-volume records and supplements core ETFs that should
 
 Hong Kong, Germany, France, Japan, Australia, and Vietnam representative ETFs are listed in `scripts/data/universe.mjs`. Vietnam representatives explicitly include `FUEVFVND.VN` VFMVN Diamond ETF. Each symbol is included only if Yahoo Finance chart returns a valid quote/history response.
 
-Regional profile fields are enriched in this order:
+Regional profile fields are enriched in this order (first non-null value wins):
 
-1. StockAnalysis regional quote profile pages, such as `/quote/hkg/2800/`, `/quote/etr/EUNL/`, `/quote/tyo/1321/`, `/quote/asx/A200/`, and `/quote/hose/FUEVFVND/`.
-2. Yahoo Finance quoteSummary, using a build-time public Yahoo session cookie/crumb, for profile fallback fields.
-3. Issuer or exchange profile overrides in `scripts/data/profile-overrides.mjs` for narrow cases where public aggregators return `n/a`; currently `STW.AX` uses State Street and `1365.T` uses JPX.
+1. Issuer or exchange profile overrides in `scripts/data/profile-overrides.mjs`, manually curated and applied with highest precedence so they always win over scraped values; currently `STW.AX` uses State Street and `1365.T` uses JPX.
+2. StockAnalysis regional quote profile pages, such as `/quote/hkg/2800/`, `/quote/etr/EUNL/`, `/quote/tyo/1321/`, `/quote/asx/A200/`, and `/quote/hose/FUEVFVND/`.
+3. Yahoo Finance quoteSummary, using a build-time public Yahoo session cookie/crumb, for profile fallback fields.
 
 Regional holdings are still unavailable from these public profile sources and remain empty arrays unless a future source is added.
 

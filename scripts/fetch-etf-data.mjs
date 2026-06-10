@@ -117,7 +117,7 @@ async function main() {
       {
         name: 'Issuer or exchange profile override',
         url: 'https://github.com/ducklove/eiayn/blob/main/scripts/data/profile-overrides.mjs',
-        fields: ['expenseRatio for regional ETFs when public aggregators return n/a'],
+        fields: ['manually curated expenseRatio for regional ETFs, applied with highest precedence'],
       },
       {
         name: 'EIAYN regional representative universe',
@@ -324,11 +324,13 @@ async function fetchYahooBackedEtf(record, options) {
     const yahooQuoteSummaryProfile = options.useYahooQuoteSummaryProfile
       ? await fetchYahooQuoteSummaryProfile(ticker)
       : emptyProfile();
+    // mergeProfiles is first-non-null-wins, so manually curated overrides
+    // must come first to take precedence over scraped values.
     const profile = mergeProfiles([
+      profileOverrideForTicker(ticker),
       stockAnalysisProfile,
       regionalProfile,
       yahooQuoteSummaryProfile,
-      profileOverrideForTicker(ticker),
     ]);
     const holdings = options.useStockAnalysis
       ? await fetchStockAnalysisHoldings(stockAnalysisPath)
