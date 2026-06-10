@@ -64,3 +64,14 @@ The radar chart maps the score components into Korean labels:
 Cost efficiency is still part of the total score, but it is not shown as a separate radar factor because annual expense ratio is already displayed as a primary ETF metric and is also reflected in `가치` and `효율성`.
 
 When a field is unavailable, the UI displays `-` or `데이터 없음` rather than estimating it.
+
+## Tracking Metrics
+
+`risk.trackingError3y` and `risk.informationRatio3y` compare an ETF's daily adjusted-close returns with its benchmark index over the trailing 3-year window. The benchmark series comes from the Yahoo Finance chart API: `scripts/data/benchmark-tracking.mjs` maps the `benchmarkIndex` strings that occur in the universe (K-ETF vendor codes such as `KRX-EI-KSP200` and display names such as `S&P 500`) to Yahoo index symbols via `resolveBenchmarkSymbol`.
+
+- The ETF and benchmark series are inner-joined by trading date. Fewer than 120 overlapping points (roughly six months of shared trading days) yields `null` for both metrics.
+- Daily active return = ETF simple daily return − benchmark simple daily return.
+- Tracking error (3y) = sample standard deviation of daily active returns × `sqrt(252)` × 100, in percent, rounded to 2 decimals.
+- Information ratio (3y) = (mean daily active return × 252 × 100) ÷ tracking error, rounded to 2 decimals. It is `null` when the tracking error is zero (or rounds to zero) or is not finite.
+
+Benchmark series are price indices while ETF series are dividend-adjusted, so a small steady positive active drift (roughly distribution yield minus fees) is expected and shows up in the information ratio; tracking error is barely affected. The metrics are emitted only for ETFs whose `benchmarkIndex` resolves to a known index symbol (about 155 of 1,348 in the current snapshot). Bespoke theme, futures, leveraged/inverse, FX, and bond benchmarks have no public Yahoo index series, so those ETFs keep `null` — consistent with the project principle that missing data is reported as missing, never estimated.
