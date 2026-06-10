@@ -6,9 +6,12 @@ import globals from 'globals';
 
 export default [
   // Never lint build output, generated/static assets, vendored docs, dependencies,
-  // or nested agent worktrees under .claude/.
+  // or nested agent worktrees under .claude/. The service worker is hand-written
+  // source that must live in public/, so it is re-included ('public/*' instead of
+  // 'public/**' keeps the public/ directory itself unignored, which the negation
+  // pattern requires).
   {
-    ignores: ['dist/**', 'public/**', 'node_modules/**', 'docs/**', '.claude/**'],
+    ignores: ['dist/**', 'public/*', '!public/sw.js', 'node_modules/**', 'docs/**', '.claude/**'],
   },
 
   // Register .jsx alongside ESLint's default *.js/*.mjs/*.cjs set so `eslint .`
@@ -68,6 +71,14 @@ export default [
     languageOptions: {
       globals: {
         ...globals.node,
+      },
+    },
+  },
+  {
+    files: ['public/sw.js'],
+    languageOptions: {
+      globals: {
+        ...globals.serviceworker,
       },
     },
   },
