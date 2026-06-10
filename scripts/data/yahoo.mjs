@@ -51,9 +51,9 @@ export async function fetchYahooMostActiveEtfs(count = 150) {
   };
 }
 
-export async function fetchYahooChart(symbol, range = '5y') {
+export async function fetchYahooChart(symbol, range = '5y', options = {}) {
   const url = yahooChartUrl(symbol, range);
-  const json = await fetchJson(url);
+  const json = await fetchJson(url, options);
   const result = json.chart?.result?.[0];
   if (!result) {
     const message = json.chart?.error?.description ?? 'Yahoo chart response missing result';

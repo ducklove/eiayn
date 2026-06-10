@@ -12,6 +12,7 @@ import {
 import { collectMissingFields } from '../src/lib/normalize.js';
 import { scoreEtfs } from '../src/lib/scoring.js';
 import { fetchKoreanEtfBaseData, KETF_SOURCES } from './data/k-etf.mjs';
+import { enrichKoreanEtfsWithYahoo, KOREA_YAHOO_SOURCE_NAME } from './data/korea-enrich.mjs';
 import { mapLimit } from './data/http.mjs';
 import { emptyProfile, nullableNumber } from './data/shared.mjs';
 import {
@@ -38,14 +39,25 @@ const OUT_FILE = path.join(OUT_DIR, 'etfs.json');
 const GENERATED_AT = new Date().toISOString();
 const US_MOST_ACTIVE_COUNT = Number(process.env.US_MOST_ACTIVE_COUNT ?? 150);
 const US_STOCKANALYSIS_LIMIT = Number(process.env.US_STOCKANALYSIS_LIMIT ?? 40);
+// Optional partial-run knob: when set, only the top-N Korean ETFs by trading
+// value get the Yahoo KRX long-horizon enrichment. Default: all Korean ETFs.
+const KOREA_YAHOO_LIMIT = nullableNumber(process.env.KOREA_YAHOO_LIMIT);
 
 async function main() {
   const excluded = [];
 
   console.log('[data:update] Collecting Korea active ETF universe');
   const koreanBase = await fetchKoreanEtfBaseData();
-  const koreaEtfs = buildKoreanEtfs(koreanBase);
-  console.log(`[data:update] Korea ETFs normalized: ${koreaEtfs.length}/${koreanBase.lineup.trace?.total ?? koreaEtfs.length}`);
+  const koreaBaseEtfs = buildKoreanEtfs(koreanBase);
+  console.log(`[data:update] Korea ETFs normalized: ${koreaBaseEtfs.length}/${koreanBase.lineup.trace?.total ?? koreaBaseEtfs.length}`);
+
+  // Best-effort long-horizon enrichment from Yahoo KRX charts. Each chart
+  // fetch is optional: failures leave the ETF unchanged and never abort the run.
+  const koreaEtfs = await enrichKoreanEtfsWithYahoo(koreaBaseEtfs, {
+    fetchChart: (symbol) => fetchYahooChart(symbol, '5y', { attempts: 2, warn: false }),
+    limit: KOREA_YAHOO_LIMIT,
+    concurrency: 6,
+  });
 
   console.log(`[data:update] Collecting Yahoo most active US ETFs (${US_MOST_ACTIVE_COUNT})`);
   const usData = await fetchUsEtfs(excluded);
@@ -103,6 +115,11 @@ async function main() {
         name: 'Yahoo Finance chart',
         url: YAHOO_CHART_ROOT,
         fields: ['price', 'historical adjusted close', 'dividends', 'USD/KRW'],
+      },
+      {
+        name: KOREA_YAHOO_SOURCE_NAME,
+        url: YAHOO_CHART_ROOT,
+        fields: ['Korea ETF 3y/5y returns', 'Korea ETF 3y risk metrics', 'dividendYield and sparkline fallback'],
       },
       {
         name: 'StockAnalysis',
