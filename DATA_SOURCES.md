@@ -8,7 +8,7 @@ EIAYN is designed for GitHub Pages static hosting. The browser does not call ext
 | --- | --- | --- |
 | K-ETF | `https://www.k-etf.com/` and `https://anchor.k-etf.com/api/` | Korea active ETF lineup, price, 1-day return, volume, trading value, market cap, category, issuer when available, 3M/1Y returns, total fee, 1Y history, top holdings |
 | Yahoo Finance MOST_ACTIVES_ETFS screener | `https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved` | US high-volume ETF universe, US ETF price, volume, AUM, expense ratio where available |
-| Yahoo Finance chart | `https://query1.finance.yahoo.com/v8/finance/chart/` | price, adjusted-close history, dividend events, quote timestamp, listed-symbol currency, USD/KRW |
+| Yahoo Finance chart | `https://query1.finance.yahoo.com/v8/finance/chart/` | price, adjusted-close history, dividend events, quote timestamp, listed-symbol currency, USD/KRW; Korea KRX `.KS` charts for 3-year/5-year enrichment |
 | Yahoo Finance quoteSummary | `https://query2.finance.yahoo.com/v10/finance/quoteSummary/` | regional ETF profile fallback for expense ratio, AUM, dividend yield, inception date |
 | StockAnalysis | `https://stockanalysis.com/` | US ETF expense ratio, assets/AUM, dividend yield, inception date, top holdings where available; regional quote profile fields where available |
 | Issuer or exchange profile override | `scripts/data/profile-overrides.mjs` | narrowly scoped, manually curated expense ratio values for regional ETFs, applied with highest precedence over scraped values |
@@ -30,6 +30,16 @@ The build then joins:
 - `instrument/holdings` for top holdings.
 
 The current snapshot includes all active K-ETF records returned by the source. If K-ETF exposes a field for only part of the universe, the missing field remains `null` or an empty array and is listed in `dataQuality.missingFields`.
+
+### Yahoo KRX long-horizon enrichment
+
+K-ETF batch history covers only one year, so after the K-ETF build each Korean ETF is optionally enriched from the Yahoo Finance chart for its KRX symbol (`${code}.KS`, 5-year range). K-ETF values always keep priority: the enrichment fills only fields that are still `null` after the K-ETF build.
+
+- `returns.y3Annualized` and `returns.y5Annualized` computed from the Yahoo adjusted-close series.
+- `risk.volatility3yAnnualized`, `risk.maxDrawdown3y`, and `risk.sharpe3y` computed over the latest 3-year window, using the same formulas as US/regional ETFs.
+- `returns.m3`, `returns.y1`, `dividendYield`, and `sparkline` only as fallbacks when K-ETF left them empty.
+
+When an ETF is enriched, `yahooSymbol` is set to the `.KS` symbol and a `Yahoo Finance chart (KRX)` entry is appended to `dataQuality.sources` listing exactly the fields that were filled. The `KOREA_YAHOO_LIMIT` environment variable restricts enrichment to the top-N Korean ETFs by trading value for partial CI or local runs; by default all Korean ETFs are attempted.
 
 ## US Collection
 
@@ -57,6 +67,7 @@ Regional holdings are still unavailable from these public profile sources and re
 
 - Required source failures cause `npm run data:update` to fail.
 - Optional StockAnalysis, Yahoo quoteSummary, and holdings failures are logged and leave affected fields missing unless `check:data` marks the field as required.
+- Korean Yahoo KRX enrichment is optional per ETF: a failed or empty chart leaves that ETF exactly as K-ETF built it, never excludes it, and never aborts the run. The update log reports a single summary line with enriched/unavailable counts.
 - `check:data` requires an expense ratio for all configured regional representative ETFs so GitHub Pages is not deployed with blank regional total-fee cells.
 - The script does not silently fall back to fake data.
 - Missing fields are stored as `null` and listed in `dataQuality.missingFields`.
@@ -65,7 +76,7 @@ Regional holdings are still unavailable from these public profile sources and re
 
 ## Known Limitations
 
-- Korean K-ETF batch history currently provides a 1-year series; Korean 3-year and 5-year return/risk fields are therefore `null` unless a future source is added.
+- Korean K-ETF batch history currently provides a 1-year series; 3-year and 5-year return/risk fields come from the best-effort Yahoo KRX enrichment and remain `null` for ETFs where Yahoo has no usable `.KS` history (delistings, very recent listings, symbols Yahoo does not cover) or where the enrichment fetch fails.
 - `nav`, `risk.trackingError3y`, and `risk.informationRatio3y` are `null` until reliable ETF-level NAV and benchmark-aligned series are mapped.
 - Yahoo Finance endpoints are public web endpoints, not guaranteed official APIs, and may be rate-limited or temporarily unavailable.
 - StockAnalysis is an accessible public web source, not an official issuer API. Field names or table structure may change.

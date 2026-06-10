@@ -4,7 +4,7 @@ AIYN scores are deterministic and computed from the generated ETF snapshot. Scor
 
 ## Return Metrics
 
-Price history uses adjusted close when Yahoo Finance chart provides it, otherwise close. Korean ETF 3-month and 1-year returns use K-ETF return rankings when available, with K-ETF 1-year history as fallback.
+Price history uses adjusted close when Yahoo Finance chart provides it, otherwise close. Korean ETF 3-month and 1-year returns use K-ETF return rankings when available, with K-ETF 1-year history as fallback. Korean 3-year and 5-year annualized returns come from a best-effort Yahoo Finance chart enrichment of the KRX symbol (`${code}.KS`); K-ETF values always keep priority and the Yahoo values fill only fields K-ETF left `null`.
 
 - 30-day return: period return from the first to the latest point in the generated recent-30-calendar-day sparkline.
 - 3-month return: period return from the first trading point on or after the date 3 months before the latest point.
@@ -21,7 +21,7 @@ If there is not enough reliable history for a period, the metric is `null`.
 - Sharpe ratio: annualized mean daily return divided by annualized volatility.
 - Risk-free rate: `0%` for the current simplified calculation.
 
-Tracking error and information ratio remain `null` until reliable benchmark mappings and adjusted benchmark series are available for every supported ETF. Korean ETFs currently use K-ETF 1-year batch history, so 3-year risk metrics are left `null` rather than estimated from a shorter period.
+Tracking error and information ratio remain `null` until reliable benchmark mappings and adjusted benchmark series are available for every supported ETF. Korean ETFs get 3-year risk metrics from the Yahoo KRX (`.KS`) chart enrichment where Yahoo history exists, computed with the same formulas as US and regional ETFs. The enrichment is best-effort: when Yahoo has no usable history for a symbol or the fetch fails, those fields stay `null` and the ETF is otherwise unchanged.
 
 ## Score Components
 
