@@ -6,6 +6,7 @@ import { useTheme } from './hooks/useTheme.js';
 import { buildCsv, downloadFile } from './lib/csv.js';
 import { resolveInitialSelection } from './lib/deepLink.js';
 import { formatDateTime } from './lib/format.js';
+import { rankEtfsByScore } from './lib/ranking.js';
 import { buildSearchIndex, filterEtfs, uniqueOptions } from './lib/search.js';
 import { AnalysisPanel } from './components/analysis/AnalysisPanel.jsx';
 import { EtfAnalysisDashboard } from './components/analysis/EtfAnalysisDashboard.jsx';
@@ -16,6 +17,7 @@ import { PortfolioSimulator } from './components/compare/PortfolioSimulator.jsx'
 import { UniverseStrip } from './components/compare/UniverseStrip.jsx';
 import { WorkspaceHeader } from './components/compare/WorkspaceHeader.jsx';
 import { EtfTable } from './components/list/EtfTable.jsx';
+import { AiynRankingView } from './components/ranking/AiynRankingView.jsx';
 import { PresetBar } from './components/common/PresetBar.jsx';
 import { RankingPanel } from './components/common/RankingPanel.jsx';
 import { SimpleListPanel } from './components/common/SimpleListPanel.jsx';
@@ -85,8 +87,8 @@ function App() {
         setSelectedIds(selection.selectedIds);
         setActiveId(selection.activeId);
         setViewMode(selection.viewMode);
-      } else if (selection.viewMode === 'list') {
-        setViewMode('list');
+      } else if (selection.viewMode === 'list' || selection.viewMode === 'ranking') {
+        setViewMode(selection.viewMode);
       } else {
         // Bare URL (the entry point): return to compare but keep the current basket.
         setViewMode('compare');
@@ -124,6 +126,8 @@ function App() {
   const recentEtfs = recentIds.map((id) => etfs.find((etf) => etf.id === id)).filter(Boolean);
   const isAnalysisView = viewMode === 'analysis';
   const isListView = viewMode === 'list';
+  const isRankingView = viewMode === 'ranking';
+  const isCompareView = !isAnalysisView && !isListView && !isRankingView;
 
   useDocumentTitle(viewMode, selectedEtf);
 
@@ -147,7 +151,6 @@ function App() {
     setSelectedIds(nextIds);
     setActiveId(next.id);
     setViewMode('compare');
-    setActionNote(`${next.shortName}을 비교 바구니에 추가했습니다.`);
   };
 
   const openAnalysis = (id) => {
@@ -155,13 +158,11 @@ function App() {
     if (!next) return;
     setActiveId(id);
     setViewMode('analysis');
-    setActionNote(`${next.shortName} 개별 분석 화면을 열었습니다.`);
     writeAnalysisUrl(id);
   };
 
   const showCompare = () => {
     setViewMode('compare');
-    setActionNote('ETF 비교 화면으로 돌아왔습니다.');
     writeCompareUrl(selectedIds, activeId);
   };
 
@@ -171,15 +172,17 @@ function App() {
 
   const showList = () => {
     setViewMode('list');
-    setActionNote('전체 목록 화면을 열었습니다.');
     writeListUrl();
   };
 
+  const showRanking = () => {
+    setViewMode('ranking');
+    writeRankingUrl();
+  };
+
   const addCompareFromList = (id) => {
-    const next = etfs.find((etf) => etf.id === id);
-    if (!next || selectedIds.includes(id)) return;
+    if (!etfs.some((etf) => etf.id === id) || selectedIds.includes(id)) return;
     setSelectedIds((current) => [...current, id].slice(-4));
-    setActionNote(`${next.shortName}을 비교 바구니에 추가했습니다.`);
   };
 
   const applyPreset = (preset) => {
@@ -187,16 +190,6 @@ function App() {
     setFilters({ ...DEFAULT_FILTERS, ...preset.filters });
     setViewMode('list');
     writeListUrl();
-    setActionNote(`'${preset.label}' 프리셋을 적용해 전체 목록으로 전환했습니다.`);
-  };
-
-  const selectFirstResult = () => {
-    const next = filteredEtfs.find((etf) => etf.id !== activeId) ?? filteredEtfs[0];
-    if (!next) {
-      setActionNote('선택할 ETF가 없습니다. 검색 조건을 조정해보세요.');
-      return;
-    }
-    openAnalysis(next.id);
   };
 
   const removeEtf = (id) => {
@@ -218,11 +211,16 @@ function App() {
   const clearFilters = () => {
     setQuery('');
     setFilters(DEFAULT_FILTERS);
-    setActionNote('검색 조건을 초기화했습니다.');
   };
 
   const exportCsv = () => {
-    const exportEtfs = isListView ? filteredEtfs : isAnalysisView ? [selectedEtf] : selectedEtfs;
+    const exportEtfs = isRankingView
+      ? rankEtfsByScore(etfs)
+      : isListView
+        ? filteredEtfs
+        : isAnalysisView
+          ? [selectedEtf]
+          : selectedEtfs;
     const rows = exportEtfs.map((etf) => ({
       id: etf.id,
       ticker: etf.ticker,
@@ -243,18 +241,26 @@ function App() {
     }));
     const csv = buildCsv(rows);
     if (!csv) return;
-    const prefix = isListView ? 'list' : isAnalysisView ? selectedEtf.id : 'compare';
+    const prefix = isRankingView
+      ? 'ranking'
+      : isListView
+        ? 'list'
+        : isAnalysisView
+          ? selectedEtf.id
+          : 'compare';
     downloadFile(
       `eiayn-${prefix}-${new Date().toISOString().slice(0, 10)}.csv`,
       csv,
       'text/csv;charset=utf-8',
     );
     setActionNote(
-      isListView
-        ? `검색 결과 ${rows.length}개 ETF를 CSV로 내보냈습니다.`
-        : isAnalysisView
-          ? `${selectedEtf.shortName} 분석 데이터를 CSV로 내보냈습니다.`
-          : '현재 비교 바구니를 CSV로 내보냈습니다.',
+      isRankingView
+        ? `AIYN 랭킹 ${rows.length}개 ETF를 CSV로 내보냈습니다.`
+        : isListView
+          ? `검색 결과 ${rows.length}개 ETF를 CSV로 내보냈습니다.`
+          : isAnalysisView
+            ? `${selectedEtf.shortName} 분석 데이터를 CSV로 내보냈습니다.`
+            : '현재 비교 바구니를 CSV로 내보냈습니다.',
     );
   };
 
@@ -264,6 +270,8 @@ function App() {
       params.set('code', selectedEtf.id);
     } else if (isListView) {
       params.set('view', 'list');
+    } else if (isRankingView) {
+      params.set('view', 'ranking');
     } else {
       if (selectedIds.length) params.set('compare', selectedIds.join(','));
       if (activeId) params.set('active', activeId);
@@ -337,7 +345,7 @@ function App() {
           theme={theme}
           onToggleTheme={toggleTheme}
         />
-        <main className={`content-grid ${isAnalysisView || isListView ? 'single-analysis' : ''}`}>
+        <main className={`content-grid ${isCompareView ? '' : 'single-analysis'}`}>
           <div className={`workspace ${isAnalysisView ? 'analysis-workspace' : ''}`}>
             <WorkspaceHeader
               viewMode={viewMode}
@@ -348,8 +356,7 @@ function App() {
               onShowCompare={showCompare}
               onShowAnalysis={showActiveAnalysis}
               onShowList={showList}
-              onAddNext={addNext}
-              onSelectFirstResult={selectFirstResult}
+              onShowRanking={showRanking}
               onClearFilters={clearFilters}
               filters={filters}
               setFilters={setFilters}
@@ -362,6 +369,14 @@ function App() {
               onGuide={() => setShowGuide(true)}
             />
             <PresetBar onApply={applyPreset} />
+            {isCompareView && (
+              <UniverseStrip
+                filteredEtfs={filteredEtfs}
+                activeEtf={selectedEtf}
+                activeId={selectedEtf.id}
+                onSelect={openAnalysis}
+              />
+            )}
             {isAnalysisView ? (
               <EtfAnalysisDashboard
                 selectedEtf={selectedEtf}
@@ -377,6 +392,8 @@ function App() {
                 onAddCompare={addCompareFromList}
                 selectedIds={selectedIds}
               />
+            ) : isRankingView ? (
+              <AiynRankingView etfs={etfs} onOpenEtf={openAnalysis} />
             ) : (
               <ComparisonGrid
                 selectedEtfs={selectedEtfs}
@@ -388,14 +405,14 @@ function App() {
                 onAddNext={addNext}
               />
             )}
-            {!isAnalysisView && !isListView && (
+            {isCompareView && (
               <div className="compare-tools">
                 <PerformanceOverlay selectedEtfs={selectedEtfs} />
                 <CostCalculator selectedEtfs={selectedEtfs} />
                 <PortfolioSimulator selectedEtfs={selectedEtfs} />
               </div>
             )}
-            {!isListView && (
+            {isAnalysisView && (
               <UniverseStrip
                 filteredEtfs={filteredEtfs}
                 activeEtf={selectedEtf}
@@ -403,8 +420,8 @@ function App() {
                 onSelect={openAnalysis}
               />
             )}
-            {!isListView && <ChangesPanel onOpenEtf={openAnalysis} />}
-            {!isListView && (
+            {!isListView && !isRankingView && <ChangesPanel onOpenEtf={openAnalysis} />}
+            {!isListView && !isRankingView && (
               <div className="bottom-grid">
                 <RankingPanel
                   filteredEtfs={filteredEtfs.length ? filteredEtfs : etfs}
@@ -425,7 +442,7 @@ function App() {
               </div>
             )}
           </div>
-          {!isAnalysisView && !isListView && (
+          {isCompareView && (
             <AnalysisPanel
               selectedEtf={selectedEtf}
               favorites={favorites}
@@ -466,6 +483,10 @@ function writeCompareUrl(selectedIds, activeId) {
 
 function writeListUrl() {
   pushUrl(`${window.location.pathname}?view=list`);
+}
+
+function writeRankingUrl() {
+  pushUrl(`${window.location.pathname}?view=ranking`);
 }
 
 export default App;

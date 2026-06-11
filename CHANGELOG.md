@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-06-11 (round 6)
+
+- Added an AIYN 랭킹 view (`?view=ranking`, fourth tab in the view switch): the full universe sorted by AIYN score descending with rank, score, coverage, and headline metrics; unscored ETFs are excluded (the scored share is stated), ties break by coverage → AUM → id, and rows open the analysis view. CSV export in this view exports the ranking.
+- Published the same ranking as a static JSON API: each deploy writes `data/rankings.json` (top 100, identity + score/coverage + metrics + deep link per entry) via `scripts/build-rankings.mjs`, sharing the ordering logic with the view.
+- Compare-screen cleanup from user feedback: the 'ETF 탐색' strip moved directly below the 빠른 탐색 preset bar, the navigation announcement banner (e.g. "ETF 비교 화면으로 돌아왔습니다.") no longer appears for view changes (the banner remains for CSV/share/error feedback), and the unintuitive '결과 열기'/'비교 추가' buttons were removed from the filter bar (the comparison grid's add card and the list view's per-row add button remain).
+
 ## 2026-06-11 (round 5)
 
 - Added a portfolio mix simulator to the compare view: per-ETF weight inputs (auto-normalized) produce 합성 총보수, 합성 배당률, weighted AIYN score, and theme/market composition bars; metrics with missing fields renormalize over the covered ETFs and show `n/m종 반영` coverage, with the simple-weighted-aggregation caveat (no correlation/rebalancing) stated inline.

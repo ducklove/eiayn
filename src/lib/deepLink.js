@@ -31,7 +31,9 @@ export function resolveInitialSelection(etfs, params, maxSelected = 4) {
       ? 'analysis'
       : requestedView === 'list'
         ? 'list'
-        : 'compare';
+        : requestedView === 'ranking'
+          ? 'ranking'
+          : 'compare';
 
   return {
     selectedIds,

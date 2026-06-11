@@ -3,11 +3,11 @@ import {
   Download,
   Filter,
   List,
-  Plus,
   RefreshCw,
   Share2,
   ShieldCheck,
   Star,
+  Trophy,
   WalletCards,
   X,
 } from 'lucide-react';
@@ -22,8 +22,7 @@ export function WorkspaceHeader({
   onShowCompare,
   onShowAnalysis,
   onShowList,
-  onAddNext,
-  onSelectFirstResult,
+  onShowRanking,
   onClearFilters,
   filters,
   setFilters,
@@ -37,18 +36,29 @@ export function WorkspaceHeader({
 }) {
   const isAnalysisView = viewMode === 'analysis';
   const isListView = viewMode === 'list';
+  const isRankingView = viewMode === 'ranking';
 
   return (
     <div className="workspace-header" id="compare">
       <div className="title-block">
         <div>
-          <h2>{isAnalysisView ? 'ETF 개별 분석' : isListView ? 'ETF 전체 목록' : 'ETF 비교'}</h2>
+          <h2>
+            {isAnalysisView
+              ? 'ETF 개별 분석'
+              : isListView
+                ? 'ETF 전체 목록'
+                : isRankingView
+                  ? 'AIYN 랭킹'
+                  : 'ETF 비교'}
+          </h2>
           <p>
             {isAnalysisView
               ? `${selectedEtf.name}의 비용, 성과, 위험, 보유종목을 한 화면에서 확인합니다.`
               : isListView
                 ? '검색·필터 결과 전체를 총보수, 수익률, AIYN 점수 기준으로 정렬해 탐색합니다.'
-                : '총보수, 순자산, 추적오차, 배당, 변동성을 실제 스냅샷 기준으로 비교합니다.'}
+                : isRankingView
+                  ? '전체 유니버스를 AIYN 점수가 높은 순으로 정렬한 랭킹입니다.'
+                  : '총보수, 순자산, 추적오차, 배당, 변동성을 실제 스냅샷 기준으로 비교합니다.'}
           </p>
         </div>
       </div>
@@ -85,6 +95,16 @@ export function WorkspaceHeader({
           >
             <List size={16} />
             전체 목록
+          </button>
+          <button
+            className={viewMode === 'ranking' ? 'active' : ''}
+            type="button"
+            role="tab"
+            aria-selected={viewMode === 'ranking'}
+            onClick={onShowRanking}
+          >
+            <Trophy size={16} />
+            AIYN 랭킹
           </button>
         </div>
 
@@ -152,16 +172,6 @@ export function WorkspaceHeader({
           <RefreshCw size={15} />
           초기화
         </button>
-        <button className="ghost-button slim" type="button" onClick={onSelectFirstResult}>
-          <Plus size={15} />
-          결과 열기
-        </button>
-        {!isAnalysisView && (
-          <button className="ghost-button slim" type="button" onClick={onAddNext}>
-            <Plus size={15} />
-            비교 추가
-          </button>
-        )}
         <span className="result-count">{resultCount}개 검색됨</span>
       </div>
 
