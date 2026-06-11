@@ -129,6 +129,27 @@ for (const etf of etfs) {
   if (!Array.isArray(etf.holdings)) errors.push(`${etf.id}: holdings must be an array`);
   if (!Array.isArray(etf.sparkline)) errors.push(`${etf.id}: sparkline must be an array`);
 
+  // nav is best-effort KRX data and must stay null-or-positive — never
+  // estimated, never zero/negative.
+  if (!(etf.nav === null || (isFiniteNumber(etf.nav) && etf.nav > 0))) {
+    errors.push(`${etf.id}: nav must be null or a positive finite number`);
+  }
+
+  // premiumDiscount is optional like performance1y (snapshots written before
+  // the KRX NAV enrichment keep validating); when the field is present it
+  // must be null or a plausible percentage.
+  if (etf.premiumDiscount !== undefined) {
+    const premiumDiscount = etf.premiumDiscount;
+    if (
+      !(
+        premiumDiscount === null ||
+        (isFiniteNumber(premiumDiscount) && Math.abs(premiumDiscount) <= 50)
+      )
+    ) {
+      errors.push(`${etf.id}: premiumDiscount must be null or a finite number with |x| <= 50`);
+    }
+  }
+
   // performance1y is optional (snapshots written before the field keep
   // validating); when present and non-null its shape is enforced.
   const performance = etf.performance1y;
