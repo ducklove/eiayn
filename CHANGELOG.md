@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-06-11 (round 5)
+
+- Added a portfolio mix simulator to the compare view: per-ETF weight inputs (auto-normalized) produce 합성 총보수, 합성 배당률, weighted AIYN score, and theme/market composition bars; metrics with missing fields renormalize over the covered ETFs and show `n/m종 반영` coverage, with the simple-weighted-aggregation caveat (no correlation/rebalancing) stated inline.
+- Korean ETF NAV / 괴리율 (premium-discount): each refresh now fetches the KRX 정보데이터시스템 'ETF 전종목 시세' table once (strictly best-effort, holiday walk-back up to 7 days, `KRX_NAV_DISABLE=1` escape hatch) and fills `nav` plus a new snapshot-wide `premiumDiscount` field for matching Korean ETFs; the analysis dashboard shows NAV/괴리율 tiles for Korean ETFs (honest `-` until the first CI refresh ships the data).
+- Holdings collection expanded from top 10 to top 25 per ETF (K-ETF and StockAnalysis parsers); the analysis dashboard keeps the top-10 list and donut by default with a `전체 보유종목 보기 (N)` toggle. The AIYN diversification factor intentionally still uses top-10 concentration, so scores are unaffected.
+- PWA offline support: web app manifest with standalone icon, plus a dependency-free service worker — network-first for pages and `data/*.json` (always fresh online, cache fallback offline), cache-first for hashed build assets; registered in production builds only.
+- SEO/share polish: build-time `sitemap.xml` (root + ~1,348 XML-escaped `?code=` deep links stamped with the snapshot date), `robots.txt`, and view-synced browser tab titles (`<ETF명> 분석 — ETF is All You Need`, `전체 목록 — …`).
+- Unit suite grew to 319 tests (KRX NAV parsing/enrichment, portfolio math and simulator component, holdings toggle, sitemap XML, document-title hook, NAV tile rendering).
+
 ## 2026-06-10 (round 4)
 
 - Added an AIYN score trend card to the analysis view, fed by a new rolling `public/data/history.json` archive (one entry per day, 60-day retention, seeded from the current snapshot); shows an honest placeholder until at least two daily snapshots accumulate.

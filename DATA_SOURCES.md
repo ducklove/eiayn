@@ -11,6 +11,7 @@ EIAYN is designed for GitHub Pages static hosting. The browser does not call ext
 | Yahoo Finance chart | `https://query1.finance.yahoo.com/v8/finance/chart/` | price, adjusted-close history, dividend events, quote timestamp, listed-symbol currency, USD/KRW; Korea KRX `.KS` charts for 3-year/5-year enrichment |
 | Yahoo Finance quoteSummary | `https://query2.finance.yahoo.com/v10/finance/quoteSummary/` | regional ETF profile fallback for expense ratio, AUM, dividend yield, inception date |
 | StockAnalysis | `https://stockanalysis.com/` | US ETF expense ratio, assets/AUM, dividend yield, inception date, top holdings where available; regional quote profile fields where available |
+| KRX 정보데이터시스템 | `http://data.krx.co.kr/` | Korean ETF NAV and premium/discount (괴리율) from one batched 'ETF 전종목 시세' request per refresh, strictly best-effort |
 | Issuer or exchange profile override | `scripts/data/profile-overrides.mjs` | narrowly scoped, manually curated expense ratio values for regional ETFs, applied with highest precedence over scraped values |
 | EIAYN regional representative universe | `https://github.com/ducklove/eiayn` | regional representative ETF selection and market classification |
 
@@ -37,7 +38,7 @@ The build then joins:
 - `timeseries/instrument-return` for current price, market cap, volume, and trading value.
 - `instrument/ranking` for 3-month and 1-year price returns plus dividend return.
 - `instrument/compare` in 200-code batches for total fee, benchmark code, and 1-year historical price series.
-- `instrument/holdings` for top holdings.
+- `instrument/holdings` for top holdings (up to 25 per ETF; the AIYN diversification factor still uses top-10 concentration).
 
 The current snapshot includes all active K-ETF records returned by the source. If K-ETF exposes a field for only part of the universe, the missing field remains `null` or an empty array and is listed in `dataQuality.missingFields`.
 
@@ -50,6 +51,16 @@ K-ETF batch history covers only one year, so after the K-ETF build each Korean E
 - `returns.m3`, `returns.y1`, `dividendYield`, `sparkline`, and `performance1y` only as fallbacks when K-ETF left them empty.
 
 When an ETF is enriched, `yahooSymbol` is set to the `.KS` symbol and a `Yahoo Finance chart (KRX)` source entry is appended listing exactly the fields that were filled (stored in the written snapshot as a `dataQuality.sourceRefs` index into `sourceCatalog`). The `KOREA_YAHOO_LIMIT` environment variable restricts enrichment to the top-N Korean ETFs by trading value for partial CI or local runs; by default all Korean ETFs are attempted.
+
+### KRX NAV / premium-discount enrichment
+
+After the Yahoo KRX enrichment, each refresh requests the KRX 정보데이터시스템 'ETF 전종목 시세' table (`dbms/MDC/STAT/standard/MDCSTAT04301`) once — a single POST covers every listed ETF for the most recent trading day, walking back one calendar day at a time (up to 7 attempts) across weekends and holidays. For Korean ETFs whose 6-digit code matches a parseable row:
+
+- `nav` is filled only when still `null` (same fill-only-null rule as the Yahoo enrichment).
+- `premiumDiscount` (괴리율, `% = (close − NAV) / NAV × 100`, 2 decimals) is set; the field exists snapshot-wide and is `null` for every non-Korean or unmatched ETF.
+- `dataQuality.navAsOf` records the KRX trading day the values are as of, and a `KRX 정보데이터시스템` source entry lists the fields actually filled.
+
+The step is strictly best-effort: a blocked endpoint, schema change, or exhausted walk-back logs one warning and leaves `nav`/`premiumDiscount` `null` without affecting the rest of the refresh. `KRX_NAV_DISABLE=1` skips the fetch entirely. Rows with unparseable close or NAV values are skipped, never estimated. `npm run check:data` enforces that `nav` is null-or-positive and `premiumDiscount` (when the field is present) is null or a finite percentage within ±50. Both fields first appear with the first CI refresh after this change; the analysis dashboard shows `-` until then.
 
 ## US Collection
 
@@ -116,7 +127,7 @@ Channel `ETF is All You Need — 데이터 업데이트` at `https://ducklove.gi
 ## Update Behavior
 
 - Required source failures cause `npm run data:update` to fail.
-- Optional StockAnalysis, Yahoo quoteSummary, and holdings failures are logged and leave affected fields missing unless `check:data` marks the field as required.
+- Optional StockAnalysis, Yahoo quoteSummary, KRX NAV, and holdings failures are logged and leave affected fields missing unless `check:data` marks the field as required.
 - Korean Yahoo KRX enrichment is optional per ETF: a failed or empty chart leaves that ETF exactly as K-ETF built it, never excludes it, and never aborts the run. The update log reports a single summary line with enriched/unavailable counts.
 - `check:data` requires an expense ratio for all configured regional representative ETFs so GitHub Pages is not deployed with blank regional total-fee cells.
 - The script does not silently fall back to fake data.
@@ -127,7 +138,7 @@ Channel `ETF is All You Need — 데이터 업데이트` at `https://ducklove.gi
 ## Known Limitations
 
 - Korean K-ETF batch history currently provides a 1-year series; 3-year and 5-year return/risk fields come from the best-effort Yahoo KRX enrichment and remain `null` for ETFs where Yahoo has no usable `.KS` history (delistings, very recent listings, symbols Yahoo does not cover) or where the enrichment fetch fails.
-- `nav`, `risk.trackingError3y`, and `risk.informationRatio3y` are `null` until reliable ETF-level NAV and benchmark-aligned series are mapped.
+- `nav` and `premiumDiscount` come from the best-effort KRX enrichment and exist only for Korean ETFs the KRX table matches (first populated by the first CI refresh after 2026-06-11); non-Korean ETFs keep `null` because no equivalent batched public NAV source is wired yet. `risk.trackingError3y` and `risk.informationRatio3y` are computed only for the ~155 ETFs whose `benchmarkIndex` maps to a known Yahoo index symbol; the rest stay `null`.
 - Yahoo Finance endpoints are public web endpoints, not guaranteed official APIs, and may be rate-limited or temporarily unavailable.
 - StockAnalysis is an accessible public web source, not an official issuer API. Field names or table structure may change.
 - Data is a build-time snapshot and may lag live market conditions.

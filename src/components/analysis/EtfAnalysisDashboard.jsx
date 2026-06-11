@@ -90,6 +90,15 @@ export function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite })
           tone="cost"
         />
         <MetricTile label="순자산 (AUM)" value={formatAum(selectedEtf.aum, selectedEtf.currency)} />
+        {selectedEtf.market === '국내' ? (
+          <>
+            <MetricTile
+              label="NAV (기준가)"
+              value={formatPrice(selectedEtf.nav, selectedEtf.currency)}
+            />
+            <MetricTile label="괴리율" value={formatPercent(selectedEtf.premiumDiscount)} />
+          </>
+        ) : null}
         <MetricTile label="배당수익률 (연)" value={formatPlainPercent(selectedEtf.dividendYield)} />
         <MetricTile label="상장일" value={selectedEtf.inceptionDate ?? '-'} />
         <MetricTile
