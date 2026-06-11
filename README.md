@@ -54,6 +54,21 @@ public/data/etfs.json
 
 The deployed GitHub Pages app reads it with `import.meta.env.BASE_URL`, so the `/eiayn/` base path remains valid.
 
+### Public JSON API
+
+The build also publishes a machine-readable AIYN ranking next to the snapshot:
+
+```text
+https://ducklove.github.io/eiayn/data/rankings.json
+```
+
+It lists the top 100 ETFs by AIYN score (descending; ETFs without a score are
+excluded, ties break by score coverage, then AUM, then id) with identity
+fields, score/coverage, headline metrics, and an analysis-view deep link per
+entry. It is regenerated on every deploy by `scripts/build-rankings.mjs` from
+the committed snapshot, sharing the exact ordering logic with the in-app
+AIYN 랭킹 view (`?view=ranking`). Missing metrics are `null`, never estimated.
+
 See [DATA_SOURCES.md](./DATA_SOURCES.md) and [docs/scoring.md](./docs/scoring.md).
 
 ## Deployment

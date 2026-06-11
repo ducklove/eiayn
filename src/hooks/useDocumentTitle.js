@@ -12,6 +12,8 @@ export function useDocumentTitle(viewMode, selectedEtf) {
       document.title = `${shortName} 분석 — ${BASE_TITLE}`;
     } else if (viewMode === 'list') {
       document.title = `전체 목록 — ${BASE_TITLE}`;
+    } else if (viewMode === 'ranking') {
+      document.title = `AIYN 랭킹 — ${BASE_TITLE}`;
     } else {
       document.title = BASE_TITLE;
     }

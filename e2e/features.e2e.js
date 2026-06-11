@@ -40,6 +40,26 @@ test.describe('dark mode and list view', () => {
     await expect(page.getByRole('heading', { name: 'ETF 전체 목록', exact: true })).toBeVisible();
   });
 
+  test('AIYN ranking view lists the top universe by score and deep-links via ?view=ranking', async ({
+    page,
+  }) => {
+    await gotoCompareHome(page);
+
+    await page.getByRole('tab', { name: 'AIYN 랭킹' }).click();
+    await expect(page.getByRole('heading', { name: 'AIYN 랭킹', exact: true })).toBeVisible();
+    await expect(page).toHaveURL(/view=ranking/);
+    await expect(page.getByRole('heading', { name: /AIYN 점수 TOP \d+/ })).toBeVisible();
+    await expect(page.locator('.etf-table tbody tr')).toHaveCount(100);
+
+    // Ranked rows open the analysis view.
+    await page.locator('.etf-table tbody tr').first().click();
+    await expect(page.getByRole('heading', { name: 'ETF 개별 분석', exact: true })).toBeVisible();
+
+    // Direct deep link into the ranking view.
+    await page.goto('./?view=ranking');
+    await expect(page.getByRole('heading', { name: 'AIYN 랭킹', exact: true })).toBeVisible();
+  });
+
   test('list row opens the analysis view and back returns to the list', async ({ page }) => {
     await gotoCompareHome(page);
     await page.getByRole('tab', { name: '전체 목록' }).click();
@@ -81,12 +101,16 @@ test.describe('dark mode and list view', () => {
     await expect(calculator.locator('.cost-row').first()).toContainText(/10년 누적/);
   });
 
-  test('performance overlay shows its placeholder until series data ships', async ({ page }) => {
+  test('performance overlay renders the normalized chart from snapshot series', async ({
+    page,
+  }) => {
     await gotoCompareHome(page);
 
     const overlay = page.locator('.performance-overlay');
     await expect(overlay.getByRole('heading', { name: /성과 비교/ })).toBeVisible();
-    // The committed snapshot predates performance1y, so the honest empty state shows.
-    await expect(overlay.locator('.empty-state')).toContainText('다음 데이터 갱신');
+    // Snapshots since 2026-06-10 carry performance1y; the overlay renders as
+    // soon as two of the default basket's ETFs have a series.
+    await expect(overlay.locator('svg.overlay-chart')).toBeVisible();
+    await expect(overlay.locator('.overlay-legend-item').nth(1)).toBeVisible();
   });
 });

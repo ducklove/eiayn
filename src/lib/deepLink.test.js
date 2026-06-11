@@ -46,6 +46,9 @@ describe('deep link utilities', () => {
 
   it('opens the list view via the view parameter', () => {
     expect(resolveInitialSelection(etfs, new URLSearchParams('view=list')).viewMode).toBe('list');
+    expect(resolveInitialSelection(etfs, new URLSearchParams('view=ranking')).viewMode).toBe(
+      'ranking',
+    );
     expect(resolveInitialSelection(etfs, new URLSearchParams('view=analysis')).viewMode).toBe(
       'analysis',
     );

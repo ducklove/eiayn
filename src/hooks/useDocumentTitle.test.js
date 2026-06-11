@@ -21,6 +21,11 @@ describe('useDocumentTitle', () => {
     expect(document.title).toBe('전체 목록 — ETF is All You Need');
   });
 
+  it('shows the ranking label in the ranking view', () => {
+    renderHook(() => useDocumentTitle('ranking', etf));
+    expect(document.title).toBe('AIYN 랭킹 — ETF is All You Need');
+  });
+
   it('uses the base title in the compare view', () => {
     renderHook(() => useDocumentTitle('compare', etf));
     expect(document.title).toBe('ETF is All You Need');

@@ -2923,3 +2923,14 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+.etf-table .rank-cell {
+  font-weight: 700;
+  color: var(--quiet);
+}
+
+.ranking-api-note {
+  margin: 10px 0 0;
+  color: var(--quiet);
+  font-size: 12px;
+}
