@@ -65,6 +65,7 @@ sourceCatalog.forEach((entry, index) => {
 const etfs = payload.etfs ?? [];
 const byId = new Map(etfs.map((etf) => [etf.id, etf]));
 const marketCounts = countBy(etfs, 'market');
+const excluded = Array.isArray(payload.coverage?.excluded) ? payload.coverage.excluded : [];
 
 for (const [market, minimum] of Object.entries(MINIMUMS)) {
   if ((marketCounts[market] ?? 0) < minimum) {
@@ -74,10 +75,11 @@ for (const [market, minimum] of Object.entries(MINIMUMS)) {
 
 if (
   payload.coverage?.korea?.sourceTotal &&
-  payload.coverage.korea.included !== payload.coverage.korea.sourceTotal
+  payload.coverage.korea.included + excludedCount(excluded, '국내') !==
+    payload.coverage.korea.sourceTotal
 ) {
   errors.push(
-    `Korea coverage mismatch: included ${payload.coverage.korea.included}, sourceTotal ${payload.coverage.korea.sourceTotal}`,
+    `Korea coverage mismatch: included ${payload.coverage.korea.included}, excluded ${excludedCount(excluded, '국내')}, sourceTotal ${payload.coverage.korea.sourceTotal}`,
   );
 }
 
@@ -343,4 +345,8 @@ function countBy(items, key) {
     acc[value] = (acc[value] ?? 0) + 1;
     return acc;
   }, {});
+}
+
+function excludedCount(items, market) {
+  return items.filter((item) => item?.market === market).length;
 }

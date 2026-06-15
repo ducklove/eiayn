@@ -89,7 +89,7 @@ async function main() {
 
   console.log('[data:update] Collecting Korea active ETF universe');
   const koreanBase = await fetchKoreanEtfBaseData();
-  const koreaBaseEtfs = buildKoreanEtfs(koreanBase);
+  const koreaBaseEtfs = buildKoreanEtfs(koreanBase, excluded);
   console.log(
     `[data:update] Korea ETFs normalized: ${koreaBaseEtfs.length}/${koreanBase.lineup.trace?.total ?? koreaBaseEtfs.length}`,
   );
@@ -349,13 +349,13 @@ async function readTextOrNull(file) {
   }
 }
 
-function buildKoreanEtfs(base) {
+function buildKoreanEtfs(base, excluded = []) {
   const quoteByCode = new Map((base.quotes.data ?? []).map((quote) => [quote.code, quote]));
   const price3mByCode = new Map((base.price3m.data ?? []).map((item) => [item.code, item]));
   const price1yByCode = new Map((base.price1y.data ?? []).map((item) => [item.code, item]));
   const dividendByCode = new Map((base.dividends.data ?? []).map((item) => [item.code, item]));
 
-  return (base.lineup.data ?? []).map((lineupItem) => {
+  return (base.lineup.data ?? []).flatMap((lineupItem) => {
     const code = lineupItem.code;
     const quote = quoteByCode.get(code);
     const compare = base.compare.get(code);
@@ -366,11 +366,21 @@ function buildKoreanEtfs(base) {
     const holdingsData = base.holdings.get(code) ?? { holdings: [], asOf: null, source: null };
     const series = normalizeHistoricalPairs(compare?.historical?.price);
     const latestPrice = nullableNumber(quote?.price) ?? nullableNumber(compare?.latest?.price);
+    if (latestPrice === null) {
+      const reason = 'missing price from K-ETF quote/compare data';
+      excluded.push({
+        ticker: code,
+        market: '국내',
+        reason,
+      });
+      console.warn(`[data:update] Excluding ${code}: ${reason}`);
+      return [];
+    }
     const categoryFullCode = metadata.category_fullcode ?? lineupItem.category_code ?? null;
     const categoryName =
       metadata.category_name ?? compare?.meta?.category ?? lineupItem.category_code ?? null;
 
-    return {
+    return [{
       id: code,
       ticker: code,
       yahooSymbol: code,
@@ -442,7 +452,7 @@ function buildKoreanEtfs(base) {
         ]),
         missingFields: [],
       },
-    };
+    }];
   });
 }
 

@@ -5,7 +5,8 @@ env:
 
 on:
   schedule:
-    - cron: '30 21 * * 0-5'
+    # 15:35 KST, shortly after the Korea regular ETF market closes.
+    - cron: '35 6 * * 1-5'
   workflow_dispatch:
 
 permissions:

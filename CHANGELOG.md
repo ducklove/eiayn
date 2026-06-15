@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-06-15
+
+- Made Korean ETF refresh tolerant of newly listed or temporary K-ETF records with no usable price: those instruments are excluded from the production snapshot, logged in `coverage.excluded`, and counted in the Korea coverage reconciliation instead of failing the whole refresh.
+- Moved the scheduled ETF data refresh to 15:35 KST on Korean market weekdays (`35 6 * * 1-5` UTC), shortly after the regular ETF session closes.
+- Refreshed the production data snapshot; the current run includes 1,352 ETFs and explicitly excludes `0193M0`, `0207G0`, and `0207Z0` because K-ETF did not provide a numeric price.
+
 ## 2026-06-11 (round 6)
 
 - Added an AIYN 랭킹 view (`?view=ranking`, fourth tab in the view switch): the full universe sorted by AIYN score descending with rank, score, coverage, and headline metrics; unscored ETFs are excluded (the scored share is stated), ties break by coverage → AUM → id, and rows open the analysis view. CSV export in this view exports the ranking.

@@ -40,7 +40,7 @@ The build then joins:
 - `instrument/compare` in 200-code batches for total fee, benchmark code, and 1-year historical price series.
 - `instrument/holdings` for top holdings (up to 25 per ETF; the AIYN diversification factor still uses top-10 concentration).
 
-The current snapshot includes all active K-ETF records returned by the source. If K-ETF exposes a field for only part of the universe, the missing field remains `null` or an empty array and is listed in `dataQuality.missingFields`.
+The current snapshot includes active K-ETF records returned by the source only after a usable numeric price is available from the K-ETF quote or compare data. Newly listed or temporary records that K-ETF lists before publishing a price are excluded from the production snapshot, logged in `coverage.excluded`, and counted against `coverage.korea.sourceTotal` during validation so one incomplete listing cannot block the whole daily refresh. If K-ETF exposes a non-critical field for only part of the included universe, the missing field remains `null` or an empty array and is listed in `dataQuality.missingFields`.
 
 ### Yahoo KRX long-horizon enrichment
 
@@ -116,7 +116,7 @@ Channel `ETF is All You Need — 데이터 업데이트` at `https://ducklove.gi
 
 ### Cadence and degradation
 
-- All three files are written by every `npm run data:update` run: the scheduled workflow (`.github/workflows/fetch-data.yml`, cron `30 21 * * 0-5` UTC = 06:30 KST Mon–Sat) and manual `workflow_dispatch` runs.
+- All three files are written by every `npm run data:update` run: the scheduled workflow (`.github/workflows/fetch-data.yml`, cron `35 6 * * 1-5` UTC = 15:35 KST Mon–Fri, shortly after the Korean regular ETF session closes) and manual `workflow_dispatch` runs.
 - The artifacts are strictly non-fatal: a missing or corrupt previous snapshot/history/feed logs a warning and degrades (diff against `null`, fresh history/feed) but never aborts the refresh, and a failed artifact never blocks writing `etfs.json`.
 - `npm run check:data` validates `history.json` and `changes.json` only when the files exist (schema version, sorted unique dates, integer scores, array shapes and caps); a missing file is never an error.
 
@@ -128,6 +128,7 @@ Channel `ETF is All You Need — 데이터 업데이트` at `https://ducklove.gi
 
 - Required source failures cause `npm run data:update` to fail.
 - Optional StockAnalysis, Yahoo quoteSummary, KRX NAV, and holdings failures are logged and leave affected fields missing unless `check:data` marks the field as required.
+- Korean ETF records with no usable numeric price are excluded and logged in `coverage.excluded`; `check:data` accepts `included + excluded = sourceTotal` for Korea while still requiring every included ETF to have a numeric price.
 - Korean Yahoo KRX enrichment is optional per ETF: a failed or empty chart leaves that ETF exactly as K-ETF built it, never excludes it, and never aborts the run. The update log reports a single summary line with enriched/unavailable counts.
 - `check:data` requires an expense ratio for all configured regional representative ETFs so GitHub Pages is not deployed with blank regional total-fee cells.
 - The script does not silently fall back to fake data.
