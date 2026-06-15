@@ -1,8 +1,9 @@
 import { formatPercent } from '../../lib/format.js';
 
 export function UniverseStrip({ filteredEtfs, activeEtf, activeId, onSelect }) {
+  const activeMatchesFilter = activeEtf && filteredEtfs.some((item) => item.id === activeEtf.id);
   const candidates = [
-    ...(activeEtf ? [activeEtf] : []),
+    ...(activeMatchesFilter ? [activeEtf] : []),
     ...filteredEtfs.filter((item) => item.id !== activeId),
   ].slice(0, 8);
 

@@ -117,6 +117,7 @@ function App() {
     () => filterEtfs(etfs, deferredQuery, filters, searchIndex),
     [etfs, deferredQuery, filters, searchIndex],
   );
+  const searchResults = useMemo(() => filteredEtfs.slice(0, 8), [filteredEtfs]);
   const selectedEtfs = useMemo(
     () => selectedIds.map((id) => etfs.find((etf) => etf.id === id)).filter(Boolean),
     [selectedIds, etfs],
@@ -344,6 +345,9 @@ function App() {
           searchRef={searchRef}
           theme={theme}
           onToggleTheme={toggleTheme}
+          searchResults={searchResults}
+          searchResultCount={filteredEtfs.length}
+          onOpenSearchResult={openAnalysis}
         />
         <main className={`content-grid ${isCompareView ? '' : 'single-analysis'}`}>
           <div className={`workspace ${isAnalysisView ? 'analysis-workspace' : ''}`}>
