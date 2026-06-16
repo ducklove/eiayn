@@ -95,14 +95,14 @@ describe('EtfTable rendering', () => {
     expect(within(cells[0]).getByText('KODEX 200')).toBeTruthy();
     expect(cells[0].querySelector('small').textContent).toBe('069500 · 삼성자산운용');
     expect(cells[1].textContent).toBe('KR');
-    expect(cells[2].textContent).toBe('₩36,000');
+    expect(cells[2].textContent).toBe('36,000');
     expect(cells[3].textContent).toBe('+0.50%');
     expect(cells[3].classList.contains('positive')).toBe(true);
     expect(cells[4].textContent).toBe('0.15%');
     expect(cells[5].textContent).toBe('1.80%');
     expect(cells[6].textContent).toBe('+11.20%');
     expect(cells[7].textContent).toBe('+8.40%');
-    expect(cells[8].textContent).toBe('₩5T');
+    expect(cells[8].textContent).toBe('5T');
     expect(cells[9].textContent).toBe('82');
     expect(cells[10].textContent).toBe('100%');
   });

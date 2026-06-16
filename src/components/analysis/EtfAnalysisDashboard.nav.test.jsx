@@ -55,7 +55,7 @@ describe('EtfAnalysisDashboard NAV / 괴리율 tiles', () => {
   it('shows NAV and premium-discount values for Korean ETFs when present', () => {
     renderDashboard(makeEtf({ nav: 36050, premiumDiscount: -0.14 }));
     expect(screen.getByText('NAV (기준가)')).toBeTruthy();
-    expect(screen.getByText('₩36,050')).toBeTruthy();
+    expect(screen.getByText('36,050')).toBeTruthy();
     expect(screen.getByText('괴리율')).toBeTruthy();
     expect(screen.getByText('-0.14%')).toBeTruthy();
   });

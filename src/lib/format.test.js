@@ -14,13 +14,14 @@ describe('formatDateTime', () => {
 
 describe('formatters', () => {
   it('formats prices with currency-aware decimals', () => {
-    expect(formatPrice(40550, 'KRW')).toBe('₩40,550');
+    expect(formatPrice(40550, 'KRW')).toBe('40,550');
     expect(formatPrice(521.36, 'USD')).toBe('$521.36');
   });
 
   it('formats signed percents and AUM units', () => {
     expect(formatPercent(1.234)).toBe('+1.23%');
     expect(formatPercent(-0.5)).toBe('-0.50%');
+    expect(formatAum(5_000_000_000_000, 'KRW')).toBe('5T');
     expect(formatAum(12_500_000_000, 'USD')).toBe('$12.50B');
   });
 

@@ -19,7 +19,7 @@ describe('MetricTile', () => {
   });
 
   it('omits the tone class when no tone is given', () => {
-    const { container } = render(<MetricTile label="AUM" value="₩5T" />);
+    const { container } = render(<MetricTile label="AUM" value="5T" />);
     expect(Array.from(container.firstChild.classList)).toEqual(['metric-tile']);
   });
 });

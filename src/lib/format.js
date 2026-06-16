@@ -1,5 +1,10 @@
 export function formatPrice(value, currency) {
   if (!isNumber(value)) return '-';
+  if (currency === 'KRW') {
+    return new Intl.NumberFormat('ko-KR', {
+      maximumFractionDigits: 0,
+    }).format(value);
+  }
   return new Intl.NumberFormat(localeForCurrency(currency), {
     style: 'currency',
     currency: currency ?? 'USD',
@@ -31,6 +36,12 @@ export function formatAum(value, currency) {
   ];
 
   const [divisor, suffix] = unit.find(([candidate]) => value >= candidate) ?? [1, ''];
+  if (currency === 'KRW') {
+    const formatted = new Intl.NumberFormat('ko-KR', {
+      maximumFractionDigits: 0,
+    }).format(value / divisor);
+    return `${formatted}${suffix}`;
+  }
   const formatted = new Intl.NumberFormat(localeForCurrency(currency), {
     style: 'currency',
     currency: currency ?? 'USD',
