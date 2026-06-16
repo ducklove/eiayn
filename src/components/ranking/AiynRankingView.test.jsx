@@ -38,6 +38,28 @@ describe('AiynRankingView', () => {
     expect(within(rows[2]).getByText('Alpha')).toBeTruthy();
   });
 
+  it('marks score, coverage, fee, dividend, return, and AUM columns for center alignment', () => {
+    const { container } = render(
+      <AiynRankingView
+        etfs={[makeEtf('Alpha', 60), makeEtf('Bravo', 95)]}
+        onOpenEtf={() => {}}
+      />,
+    );
+
+    const headerLabels = ['AIYN', '충족도', '총보수', '배당 (연)', '1년', 'AUM'];
+    for (const label of headerLabels) {
+      expect(screen.getByRole('columnheader', { name: label }).classList).toContain(
+        'ranking-center-cell',
+      );
+    }
+
+    const firstBodyCells = within(screen.getAllByRole('row')[1]).getAllByRole('cell');
+    for (const index of [3, 4, 5, 6, 7, 8]) {
+      expect(firstBodyCells[index].classList).toContain('ranking-center-cell');
+    }
+    expect(container.querySelector('.aiyn-ranking-table')).toBeTruthy();
+  });
+
   it('excludes unscored ETFs and reports the scored share honestly', () => {
     render(
       <AiynRankingView

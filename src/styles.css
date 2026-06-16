@@ -2481,6 +2481,10 @@ a {
   font-weight: 800;
 }
 
+.aiyn-ranking-table .ranking-center-cell {
+  text-align: center;
+}
+
 .etf-table .action-cell {
   white-space: nowrap;
 }

@@ -24,18 +24,18 @@ export function AiynRankingView({ etfs, onOpenEtf }) {
         </span>
       </div>
       <div className="table-scroll">
-        <table className="etf-table">
+        <table className="etf-table aiyn-ranking-table">
           <thead>
             <tr>
               <th>순위</th>
               <th>ETF</th>
               <th>시장</th>
-              <th>AIYN</th>
-              <th>충족도</th>
-              <th>총보수</th>
-              <th>배당 (연)</th>
-              <th>1년</th>
-              <th>AUM</th>
+              <th className="ranking-center-cell">AIYN</th>
+              <th className="ranking-center-cell">충족도</th>
+              <th className="ranking-center-cell">총보수</th>
+              <th className="ranking-center-cell">배당 (연)</th>
+              <th className="ranking-center-cell">1년</th>
+              <th className="ranking-center-cell">AUM</th>
             </tr>
           </thead>
           <tbody>
@@ -57,18 +57,20 @@ export function AiynRankingView({ etfs, onOpenEtf }) {
                   </a>
                 </td>
                 <td>{etf.market}</td>
-                <td className="num score-cell">{etf.aiynScore}</td>
-                <td className="num">
+                <td className="num score-cell ranking-center-cell">{etf.aiynScore}</td>
+                <td className="num ranking-center-cell">
                   {typeof etf.scoreCoverage === 'number'
                     ? `${Math.round(etf.scoreCoverage * 100)}%`
                     : '-'}
                 </td>
-                <td className="num">{formatPlainPercent(etf.expenseRatio)}</td>
-                <td className="num">{formatPlainPercent(etf.dividendYield)}</td>
-                <td className={`num ${returnTone(etf.returns?.y1) ?? ''}`}>
+                <td className="num ranking-center-cell">{formatPlainPercent(etf.expenseRatio)}</td>
+                <td className="num ranking-center-cell">
+                  {formatPlainPercent(etf.dividendYield)}
+                </td>
+                <td className={`num ranking-center-cell ${returnTone(etf.returns?.y1) ?? ''}`}>
                   {formatPercent(etf.returns?.y1)}
                 </td>
-                <td className="num">{formatAum(etf.aum, etf.currency)}</td>
+                <td className="num ranking-center-cell">{formatAum(etf.aum, etf.currency)}</td>
               </tr>
             ))}
           </tbody>
