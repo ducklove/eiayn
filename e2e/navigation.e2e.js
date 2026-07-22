@@ -17,7 +17,9 @@ test.describe('search, deep links, and history', () => {
     await gotoCompareHome(page);
 
     await page.getByPlaceholder(SEARCH_PLACEHOLDER).fill(QQQ_SHORT_NAME);
-    await expect(page.getByText('1개 검색됨')).toBeVisible();
+    // Both the global-search dropdown and the workspace header render the
+    // count; scope to the workspace header so the locator stays unambiguous.
+    await expect(page.locator('#search').getByText('1개 검색됨')).toBeVisible();
 
     await universeStrip(page).getByRole('button', { name: QQQ_SHORT_NAME }).click();
 
