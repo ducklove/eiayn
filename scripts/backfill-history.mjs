@@ -103,9 +103,7 @@ async function main() {
   // Live entries are never touched; a rerun may replace earlier backfilled
   // entries (e.g. after improving the reconstruction).
   const liveDates = new Set(
-    (history.entries ?? [])
-      .filter((entry) => entry.backfilled !== true)
-      .map((entry) => entry.date),
+    (history.entries ?? []).filter((entry) => entry.backfilled !== true).map((entry) => entry.date),
   );
   const targetDates = weekdaysBetween(FROM, TO).filter((date) => !liveDates.has(date));
   if (!targetDates.length) {
