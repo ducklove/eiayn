@@ -66,7 +66,26 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git commit -m "Refresh ETF data snapshot (auto)"
-            git push origin main
+            # The fetch takes ~15 minutes, so main may have moved since
+            # checkout; rebase-and-retry instead of failing the whole run on
+            # a non-fast-forward push. The generated data files are wholly
+            # rewritten each run and the concurrency group serializes refresh
+            # runs, so a genuine rebase conflict means a human edited the
+            # snapshot mid-run — give up and let that state win.
+            pushed=false
+            for attempt in 1 2 3; do
+              if git push origin main; then
+                pushed=true
+                break
+              fi
+              echo "Push rejected (attempt ${attempt}); rebasing onto updated main."
+              git fetch origin main
+              git rebase origin/main || { git rebase --abort; break; }
+            done
+            if [ "$pushed" != "true" ]; then
+              echo "::error::Could not push the refreshed snapshot after 3 attempts."
+              exit 1
+            fi
             echo "pushed=true" >> "$GITHUB_OUTPUT"
           fi
 
