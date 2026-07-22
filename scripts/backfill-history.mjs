@@ -43,9 +43,27 @@ const ROOT = process.cwd();
 const DATA_DIR = path.join(ROOT, 'public', 'data');
 const SNAPSHOT_FILE = path.join(DATA_DIR, 'etfs.json');
 const HISTORY_FILE = path.join(DATA_DIR, 'history.json');
-// 10y range so the 5-year return window is fully covered as of every gap day.
-const CHART_RANGE = '10y';
+// 10y first so the 5-year return window is fully covered as of every gap
+// day; Yahoo rejects long ranges for shorter-lived symbols, so fall back to
+// 5y (the main pipeline's proven range — the 5y-minus-gap window it implies
+// matches the pipeline's own inclusive-boundary tolerance).
+const CHART_RANGES = ['10y', '5y'];
 const CHART_CONCURRENCY = 6;
+
+async function fetchChartSeries(symbol) {
+  for (const range of CHART_RANGES) {
+    try {
+      const chart = await fetchYahooChart(symbol, range, { attempts: 2, warn: false });
+      const series = chart.series
+        .map((point) => ({ date: point.date, value: point.adjustedClose ?? point.close }))
+        .filter((point) => point.value !== null && point.value !== undefined);
+      if (series.length >= 2) return series;
+    } catch {
+      // Try the shorter range, or give up silently (best-effort).
+    }
+  }
+  return null;
+}
 
 function argValue(flag, fallback) {
   const index = process.argv.indexOf(flag);
@@ -82,10 +100,16 @@ function truncateSeries(series, date) {
 async function main() {
   const snapshot = JSON.parse(await readFile(SNAPSHOT_FILE, 'utf8'));
   const history = JSON.parse(await readFile(HISTORY_FILE, 'utf8'));
-  const existingDates = new Set((history.entries ?? []).map((entry) => entry.date));
-  const targetDates = weekdaysBetween(FROM, TO).filter((date) => !existingDates.has(date));
+  // Live entries are never touched; a rerun may replace earlier backfilled
+  // entries (e.g. after improving the reconstruction).
+  const liveDates = new Set(
+    (history.entries ?? [])
+      .filter((entry) => entry.backfilled !== true)
+      .map((entry) => entry.date),
+  );
+  const targetDates = weekdaysBetween(FROM, TO).filter((date) => !liveDates.has(date));
   if (!targetDates.length) {
-    console.log('[backfill] nothing to do: every weekday in range already has an entry');
+    console.log('[backfill] nothing to do: every weekday in range has a live entry');
     return;
   }
   console.log(`[backfill] target days: ${targetDates.join(', ')}`);
@@ -95,16 +119,8 @@ async function main() {
   const seriesById = new Map();
   let fetched = 0;
   await mapLimit(etfs, CHART_CONCURRENCY, async (etf) => {
-    const symbol = etf.yahooSymbol ?? etf.ticker;
-    try {
-      const chart = await fetchYahooChart(symbol, CHART_RANGE, { attempts: 2, warn: false });
-      const series = chart.series
-        .map((point) => ({ date: point.date, value: point.adjustedClose ?? point.close }))
-        .filter((point) => point.value !== null && point.value !== undefined);
-      if (series.length >= 2) seriesById.set(etf.id, series);
-    } catch {
-      // Best-effort: ETFs without a usable chart are omitted from backfill.
-    }
+    const series = await fetchChartSeries(etf.yahooSymbol ?? etf.ticker);
+    if (series) seriesById.set(etf.id, series);
     fetched += 1;
     if (fetched % 250 === 0 || fetched === etfs.length) {
       console.log(`[backfill] charts ${fetched}/${etfs.length} (${seriesById.size} usable)`);
@@ -116,18 +132,9 @@ async function main() {
     etfs.map((etf) => resolveBenchmarkSymbol(etf.benchmarkIndex)).filter(Boolean),
   );
   await mapLimit([...benchmarkSymbols], 4, async (symbol) => {
-    try {
-      const chart = await fetchYahooChart(symbol, CHART_RANGE, { attempts: 2, warn: false });
-      benchmarkSeries.set(
-        symbol,
-        chart.series.map((point) => ({
-          date: point.date,
-          value: point.adjustedClose ?? point.close,
-        })),
-      );
-    } catch {
-      // Tracking metrics stay null for ETFs on this benchmark.
-    }
+    const series = await fetchChartSeries(symbol);
+    if (series) benchmarkSeries.set(symbol, series);
+    // On total failure, tracking metrics stay null for ETFs on this benchmark.
   });
   console.log(
     `[backfill] benchmarks: ${benchmarkSeries.size}/${benchmarkSymbols.size} series available`,
