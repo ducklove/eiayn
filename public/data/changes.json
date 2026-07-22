@@ -1,9 +1,15 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-22T03:52:38.033Z",
-  "previousGeneratedAt": "2026-07-22T03:37:49.673Z",
+  "generatedAt": "2026-07-22T09:09:45.286Z",
+  "previousGeneratedAt": "2026-07-22T03:52:38.033Z",
   "newListings": [],
-  "delisted": [],
+  "delisted": [
+    {
+      "id": "BMNU",
+      "name": "T-REX 2X Long BMNR Daily Target ETF",
+      "market": "미국"
+    }
+  ],
   "feeChanges": [],
   "scoreMoves": []
 }
