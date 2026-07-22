@@ -456,7 +456,7 @@ function App() {
         </main>
         <footer className="site-footer">
           <span>마지막 업데이트: {formatDateTime(data.generatedAt)} KST</span>
-          <span>데이터 출처: K-ETF, Yahoo Finance, StockAnalysis</span>
+          <span>데이터 출처: 네이버 금융, Yahoo Finance, StockAnalysis</span>
           <a href="#risk">투자 유의 고지</a>
         </footer>
       </div>

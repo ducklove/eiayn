@@ -13,6 +13,9 @@ export async function fetchText(url, options = {}) {
     attempts = 3,
     timeoutMs = 45_000,
     warn = true,
+    // fetch's response.text() always decodes UTF-8; sources serving legacy
+    // encodings (e.g. Naver's EUC-KR etfItemList) must set charset explicitly.
+    charset = null,
   } = options;
 
   let lastError = null;
@@ -30,6 +33,7 @@ export async function fetchText(url, options = {}) {
         },
       });
       if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+      if (charset) return new TextDecoder(charset).decode(await response.arrayBuffer());
       return await response.text();
     } catch (error) {
       lastError = error;

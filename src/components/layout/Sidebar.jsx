@@ -139,7 +139,7 @@ export function Sidebar({
       </section>
 
       <div className="data-note">
-        <span>출처: K-ETF, Yahoo Finance, StockAnalysis</span>
+        <span>출처: 네이버 금융, Yahoo Finance, StockAnalysis</span>
         <span>마지막 업데이트: {formatDateTime(generatedAt)} KST</span>
       </div>
     </aside>

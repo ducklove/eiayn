@@ -95,7 +95,14 @@ function normalizeEntry(entry) {
   const { date, generatedAt } = entry;
   if (typeof date !== 'string' || !DATE_PATTERN.test(date)) return null;
   if (typeof generatedAt !== 'string' || generatedAt === '') return null;
-  return { date, generatedAt, scores: normalizeScores(entry.scores) };
+  return {
+    date,
+    generatedAt,
+    scores: normalizeScores(entry.scores),
+    // Entries reconstructed after an outage carry backfilled: true (see
+    // scripts/backfill-history.mjs); the marker must survive later appends.
+    ...(entry.backfilled === true ? { backfilled: true } : {}),
+  };
 }
 
 function normalizeScores(scores) {

@@ -172,6 +172,20 @@ describe('appendHistoryEntry', () => {
     expect(previous).toEqual(frozenLike);
   });
 
+  it('preserves the backfilled marker on new and existing entries', () => {
+    const backfilled = { ...entryFor('2026-07-01'), backfilled: true };
+    const first = appendHistoryEntry(null, backfilled);
+    expect(first.entries[0].backfilled).toBe(true);
+
+    const second = appendHistoryEntry(first, entryFor('2026-07-02'));
+    expect(second.entries[0].backfilled).toBe(true);
+    expect(second.entries[1]).not.toHaveProperty('backfilled');
+
+    // Non-true values never produce the marker.
+    const noisy = appendHistoryEntry(null, { ...entryFor('2026-07-03'), backfilled: 'yes' });
+    expect(noisy.entries[0]).not.toHaveProperty('backfilled');
+  });
+
   it('throws a TypeError for an invalid new entry', () => {
     expect(() => appendHistoryEntry(null, null)).toThrow(TypeError);
     expect(() => appendHistoryEntry(null, {})).toThrow(TypeError);

@@ -7,7 +7,7 @@ Live page: https://ducklove.github.io/eiayn/
 ## What It Does
 
 - Loads `/data/etfs.json`, generated during build, instead of bundling production ETF data in React source.
-- Covers all active Korean ETFs from K-ETF, high-volume US ETFs from Yahoo Finance, and representative ETFs from Hong Kong, Germany, France, Japan, Australia, and Vietnam.
+- Covers all listed Korean ETFs from Naver Finance, high-volume US ETFs from Yahoo Finance, and representative ETFs from Hong Kong, Germany, France, Japan, Australia, and Vietnam.
 - Supports integrated search across ETF metadata and top holdings where holdings are available.
 - Supports market/theme/provider/risk filters, comparison basket, ranking, detail panel, favorites, recent views, CSV export, and shareable URLs.
 - Stores favorites and recent views in browser `localStorage`.
@@ -17,7 +17,7 @@ Live page: https://ducklove.github.io/eiayn/
 
 The generated snapshot currently targets:
 
-- Korea: all active ETFs published by K-ETF.
+- Korea: all listed ETFs from the Naver Finance ETF lineup (the former K-ETF and KRX 정보데이터시스템 sources shut their public endpoints in 2026-06/07).
 - US: Yahoo Finance `MOST_ACTIVES_ETFS` top list plus core ETF supplements such as `SPY`, `QQQ`, `VTI`, `SCHD`, `SOXX`, and `ARKK`.
 - Regional representatives: Hong Kong, Germany, France, Japan, Australia, and Vietnam ETFs with Yahoo Finance chart coverage. Vietnam coverage explicitly includes `FUEVFVND.VN` VFMVN Diamond ETF.
 

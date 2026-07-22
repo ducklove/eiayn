@@ -64,9 +64,7 @@ export function AiynRankingView({ etfs, onOpenEtf }) {
                     : '-'}
                 </td>
                 <td className="num ranking-center-cell">{formatPlainPercent(etf.expenseRatio)}</td>
-                <td className="num ranking-center-cell">
-                  {formatPlainPercent(etf.dividendYield)}
-                </td>
+                <td className="num ranking-center-cell">{formatPlainPercent(etf.dividendYield)}</td>
                 <td className={`num ranking-center-cell ${returnTone(etf.returns?.y1) ?? ''}`}>
                   {formatPercent(etf.returns?.y1)}
                 </td>

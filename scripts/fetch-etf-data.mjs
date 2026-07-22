@@ -14,9 +14,22 @@ import { scoreEtfs } from '../src/lib/scoring.js';
 import { diffSnapshots } from './data/changes.mjs';
 import { buildFeedXml, changeSummaryLabel } from './data/feed.mjs';
 import { appendHistoryEntry, historyFromSnapshot } from './data/history.mjs';
-import { fetchKoreanEtfBaseData, KETF_SOURCES } from './data/k-etf.mjs';
+import {
+  classifyKoreanAssetClass,
+  classifyKoreanTheme,
+  fetchKoreanEtfBaseData,
+  koreanCategory,
+  naverAnalysisUrl,
+  NAVER_SOURCES,
+  normalizeNaverHoldings,
+  normalizeIssuerName,
+  parseDeviation,
+  parseNaverListedDate,
+  parseNaverReferenceDate,
+  periodReturn,
+} from './data/naver.mjs';
 import { enrichKoreanEtfsWithYahoo, KOREA_YAHOO_SOURCE_NAME } from './data/korea-enrich.mjs';
-import { applyKrxNavEnrichment, fetchKrxNav } from './data/krx-nav.mjs';
+import { applyKrxNavEnrichment } from './data/krx-nav.mjs';
 import {
   computeTrackingMetrics,
   resolveBenchmarkSymbol,
@@ -24,7 +37,7 @@ import {
 } from './data/benchmark-tracking.mjs';
 import { buildPerformance1y, estimatePerformance1ySize } from './data/performance.mjs';
 import { mapLimit } from './data/http.mjs';
-import { emptyProfile, nullableNumber } from './data/shared.mjs';
+import { cleanText, emptyProfile, nullableNumber } from './data/shared.mjs';
 import {
   fetchExchangeRate,
   fetchYahooChart,
@@ -87,11 +100,11 @@ function benchmarkForIndex(benchmarkIndex) {
 async function main() {
   const excluded = [];
 
-  console.log('[data:update] Collecting Korea active ETF universe');
+  console.log('[data:update] Collecting Korea ETF universe from Naver Finance');
   const koreanBase = await fetchKoreanEtfBaseData();
   const koreaBaseEtfs = buildKoreanEtfs(koreanBase, excluded);
   console.log(
-    `[data:update] Korea ETFs normalized: ${koreaBaseEtfs.length}/${koreanBase.lineup.trace?.total ?? koreaBaseEtfs.length}`,
+    `[data:update] Korea ETFs normalized: ${koreaBaseEtfs.length}/${koreanBase.lineup.length}`,
   );
 
   // Best-effort long-horizon enrichment from Yahoo KRX charts. Each chart
@@ -103,27 +116,6 @@ async function main() {
     concurrency: 6,
   });
 
-  // Strictly best-effort NAV / premium-discount data from the KRX information
-  // data system (one request covers every listed ETF). Any failure — blocked
-  // endpoint, changed schema, exhausted holiday walk-back — leaves the map
-  // empty so nav/premiumDiscount stay null, and never aborts the run.
-  let krxNav = { navMap: new Map(), tradeDate: null };
-  if (process.env.KRX_NAV_DISABLE === '1') {
-    console.log('[data:update] KRX NAV: skipped (KRX_NAV_DISABLE=1)');
-  } else {
-    try {
-      krxNav = await fetchKrxNav();
-      const matched = koreaEtfs.filter((etf) => krxNav.navMap.has(etf.ticker)).length;
-      console.log(
-        `[data:update] KRX NAV: matched ${matched}/${koreaEtfs.length} Korean ETFs (trdDd=${krxNav.trdDd})`,
-      );
-    } catch (error) {
-      console.warn(
-        `[data:update] KRX NAV unavailable: ${error.message} — nav/premiumDiscount remain null`,
-      );
-    }
-  }
-
   console.log(`[data:update] Collecting Yahoo most active US ETFs (${US_MOST_ACTIVE_COUNT})`);
   const usData = await fetchUsEtfs(excluded);
   console.log(`[data:update] US ETFs normalized: ${usData.etfs.length}`);
@@ -132,12 +124,12 @@ async function main() {
   const regionalEtfs = await fetchRegionalEtfs(excluded);
   console.log(`[data:update] Regional ETFs normalized: ${regionalEtfs.length}`);
 
-  // The KRX application runs even when the fetch failed or was disabled (the
-  // map is just empty) so premiumDiscount: null exists on every ETF.
+  // Korean nav/premiumDiscount now come from Naver inside buildKoreanEtfs.
+  // Applying the (empty-map) KRX enrichment pass keeps the snapshot-wide
+  // invariant that premiumDiscount: null exists on every non-Korean ETF.
   const etfs = applyKrxNavEnrichment(
     dedupeEtfs([...koreaEtfs, ...usData.etfs, ...regionalEtfs]).sort(sortEtfsForDisplay),
-    krxNav.navMap,
-    { tradeDate: krxNav.tradeDate },
+    new Map(),
   );
 
   const scoredEtfs = scoreEtfs(etfs).map((etf) => ({
@@ -166,9 +158,9 @@ async function main() {
     universe: scoredEtfs.map((etf) => etf.id),
     coverage: {
       korea: {
-        sourceTotal: koreanBase.lineup.trace?.total ?? null,
+        sourceTotal: koreanBase.lineup.length,
         included: koreaEtfs.length,
-        quoteAsOf: koreanBase.quotes.trace?.latest_ts ?? null,
+        quoteAsOf: GENERATED_AT,
       },
       us: {
         mostActiveRequested: US_MOST_ACTIVE_COUNT,
@@ -182,16 +174,30 @@ async function main() {
     },
     sources: [
       {
-        name: 'K-ETF',
-        url: 'https://www.k-etf.com/',
+        name: NAVER_SOURCES.lineup.name,
+        url: 'https://finance.naver.com/sise/etf.naver',
         fields: [
-          'Korea active ETF lineup',
+          'Korea ETF lineup',
           'price',
+          'changePercent',
+          'volume',
           'trading value',
           'market cap',
-          'fees',
-          '1Y history',
-          'holdings',
+        ],
+      },
+      {
+        name: NAVER_SOURCES.analysis.name,
+        url: 'https://m.stock.naver.com/',
+        fields: [
+          'issuer',
+          'total fee',
+          'base index',
+          'listing date',
+          'NAV',
+          'premium/discount',
+          '3M/1Y returns',
+          'dividend yield',
+          'top-10 holdings',
         ],
       },
       {
@@ -350,110 +356,133 @@ async function readTextOrNull(file) {
 }
 
 function buildKoreanEtfs(base, excluded = []) {
-  const quoteByCode = new Map((base.quotes.data ?? []).map((quote) => [quote.code, quote]));
-  const price3mByCode = new Map((base.price3m.data ?? []).map((item) => [item.code, item]));
-  const price1yByCode = new Map((base.price1y.data ?? []).map((item) => [item.code, item]));
-  const dividendByCode = new Map((base.dividends.data ?? []).map((item) => [item.code, item]));
+  // Trading-value rank across the lineup (1 = highest). Replaces the K-ETF
+  // quote rank; only used as an informational liquidity field.
+  const rankByCode = new Map(
+    [...base.lineup]
+      .sort((a, b) => (nullableNumber(b.amonut) ?? 0) - (nullableNumber(a.amonut) ?? 0))
+      .map((item, index) => [item.itemcode, index + 1]),
+  );
 
-  return (base.lineup.data ?? []).flatMap((lineupItem) => {
-    const code = lineupItem.code;
-    const quote = quoteByCode.get(code);
-    const compare = base.compare.get(code);
-    const price3m = price3mByCode.get(code);
-    const price1y = price1yByCode.get(code);
-    const dividend = dividendByCode.get(code);
-    const metadata = price1y ?? price3m ?? dividend ?? {};
-    const holdingsData = base.holdings.get(code) ?? { holdings: [], asOf: null, source: null };
-    const series = normalizeHistoricalPairs(compare?.historical?.price);
-    const latestPrice = nullableNumber(quote?.price) ?? nullableNumber(compare?.latest?.price);
-    if (latestPrice === null) {
-      const reason = 'missing price from K-ETF quote/compare data';
-      excluded.push({
-        ticker: code,
-        market: '국내',
-        reason,
-      });
+  return base.lineup.flatMap((item) => {
+    const code = item.itemcode;
+    const analysis = base.analyses.get(code) ?? null;
+    const analysisUrl = naverAnalysisUrl(code);
+    const price = nullableNumber(item.nowVal);
+    if (price === null || price <= 0) {
+      const reason = 'missing price from Naver ETF lineup';
+      excluded.push({ ticker: code, market: '국내', reason });
       console.warn(`[data:update] Excluding ${code}: ${reason}`);
       return [];
     }
-    const categoryFullCode = metadata.category_fullcode ?? lineupItem.category_code ?? null;
-    const categoryName =
-      metadata.category_name ?? compare?.meta?.category ?? lineupItem.category_code ?? null;
 
-    return [{
-      id: code,
-      ticker: code,
-      yahooSymbol: code,
-      name: metadata.name ?? lineupItem.name,
-      shortName: metadata.name ?? lineupItem.name,
-      provider: metadata.issuer_name ?? null,
-      market: '국내',
-      assetClass: koreanAssetClass(categoryFullCode),
-      theme: koreanTheme(categoryFullCode, categoryName),
-      category: metadata.category_fullname ?? categoryName,
-      benchmarkIndex: compare?.meta?.benchmark ?? null,
-      currency: 'KRW',
-      price: roundNullable(latestPrice, 0),
-      changePercent: roundNullable(nullableNumber(quote?.return_1d)),
-      expenseRatio: roundNullable(nullableNumber(compare?.tax_fee?.total_fee), 4),
-      aum: nullableNumber(quote?.marketcap),
-      dividendYield: roundNullable(nullableNumber(dividend?.value)),
-      inceptionDate: lineupItem.listed_date ?? null,
-      nav: null,
-      returns: {
-        m3: roundNullable(
-          nullableNumber(price3m?.value) ?? calculatePeriodReturn(series, { months: 3 }),
-        ),
-        y1: roundNullable(
-          nullableNumber(price1y?.value) ?? calculatePeriodReturn(series, { years: 1 }),
-        ),
-        y3Annualized: null,
-        y5Annualized: null,
+    const name = cleanText(analysis?.itemName) || cleanText(item.itemname) || code;
+    const benchmarkIndex = cleanText(analysis?.etfBaseIndex) || null;
+    const assetClass = classifyKoreanAssetClass({
+      name,
+      baseIndex: benchmarkIndex ?? '',
+      tabCode: nullableNumber(item.etfTabCode),
+    });
+    const theme = classifyKoreanTheme({
+      name,
+      baseIndex: benchmarkIndex ?? '',
+      themeMiddle: analysis?.themeReturns?.themeMiddleCodeDesc ?? '',
+      assetClass,
+    });
+    const holdingsData = normalizeNaverHoldings(analysis, analysisUrl);
+    // Official previous-trading-day NAV from the analysis endpoint; the
+    // lineup's live iNAV is the fallback. Both must be positive to be used.
+    const nav = nullableNumber(analysis?.nav) ?? nullableNumber(item.nav);
+    const navAsOf = parseNaverReferenceDate(analysis?.navPerformanceReferenceDate);
+    // Naver units: amonut is 백만원, marketSum is 억원; snapshot stores raw KRW.
+    const tradingValue = scaleNullable(nullableNumber(item.amonut), 1_000_000);
+    const marketCap = scaleNullable(nullableNumber(item.marketSum), 100_000_000);
+
+    return [
+      {
+        id: code,
+        ticker: code,
+        yahooSymbol: code,
+        name,
+        shortName: name,
+        provider: normalizeIssuerName(analysis?.issuerName),
+        market: '국내',
+        assetClass,
+        theme,
+        category: koreanCategory({ assetClass, theme }),
+        benchmarkIndex,
+        currency: 'KRW',
+        price: roundNullable(price, 0),
+        changePercent: roundNullable(nullableNumber(item.changeRate)),
+        expenseRatio: roundNullable(nullableNumber(analysis?.totalFee), 4),
+        aum: marketCap,
+        dividendYield: roundNullable(nullableNumber(analysis?.dividend?.dividendYieldTtm)),
+        inceptionDate: parseNaverListedDate(analysis?.listedDate),
+        nav: nav !== null && nav > 0 ? nav : null,
+        premiumDiscount: parseDeviation(analysis),
+        returns: {
+          m3: roundNullable(
+            periodReturn(analysis, 'M3') ?? nullableNumber(item.threeMonthEarnRate),
+          ),
+          y1: roundNullable(periodReturn(analysis, 'Y1')),
+          y3Annualized: null,
+          y5Annualized: null,
+        },
+        risk: {
+          volatility3yAnnualized: null,
+          maxDrawdown3y: null,
+          sharpe3y: null,
+          trackingError3y: null,
+          informationRatio3y: null,
+        },
+        holdings: holdingsData.holdings,
+        // Long-horizon series fields are filled by the Yahoo KRX enrichment.
+        sparkline: [],
+        performance1y: null,
+        liquidity: {
+          volume: nullableNumber(item.quant),
+          tradingValue,
+          marketCap,
+          sourceRank: rankByCode.get(code) ?? null,
+        },
+        dataQuality: {
+          quoteAsOf: GENERATED_AT,
+          profileAsOf: GENERATED_AT,
+          holdingsAsOf: null,
+          ...(nav !== null && nav > 0 && navAsOf ? { navAsOf } : {}),
+          sources: compactSources([
+            {
+              ...NAVER_SOURCES.lineup,
+              fields: ['lineup', 'price', 'changePercent', 'volume', 'tradingValue', 'marketCap'],
+            },
+            analysis
+              ? {
+                  name: NAVER_SOURCES.analysis.name,
+                  url: analysisUrl,
+                  fields: [
+                    'provider',
+                    'expenseRatio',
+                    'benchmarkIndex',
+                    'inceptionDate',
+                    'nav',
+                    'premiumDiscount',
+                    'returns.m3',
+                    'returns.y1',
+                    'dividendYield',
+                  ],
+                }
+              : null,
+            holdingsData.source,
+          ]),
+          missingFields: [],
+        },
       },
-      risk: {
-        volatility3yAnnualized: null,
-        maxDrawdown3y: null,
-        sharpe3y: null,
-        trackingError3y: null,
-        informationRatio3y: null,
-      },
-      holdings: holdingsData.holdings,
-      sparkline: normalizeSparkline(series),
-      performance1y: buildPerformance1y(series),
-      liquidity: {
-        volume: nullableNumber(quote?.volume),
-        tradingValue: nullableNumber(quote?.trading_value),
-        marketCap: nullableNumber(quote?.marketcap),
-        sourceRank: nullableNumber(quote?.rank),
-      },
-      dataQuality: {
-        quoteAsOf: quote?.ts ?? base.quotes.trace?.latest_ts ?? GENERATED_AT,
-        profileAsOf: base.price1y.trace?.asof
-          ? `${base.price1y.trace.asof}T00:00:00.000Z`
-          : GENERATED_AT,
-        holdingsAsOf: holdingsData.asOf,
-        sources: compactSources([
-          {
-            ...KETF_SOURCES.lineup,
-            fields: ['active ETF lineup', 'name', 'listing date', 'category'],
-          },
-          {
-            ...KETF_SOURCES.quotes,
-            fields: ['price', 'changePercent', 'aum', 'volume', 'tradingValue'],
-          },
-          {
-            ...KETF_SOURCES.compare,
-            fields: ['expenseRatio', 'benchmarkIndex', '1Y history', 'performance1y'],
-          },
-          { ...KETF_SOURCES.priceRanking3m, fields: ['returns.m3', 'issuer', 'category'] },
-          { ...KETF_SOURCES.priceRanking1y, fields: ['returns.y1', 'issuer', 'category'] },
-          dividend ? { ...KETF_SOURCES.dividendRanking, fields: ['dividendYield'] } : null,
-          holdingsData.source,
-        ]),
-        missingFields: [],
-      },
-    }];
+    ];
   });
+}
+
+function scaleNullable(value, factor) {
+  return value === null ? null : value * factor;
 }
 
 function supplementTicker(supplement) {
@@ -700,12 +729,6 @@ async function fetchYahooBackedEtf(record, options) {
   }
 }
 
-function normalizeHistoricalPairs(pairs) {
-  return (pairs ?? [])
-    .map(([date, value]) => ({ date, value: nullableNumber(value) }))
-    .filter((point) => point.date && point.value !== null);
-}
-
 function classifyYahooEtf(name, fallbackCategory) {
   const lower = name.toLowerCase();
   if (/treasury|bond|income|aggregate|muni|mortgage|loan|high yield|tips?\b/.test(lower)) {
@@ -796,30 +819,6 @@ function classifyYahooEtf(name, fallbackCategory) {
     category: fallbackCategory ?? '주식 ETF',
     benchmarkIndex: null,
   };
-}
-
-function koreanAssetClass(fullCode) {
-  if (!fullCode) return 'ETF';
-  if (fullCode.startsWith('FI_')) return '채권';
-  if (fullCode.startsWith('MA_')) return '혼합자산';
-  if (fullCode.startsWith('CM_')) return '원자재';
-  if (fullCode.startsWith('EQ_')) return '주식';
-  return 'ETF';
-}
-
-function koreanTheme(fullCode, categoryName) {
-  if (!fullCode && categoryName) return categoryName;
-  if (!fullCode) return '기타';
-  if (fullCode.includes('DIVIDEND')) return '배당';
-  if (fullCode.includes('SEMICONDUCTOR')) return '반도체';
-  if (fullCode.includes('AI') || fullCode.includes('ROBOTICS')) return 'AI/로봇';
-  if (fullCode.includes('BATTERY')) return '2차전지';
-  if (fullCode.includes('COVEREDCALL')) return '커버드콜';
-  if (fullCode.includes('BOND') || fullCode.startsWith('FI_')) return '채권';
-  if (fullCode.includes('MARKET')) return '시장대표';
-  if (fullCode.includes('SECTOR')) return categoryName ?? '섹터';
-  if (fullCode.includes('THEME')) return categoryName ?? '테마';
-  return categoryName ?? '기타';
 }
 
 function providerFromName(name) {

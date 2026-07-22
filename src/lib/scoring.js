@@ -40,9 +40,7 @@ export function scoreEtfs(etfs) {
 }
 
 export function scoreComponents(etf, context) {
-  const topHoldingConcentration = etf.holdings?.length
-    ? etf.holdings.slice(0, 10).reduce((sum, holding) => sum + (holding.weight ?? 0), 0)
-    : null;
+  const topHoldingConcentration = holdingConcentration(etf);
 
   return {
     cost: normalizeLow(etf.expenseRatio, context.expenseRatio),
@@ -92,14 +90,21 @@ export function buildScoringContext(etfs) {
     sharpe3y: extent(etfs.map((etf) => etf.risk?.sharpe3y)),
     trackingError3y: extent(etfs.map((etf) => etf.risk?.trackingError3y)),
     informationRatio3y: extent(etfs.map((etf) => etf.risk?.informationRatio3y)),
-    topHoldingConcentration: extent(
-      etfs.map((etf) =>
-        etf.holdings?.length
-          ? etf.holdings.slice(0, 10).reduce((sum, holding) => sum + (holding.weight ?? 0), 0)
-          : null,
-      ),
-    ),
+    topHoldingConcentration: extent(etfs.map(holdingConcentration)),
   };
+}
+
+// Sum of the top-10 holdings' published weights. Some sources (e.g. Naver for
+// foreign-listed or bond constituents) list holdings by name without weights;
+// those rows are useful for search but carry no concentration signal, so only
+// weighted rows count and an all-weightless list yields null — never a
+// zero-concentration "perfect diversification" artifact.
+function holdingConcentration(etf) {
+  const weighted = (etf.holdings ?? [])
+    .slice(0, 10)
+    .filter((holding) => isFiniteNumber(holding?.weight));
+  if (!weighted.length) return null;
+  return weighted.reduce((sum, holding) => sum + holding.weight, 0);
 }
 
 function extent(values) {

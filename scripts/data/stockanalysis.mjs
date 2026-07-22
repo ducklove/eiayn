@@ -1,8 +1,7 @@
 import { load } from 'cheerio';
 import { parseCompactMoney, toFiniteNumber } from '../../src/lib/metrics.js';
 import { optionalText } from './http.mjs';
-import { HOLDINGS_LIMIT } from './k-etf.mjs';
-import { cleanText, emptyProfile } from './shared.mjs';
+import { cleanText, emptyProfile, HOLDINGS_LIMIT } from './shared.mjs';
 
 export async function fetchStockAnalysisProfile(path, currency) {
   const url = stockAnalysisUrl(path);

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-07-22
+
+- Restored the daily data refresh after a 27-day outage (last successful refresh 2026-06-25). Both Korean sources died upstream in late June: the K-ETF anchor API was privatized behind its own backend (403 Forbidden for all external callers, including browsers on k-etf.com itself) and the KRX 정보데이터시스템 relaunched as the login-only "KRX Data Marketplace", killing the anonymous NAV batch endpoint.
+- Replaced both with Naver Finance: `finance.naver.com/api/sise/etfItemList.nhn` (one EUC-KR request for the full lineup with price, change, iNAV, volume, trading value, market cap) plus best-effort per-ETF `m.stock.naver.com/api/stock/{code}/etfAnalysis` (issuer, total fee, base index, listing date, official NAV, 괴리율, M3/Y1 returns, TTM dividend yield, theme labels, top-10 holdings). New `scripts/data/naver.mjs` module with name/index/theme-based asset-class and theme classifiers reproducing the established filter vocabulary; the Yahoo KRX `.KS` enrichment continues to supply all long-horizon series fields fill-only-null.
+- Known degradations vs the K-ETF era: Korean holdings shrink from top-25 to top-10, and where Naver publishes no constituent weights (foreign-listed underlyings, bonds) the rows are name-only — still searchable, but with `-` weights and a null diversification score component; Korean 1-year price history now depends wholly on Yahoo coverage; benchmark indexes are display names instead of vendor codes (explicit aliases added to the tracking map).
+- Backfilled `history.json` AIYN score entries for the missed 2026-06-26 – 2026-07-21 trading days from Yahoo historical charts: price-derived score components (short/long returns, risk, sparkline) recomputed as of each day; slow-moving inputs (fees, AUM, holdings) held at current values. Backfilled entries are approximations and are marked `backfilled: true`.
+
 ## 2026-06-15
 
 - Made Korean ETF refresh tolerant of newly listed or temporary K-ETF records with no usable price: those instruments are excluded from the production snapshot, logged in `coverage.excluded`, and counted in the Korea coverage reconciliation instead of failing the whole refresh.

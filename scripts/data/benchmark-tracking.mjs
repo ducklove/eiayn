@@ -89,6 +89,17 @@ export const BENCHMARK_SYMBOLS = {
   // used display names. Cheap insurance against naming drift.
   'KOSPI 200': '^KS200',
   '코스피 200': '^KS200',
+
+  // Naver Finance base-index display names (the Korean source since 2026-07).
+  // TR variants reuse the price-index proxy, matching the K-ETF-era
+  // convention for KRX-IX-KSP200tr / XNAS-EI-XNDX above.
+  코스피: '^KS11',
+  '코스피 200 TR지수': '^KS200',
+  'NASDAQ 100': '^NDX',
+  'NASDAQ 100 Total Return Index': '^NDX',
+  'NASDAQ-100 Total Return Index': '^NDX',
+  'S&P 500 Total Return Index': '^GSPC',
+  'PHLX Semiconductor Sector Index': '^SOX',
 };
 
 // Lowercase/whitespace-normalized lookup, plus an extra alias without a

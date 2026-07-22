@@ -40,10 +40,7 @@ describe('AiynRankingView', () => {
 
   it('marks score, coverage, fee, dividend, return, and AUM columns for center alignment', () => {
     const { container } = render(
-      <AiynRankingView
-        etfs={[makeEtf('Alpha', 60), makeEtf('Bravo', 95)]}
-        onOpenEtf={() => {}}
-      />,
+      <AiynRankingView etfs={[makeEtf('Alpha', 60), makeEtf('Bravo', 95)]} onOpenEtf={() => {}} />,
     );
 
     const headerLabels = ['AIYN', '충족도', '총보수', '배당 (연)', '1년', 'AUM'];

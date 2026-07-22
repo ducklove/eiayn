@@ -127,4 +127,27 @@ describe('scoreEtfs', () => {
     expect(scored.aiynScore).toBeGreaterThan(0);
     expect(scored.scoreCoverage).toBeLessThan(1);
   });
+
+  it('ignores weightless holdings for concentration instead of scoring them as zero', () => {
+    const scored = scoreEtfs([
+      { ...baseEtf, id: 'CONCENTRATED', holdings: [{ name: 'A', weight: 90 }] },
+      // Name-only holdings (weights unpublished upstream) carry no signal:
+      // the diversification component must be null, not a perfect score.
+      {
+        ...baseEtf,
+        id: 'WEIGHTLESS',
+        holdings: [
+          { name: 'A', weight: null },
+          { name: 'B', weight: null },
+        ],
+      },
+      { ...baseEtf, id: 'MIXED', holdings: [{ name: 'A', weight: 40 }, { name: 'B' }] },
+    ]);
+    const byId = new Map(scored.map((etf) => [etf.id, etf]));
+
+    expect(byId.get('WEIGHTLESS').scoreBreakdown.분산).toBeNull();
+    expect(byId.get('MIXED').scoreBreakdown.분산).toBeGreaterThan(
+      byId.get('CONCENTRATED').scoreBreakdown.분산,
+    );
+  });
 });
