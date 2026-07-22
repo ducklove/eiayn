@@ -18,7 +18,8 @@
 // - Backfilled entries carry `backfilled: true` (preserved by
 //   scripts/data/history.mjs across later appends) so the UI/consumers can
 //   distinguish reconstructed points from live daily observations.
-// - Existing entries are never modified or replaced.
+// - Live entries are never modified or replaced; a rerun may replace
+//   earlier backfilled entries with an improved reconstruction.
 //
 // Usage: node scripts/backfill-history.mjs [--from 2026-06-26] [--to 2026-07-21]
 
