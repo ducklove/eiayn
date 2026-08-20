@@ -1,11 +1,188 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-18T07:20:14.810Z",
-  "previousGeneratedAt": "2026-08-14T07:57:16.182Z",
+  "generatedAt": "2026-08-20T07:23:31.994Z",
+  "previousGeneratedAt": "2026-08-18T07:20:14.810Z",
   "newListings": [
+    {
+      "id": "VTV",
+      "name": "Vanguard Morningstar Value ETF",
+      "market": "미국"
+    },
+    {
+      "id": "VCSH",
+      "name": "Vanguard Short-Term Corporate Bond Index Fund ETF Shares",
+      "market": "미국"
+    },
+    {
+      "id": "AVLV",
+      "name": "Avantis US Large Cap Value ETF",
+      "market": "미국"
+    },
+    {
+      "id": "GDXJ",
+      "name": "VanEck Junior Gold Miners ETF",
+      "market": "미국"
+    },
+    {
+      "id": "SPHQ",
+      "name": "Invesco S&P 500 Quality ETF",
+      "market": "미국"
+    },
+    {
+      "id": "IEUR",
+      "name": "iShares Core MSCI Europe ETF",
+      "market": "미국"
+    },
+    {
+      "id": "EMXC",
+      "name": "iShares MSCI Emerging Markets ex China ETF",
+      "market": "미국"
+    },
+    {
+      "id": "EWJ",
+      "name": "iShares MSCI Japan ETF",
+      "market": "미국"
+    },
+    {
+      "id": "MBB",
+      "name": "iShares MBS ETF",
+      "market": "미국"
+    },
+    {
+      "id": "SHY",
+      "name": "iShares 1-3 Year Treasury Bond ETF",
+      "market": "미국"
+    },
+    {
+      "id": "BFLX",
+      "name": "iShares Flexible Equity Active ETF",
+      "market": "미국"
+    },
+    {
+      "id": "HDV",
+      "name": "iShares Core High Dividend ETF",
+      "market": "미국"
+    },
+    {
+      "id": "ARKG",
+      "name": "ARK Genomic Revolution ETF",
+      "market": "미국"
+    },
+    {
+      "id": "ETHU",
+      "name": "2x Ether ETF",
+      "market": "미국"
+    },
+    {
+      "id": "BNDX",
+      "name": "Vanguard Total International Bond Index Fund ETF Shares",
+      "market": "미국"
+    },
+    {
+      "id": "SKUU",
+      "name": "GraniteShares 2x Long SK Hynix Daily ETF",
+      "market": "미국"
+    },
+    {
+      "id": "FBND",
+      "name": "Fidelity Total Bond ETF",
+      "market": "미국"
+    },
+    {
+      "id": "USHY",
+      "name": "iShares Broad USD High Yield Corporate Bond ETF",
+      "market": "미국"
+    },
+    {
+      "id": "DFCF",
+      "name": "Dimensional Core Fixed Income ETF",
+      "market": "미국"
+    },
+    {
+      "id": "SCHO",
+      "name": "Schwab Short-Term U.S. Treasury ETF",
+      "market": "미국"
+    },
+    {
+      "id": "SILJ",
+      "name": "Amplify Junior Silver Miners ETF",
+      "market": "미국"
+    },
+    {
+      "id": "EMLC",
+      "name": "VanEck J.P. Morgan EM Local Currency Bond ETF",
+      "market": "미국"
+    },
+    {
+      "id": "BTC",
+      "name": "Grayscale Bitcoin Mini Trust ETF",
+      "market": "미국"
+    },
+    {
+      "id": "SPTL",
+      "name": "State Street SPDR Portfolio Long Term Treasury ETF",
+      "market": "미국"
+    },
+    {
+      "id": "ETH",
+      "name": "Grayscale Ethereum Mini Trust ETF",
+      "market": "미국"
+    },
+    {
+      "id": "FETH",
+      "name": "Fidelity Ethereum Fund",
+      "market": "미국"
+    },
+    {
+      "id": "BITU",
+      "name": "Proshares Ultra Bitcoin ETF",
+      "market": "미국"
+    },
+    {
+      "id": "BMNU",
+      "name": "T-REX 2X Long BMNR Daily Target ETF",
+      "market": "미국"
+    },
+    {
+      "id": "PGX",
+      "name": "Invesco Preferred ETF",
+      "market": "미국"
+    },
+    {
+      "id": "CRCG",
+      "name": "Leverage Shares 2X Long CRCL Da",
+      "market": "미국"
+    },
+    {
+      "id": "MSOS",
+      "name": "AdvisorShares Pure US Cannabis ETF",
+      "market": "미국"
+    },
+    {
+      "id": "RGTZ",
+      "name": "Defiance Daily Target 2x Short ",
+      "market": "미국"
+    }
+  ],
+  "delisted": [
+    {
+      "id": "0036D0",
+      "name": "TIME 미국배당다우존스액티브",
+      "market": "국내"
+    },
+    {
+      "id": "397420",
+      "name": "RISE 국채선물5년추종",
+      "market": "국내"
+    },
     {
       "id": "IJH",
       "name": "iShares Core S&P Mid-Cap ETF",
+      "market": "미국"
+    },
+    {
+      "id": "USO",
+      "name": "United States Oil Fund, LP",
       "market": "미국"
     },
     {
@@ -24,8 +201,8 @@
       "market": "미국"
     },
     {
-      "id": "IDEV",
-      "name": "iShares Core MSCI International Developed Markets ETF",
+      "id": "XLRE",
+      "name": "State Street Real Estate Select Sector SPDR ETF",
       "market": "미국"
     },
     {
@@ -49,8 +226,8 @@
       "market": "미국"
     },
     {
-      "id": "JPST",
-      "name": "JPMorgan Ultra-Short Income ETF",
+      "id": "JEPQ",
+      "name": "JPMorgan Nasdaq Equity Premium Income ETF",
       "market": "미국"
     },
     {
@@ -59,13 +236,8 @@
       "market": "미국"
     },
     {
-      "id": "FBTC",
-      "name": "Fidelity Wise Origin Bitcoin Trust",
-      "market": "미국"
-    },
-    {
-      "id": "TMF",
-      "name": "Direxion Daily 20+ Year Treasury Bull 3X Shares",
+      "id": "SCHF",
+      "name": "Schwab International Equity ETF",
       "market": "미국"
     },
     {
@@ -79,13 +251,43 @@
       "market": "미국"
     },
     {
-      "id": "MVLL",
-      "name": "GraniteShares 2x Long MRVL Daily ETF",
+      "id": "MULL",
+      "name": "GraniteShares 2x Long MU Daily ",
+      "market": "미국"
+    },
+    {
+      "id": "SMCX",
+      "name": "Defiance Daily Target 2X Long S",
+      "market": "미국"
+    },
+    {
+      "id": "METU",
+      "name": "Direxion Daily META Bull 2X ETF",
       "market": "미국"
     },
     {
       "id": "SCO",
       "name": "ProShares UltraShort Bloomberg Crude Oil",
+      "market": "미국"
+    },
+    {
+      "id": "INTW",
+      "name": "GraniteShares 2x Long INTC Daily ETF",
+      "market": "미국"
+    },
+    {
+      "id": "SCHH",
+      "name": "Schwab U.S. REIT ETF",
+      "market": "미국"
+    },
+    {
+      "id": "NVDX",
+      "name": "T-Rex 2X Long NVIDIA Daily Targ",
+      "market": "미국"
+    },
+    {
+      "id": "BOIL",
+      "name": "ProShares Ultra Bloomberg Natural Gas",
       "market": "미국"
     },
     {
@@ -112,264 +314,146 @@
       "id": "CBRZ",
       "name": "Tradr 2X Short CBRS Daily ETF",
       "market": "미국"
-    }
-  ],
-  "delisted": [
+    },
     {
-      "id": "FBND",
-      "name": "Fidelity Total Bond ETF",
+      "id": "SMCZ",
+      "name": "Defiance Daily Target 2X Short SMCI ETF",
       "market": "미국"
     },
     {
-      "id": "SPYM",
-      "name": "State Street SPDR Portfolio S&P 500 ETF",
-      "market": "미국"
-    },
-    {
-      "id": "XLC",
-      "name": "State Street Communication Services Select Sector SPDR ETF",
-      "market": "미국"
-    },
-    {
-      "id": "IYR",
-      "name": "iShares U.S. Real Estate ETF",
-      "market": "미국"
-    },
-    {
-      "id": "SH",
-      "name": "ProShares Short S&P500",
-      "market": "미국"
-    },
-    {
-      "id": "SKUU",
-      "name": "GraniteShares 2x Long SK Hynix Daily ETF",
-      "market": "미국"
-    },
-    {
-      "id": "NEBX",
-      "name": "Tradr 2X Long NBIS Daily ETF",
-      "market": "미국"
-    },
-    {
-      "id": "ILF",
-      "name": "iShares Latin America 40 ETF",
-      "market": "미국"
-    },
-    {
-      "id": "TZA",
-      "name": "Direxion Daily Small Cap Bear 3X Shares",
-      "market": "미국"
-    },
-    {
-      "id": "SPTL",
-      "name": "State Street SPDR Portfolio Long Term Treasury ETF",
-      "market": "미국"
-    },
-    {
-      "id": "PTIR",
-      "name": "GraniteShares 2x Long PLTR Dail",
-      "market": "미국"
-    },
-    {
-      "id": "LOFF",
-      "name": "Direxion Daily SpaceX Bull 2X E",
-      "market": "미국"
-    },
-    {
-      "id": "SPCF",
-      "name": "ProShares Ultra SpaceX",
-      "market": "미국"
-    },
-    {
-      "id": "PGX",
-      "name": "Invesco Preferred ETF",
-      "market": "미국"
-    },
-    {
-      "id": "ORCU",
-      "name": "Direxion Daily ORCL Bull 2X ETF",
-      "market": "미국"
-    },
-    {
-      "id": "NVDQ",
-      "name": "T-Rex 2X Inverse NVIDIA Daily T",
-      "market": "미국"
-    },
-    {
-      "id": "ONDL",
-      "name": "Defiance Daily Target 2X Long ONDS ETF",
-      "market": "미국"
-    },
-    {
-      "id": "CRMG",
-      "name": "Leverage Shares 2X Long CRM Dai",
-      "market": "미국"
-    },
-    {
-      "id": "PLTZ",
-      "name": "Defiance Daily Target 2x Short PLTR ETF",
-      "market": "미국"
-    },
-    {
-      "id": "TSDD",
-      "name": "Graniteshares 2x Short TSLA Daily ETF",
-      "market": "미국"
-    },
-    {
-      "id": "LUNL",
-      "name": "Defiance Daily Target 2X Long LUNR ETF",
-      "market": "미국"
-    },
-    {
-      "id": "ADBG",
-      "name": "Leverage Shares 2X Long ADBE Daily ETF",
-      "market": "미국"
-    },
-    {
-      "id": "RGTZ",
-      "name": "Defiance Daily Target 2x Short ",
-      "market": "미국"
-    },
-    {
-      "id": "QBTZ",
-      "name": "Defiance Daily Target 2x Short ",
+      "id": "ONDG",
+      "name": "Leverage Shares 2X Long ONDS Daily ETF",
       "market": "미국"
     }
   ],
   "feeChanges": [
     {
-      "id": "FXI",
-      "name": "iShares China Large-Cap ETF",
-      "from": 0.73,
-      "to": 0.74
-    },
-    {
-      "id": "IS3N.DE",
-      "name": "iShares Core MSCI EM IMI UCITS ETF USD (Acc)",
-      "from": 0.18,
-      "to": 0.22
+      "id": "3032.HK",
+      "name": "Hang Seng Investment Index Funds Series - Hang Seng Tech Index ETF",
+      "from": 0.69,
+      "to": 0.87
     }
   ],
   "scoreMoves": [
     {
+      "id": "0207G0",
+      "name": "SOL 우주항공밸류체인",
+      "from": 67,
+      "to": 47
+    },
+    {
+      "id": "0192T0",
+      "name": "SOL 코스닥TOP10",
+      "from": 69,
+      "to": 51
+    },
+    {
+      "id": "0183J0",
+      "name": "TIGER 미국우주테크",
+      "from": 69,
+      "to": 52
+    },
+    {
+      "id": "0207Z0",
+      "name": "KIWOOM 미국우주데이터센터인프라",
+      "from": 62,
+      "to": 45
+    },
+    {
+      "id": "NBIL",
+      "name": "GraniteShares 2x Long NBIS Dail",
+      "from": 55,
+      "to": 38
+    },
+    {
+      "id": "0168K0",
+      "name": "TIGER 기술이전바이오액티브",
+      "from": 65,
+      "to": 49
+    },
+    {
       "id": "0180V0",
       "name": "ACE 미국우주테크액티브",
-      "from": 47,
-      "to": 64
+      "from": 64,
+      "to": 48
     },
     {
       "id": "0181L0",
       "name": "SOL 미국우주항공TOP10",
-      "from": 49,
-      "to": 65
+      "from": 65,
+      "to": 49
     },
     {
-      "id": "0184V0",
-      "name": "UNICORN K바이오액티브",
-      "from": 61,
-      "to": 46
+      "id": "0048K0",
+      "name": "KODEX 차이나휴머노이드로봇",
+      "from": 65,
+      "to": 50
+    },
+    {
+      "id": "0102X0",
+      "name": "ACE 유럽방산TOP10",
+      "from": 74,
+      "to": 59
     },
     {
       "id": "0185L0",
       "name": "TIME 글로벌휴머노이드로봇산업액티브",
-      "from": 44,
-      "to": 59
+      "from": 59,
+      "to": 44
     },
     {
-      "id": "0191S0",
-      "name": "IBK 코스닥150",
-      "from": 67,
-      "to": 52
+      "id": "0190M0",
+      "name": "KIWOOM 미국AI테크하이베타",
+      "from": 61,
+      "to": 46
     },
     {
-      "id": "0107F0",
-      "name": "KIWOOM 미국고배당&AI테크",
-      "from": 53,
-      "to": 67
+      "id": "0104G0",
+      "name": "PLUS K방산레버리지",
+      "from": 56,
+      "to": 42
     },
     {
-      "id": "0166N0",
-      "name": "PLUS 코스닥150액티브",
-      "from": 43,
-      "to": 57
-    },
-    {
-      "id": "0189B0",
-      "name": "TIGER 은액티브",
-      "from": 51,
-      "to": 65
+      "id": "0144M0",
+      "name": "KODEX 미국드론UAM TOP10",
+      "from": 65,
+      "to": 51
     },
     {
       "id": "0203S0",
       "name": "WON 삼성전자현대차채권혼합50",
-      "from": 53,
-      "to": 67
+      "from": 67,
+      "to": 53
+    },
+    {
+      "id": "0204D0",
+      "name": "KODEX 현대차로보틱스밸류체인TOP3플러스",
+      "from": 63,
+      "to": 49
     },
     {
       "id": "0209Z0",
       "name": "ACE 코리아AI전력TOP10",
-      "from": 48,
-      "to": 62
+      "from": 62,
+      "to": 48
+    },
+    {
+      "id": "0215T0",
+      "name": "HANARO 미국AI광통신TOP10",
+      "from": 66,
+      "to": 52
+    },
+    {
+      "id": "0227K0",
+      "name": "RISE 미국우주위성통신",
+      "from": 67,
+      "to": 53
     },
     {
       "id": "413220",
       "name": "SOL 차이나태양광CSI(합성)",
-      "from": 49,
-      "to": 63
-    },
-    {
-      "id": "414780",
-      "name": "TIGER 차이나과창판STAR50(합성)",
-      "from": 61,
-      "to": 75
-    },
-    {
-      "id": "438320",
-      "name": "TIGER 차이나항셍테크레버리지(합성 H)",
-      "from": 42,
-      "to": 56
-    },
-    {
-      "id": "449690",
-      "name": "TIGER 한중반도체(합성)",
-      "from": 59,
-      "to": 73
-    },
-    {
-      "id": "450190",
-      "name": "KODEX 한중반도체(합성)",
-      "from": 59,
-      "to": 73
-    },
-    {
-      "id": "0103T0",
-      "name": "1Q K소버린AI",
-      "from": 64,
-      "to": 51
-    },
-    {
-      "id": "0151S0",
-      "name": "KODEX 미국AI반도체TOP3플러스",
-      "from": 59,
-      "to": 72
-    },
-    {
-      "id": "0183V0",
-      "name": "KIWOOM 삼성전자&SK하이닉스채권혼합50",
-      "from": 59,
-      "to": 72
-    },
-    {
-      "id": "0198A0",
-      "name": "KIWOOM 코스닥150커버드콜액티브",
-      "from": 64,
-      "to": 51
-    },
-    {
-      "id": "0204S0",
-      "name": "TIGER 코스닥액티브",
-      "from": 61,
-      "to": 48
+      "from": 63,
+      "to": 49
     }
   ]
 }
