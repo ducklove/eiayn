@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { rankEtfsByScore } from './ranking.js';
 
 function etf(id, aiynScore, overrides = {}) {
-  return { id, aiynScore, scoreCoverage: 1, aum: 1000, ...overrides };
+  return { id, currency: 'USD', aiynScore, scoreCoverage: 1, aum: 1000, ...overrides };
 }
 
 describe('rankEtfsByScore', () => {
@@ -50,4 +50,18 @@ describe('rankEtfsByScore', () => {
     rankEtfsByScore(input);
     expect(input.map((item) => item.id)).toEqual(['A', 'B']);
   });
+});
+
+it('시장·자산군·충족도로 좁힌 집단 안에서 순위를 정한다', () => {
+  const etfs = [
+    etf('KR-EQ', 80, { market: '국내', assetClass: '주식', scoreCoverage: 0.9 }),
+    etf('US-EQ', 90, { market: '미국', assetClass: '주식', scoreCoverage: 1 }),
+    etf('KR-BOND', 90, { market: '국내', assetClass: '채권', scoreCoverage: 1 }),
+    etf('PARTIAL', 95, { market: '국내', assetClass: '주식', scoreCoverage: 0.7 }),
+  ];
+  expect(
+    rankEtfsByScore(etfs, { market: '국내', assetClass: '주식', minCoverage: 0.8 }).map(
+      (x) => x.id,
+    ),
+  ).toEqual(['KR-EQ']);
 });

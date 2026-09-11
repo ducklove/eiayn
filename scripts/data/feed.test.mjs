@@ -54,7 +54,7 @@ describe('buildFeedXml', () => {
     const doc = parseXml(buildFeedXml(null, changesFixture()));
     const item = doc.querySelector('channel > item');
     expect(item.querySelector('title').textContent).toBe(
-      '[2026-06-11] 신규 상장 3종, 보수 변동 2종, 점수 급변 1종',
+      '[2026-06-11] 목록 편입 3종, 보수 변동 2종, 점수 급변 1종',
     );
     const guid = item.querySelector('guid');
     expect(guid.textContent).toBe('eiayn-data-update-2026-06-10T21:40:00.000Z');
@@ -143,10 +143,10 @@ describe('buildFeedXml', () => {
 describe('changeSummaryLabel', () => {
   it('joins only the non-empty change groups', () => {
     expect(changeSummaryLabel(changesFixture())).toBe(
-      '신규 상장 3종, 보수 변동 2종, 점수 급변 1종',
+      '목록 편입 3종, 보수 변동 2종, 점수 급변 1종',
     );
     expect(changeSummaryLabel(changesFixture({ delisted: [{ id: 'X' }] }))).toBe(
-      '신규 상장 3종, 상장 폐지 1종, 보수 변동 2종, 점수 급변 1종',
+      '목록 편입 3종, 목록 제외 1종, 보수 변동 2종, 점수 급변 1종',
     );
     expect(
       changeSummaryLabel({ newListings: [], delisted: [], feeChanges: [], scoreMoves: [] }),

@@ -46,6 +46,13 @@ export function diffSnapshots(previousPayload, newPayload) {
 
   const previousEtfs = etfList(previousPayload);
   if (!previousEtfs) return changes;
+  const sameScoreModel =
+    (previousPayload.scoreModelVersion ?? '1.0.0') === (newPayload.scoreModelVersion ?? '1.0.0');
+  if (!sameScoreModel)
+    changes.scoreModelChange = {
+      from: previousPayload.scoreModelVersion ?? '1.0.0',
+      to: newPayload.scoreModelVersion ?? '1.0.0',
+    };
 
   const previousById = byId(previousEtfs);
   const newById = byId(newEtfs);
@@ -79,6 +86,7 @@ export function diffSnapshots(previousPayload, newPayload) {
     const fromScore = finiteOrNull(previous.aiynScore);
     const toScore = finiteOrNull(etf.aiynScore);
     if (
+      sameScoreModel &&
       fromScore !== null &&
       toScore !== null &&
       Math.abs(toScore - fromScore) >= SCORE_MOVE_MIN_DELTA

@@ -4,6 +4,7 @@ import { scoreEtfs } from './scoring.js';
 describe('scoreEtfs', () => {
   const baseEtf = {
     id: 'BASE',
+    currency: 'USD',
     expenseRatio: 0.1,
     aum: 10_000_000_000,
     returns: { y1: 10, y3Annualized: 8, y5Annualized: 7 },

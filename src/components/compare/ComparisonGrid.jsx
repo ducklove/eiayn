@@ -34,7 +34,12 @@ export function ComparisonGrid({
   onAddNext,
 }) {
   return (
-    <section className="comparison-grid" id="basket" aria-labelledby="comparison-title">
+    <section
+      className="comparison-grid"
+      id="basket"
+      tabIndex={-1}
+      aria-labelledby="comparison-title"
+    >
       <div className="compare-labels">
         <div className="compare-cell header-cell">
           <h3 id="comparison-title">비교 중인 ETF ({selectedEtfs.length})</h3>

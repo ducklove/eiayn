@@ -47,7 +47,7 @@ export function historyFromSnapshot(payload) {
     if (typeof score !== 'number' || !Number.isFinite(score)) continue;
     scores[id] = Math.round(score);
   }
-  return { date, generatedAt, scores };
+  return { date, generatedAt, scores, scoreModelVersion: payload.scoreModelVersion ?? '1.0.0' };
 }
 
 /**
@@ -99,6 +99,7 @@ function normalizeEntry(entry) {
     date,
     generatedAt,
     scores: normalizeScores(entry.scores),
+    scoreModelVersion: entry.scoreModelVersion ?? '1.0.0',
     // Entries reconstructed after an outage carry backfilled: true (see
     // scripts/backfill-history.mjs); the marker must survive later appends.
     ...(entry.backfilled === true ? { backfilled: true } : {}),

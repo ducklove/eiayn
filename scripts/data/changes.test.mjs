@@ -192,3 +192,15 @@ describe('diffSnapshots', () => {
     expect(() => diffSnapshots(null, { etfs: 'nope' })).toThrow(TypeError);
   });
 });
+
+it('산식 버전이 바뀐 날은 점수 급변으로 보고하지 않는다', () => {
+  const old = { generatedAt: '2026-09-10T00:00:00Z', etfs: [{ id: 'A', aiynScore: 90 }] };
+  const next = {
+    generatedAt: '2026-09-11T00:00:00Z',
+    scoreModelVersion: '2.0.0',
+    etfs: [{ id: 'A', aiynScore: 50 }],
+  };
+  const changes = diffSnapshots(old, next);
+  expect(changes.scoreMoves).toEqual([]);
+  expect(changes.scoreModelChange).toEqual({ from: '1.0.0', to: '2.0.0' });
+});

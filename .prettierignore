@@ -4,6 +4,7 @@ node_modules
 
 # Generated data snapshot (machine-written JSON)
 public/data
+public/runtime-data
 
 # Lockfile (npm-managed)
 package-lock.json

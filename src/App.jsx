@@ -1,12 +1,13 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { useDocumentTitle } from './hooks/useDocumentTitle.js';
 import { useEtfData } from './hooks/useEtfData.js';
+import { useEtfDetails } from './hooks/useEtfDetails.js';
 import { usePersistentState } from './hooks/usePersistentState.js';
 import { useTheme } from './hooks/useTheme.js';
 import { buildCsv, downloadFile } from './lib/csv.js';
 import { resolveInitialSelection } from './lib/deepLink.js';
 import { formatDateTime } from './lib/format.js';
-import { rankEtfsByScore } from './lib/ranking.js';
+import { rankEtfsByScore, readRankingFilters, writeRankingFilters } from './lib/ranking.js';
 import {
   buildSearchIndex,
   DEFAULT_FILTERS,
@@ -45,11 +46,17 @@ function App() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [activeId, setActiveId] = useState(null);
   const [viewMode, setViewMode] = useState('compare');
+  const [rankingFilters, setRankingFilters] = useState({
+    market: '',
+    assetClass: '',
+    minCoverage: 0,
+  });
   const [favorites, setFavorites] = usePersistentState('eiayn:favorites:v1', [], isIdList);
   const [recentIds, setRecentIds] = usePersistentState('eiayn:recent:v1', [], isIdList);
   const [actionNote, setActionNote] = useState('');
   const [showGuide, setShowGuide] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [pendingSection, setPendingSection] = useState(() => window.location.hash.slice(1));
   const searchRef = useRef(null);
   const deferredQuery = useDeferredValue(query);
 
@@ -64,6 +71,7 @@ function App() {
     const searchState = readSearchState(params, etfs);
     setQuery(searchState.query);
     setFilters(searchState.filters);
+    setRankingFilters(readRankingFilters(params, etfs));
     if (initialSelection.requestedCode && !initialSelection.matchedCodeId) {
       setActionNote(`${initialSelection.requestedCode} 코드를 찾지 못해 기본 ETF를 표시합니다.`);
     }
@@ -84,6 +92,8 @@ function App() {
       const searchState = readSearchState(params, etfs);
       setQuery(searchState.query);
       setFilters(searchState.filters);
+      setRankingFilters(readRankingFilters(params, etfs));
+      setPendingSection(window.location.hash.slice(1));
       if (params.get('code') || params.get('compare') || params.get('active')) {
         setSelectedIds(selection.selectedIds);
         setActiveId(selection.activeId);
@@ -102,12 +112,13 @@ function App() {
   useEffect(() => {
     if (!initialized) return;
     const params = writeSearchParams(new URLSearchParams(window.location.search), query, filters);
+    if (viewMode === 'ranking') writeRankingFilters(params, rankingFilters);
     window.history.replaceState(
       null,
       '',
       `${window.location.pathname}?${params.toString()}${window.location.hash}`,
     );
-  }, [query, filters, initialized]);
+  }, [query, filters, initialized, viewMode, rankingFilters]);
 
   // Focus search with "/" unless the user is already typing in a field.
   useEffect(() => {
@@ -143,11 +154,21 @@ function App() {
       })),
     [allSearchResults, deferredQuery, searchIndex],
   );
+  const detailIds =
+    viewMode === 'analysis' ? [activeId] : viewMode === 'compare' ? [...selectedIds, activeId] : [];
+  const details = useEtfDetails(data, detailIds);
   const selectedEtfs = useMemo(
-    () => selectedIds.map((id) => etfs.find((etf) => etf.id === id)).filter(Boolean),
-    [selectedIds, etfs],
+    () =>
+      selectedIds
+        .map((id) => details.entries[id] ?? etfs.find((etf) => etf.id === id))
+        .filter(Boolean),
+    [selectedIds, etfs, details.entries],
   );
-  const selectedEtf = etfs.find((etf) => etf.id === activeId) ?? selectedEtfs[0] ?? etfs[0];
+  const selectedEtf =
+    details.entries[activeId] ??
+    etfs.find((etf) => etf.id === activeId) ??
+    selectedEtfs[0] ??
+    etfs[0];
   const favoriteEtfs = etfs.filter((etf) => favorites.includes(etf.id));
   const recentEtfs = recentIds.map((id) => etfs.find((etf) => etf.id === id)).filter(Boolean);
   const isAnalysisView = viewMode === 'analysis';
@@ -156,6 +177,16 @@ function App() {
   const isCompareView = !isAnalysisView && !isListView && !isRankingView;
 
   useDocumentTitle(viewMode, selectedEtf);
+
+  useEffect(() => {
+    if (!pendingSection || !initialized) return;
+    if ((viewMode === 'compare' || viewMode === 'analysis') && !details.ready) return;
+    const target = document.getElementById(pendingSection);
+    if (!target) return;
+    target.scrollIntoView({ block: 'start' });
+    target.focus({ preventScroll: true });
+    setPendingSection('');
+  }, [pendingSection, initialized, viewMode, details.ready]);
 
   const filterOptions = useMemo(
     () => ({
@@ -209,7 +240,18 @@ function App() {
 
   const showRanking = () => {
     setViewMode('ranking');
-    writeRankingUrl(query, filters);
+    writeRankingUrl(query, filters, rankingFilters);
+  };
+
+  const navigateSection = (section) => {
+    if (['model', 'score-model', 'risk'].includes(section)) openAnalysis(selectedEtf.id);
+    else showCompare();
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}${window.location.search}#${section}`,
+    );
+    setPendingSection(section);
   };
 
   const addCompareFromList = (id) => {
@@ -247,7 +289,7 @@ function App() {
 
   const exportCsv = () => {
     const exportEtfs = isRankingView
-      ? rankEtfsByScore(etfs)
+      ? rankEtfsByScore(etfs, rankingFilters)
       : isListView
         ? filteredEtfs
         : isAnalysisView
@@ -270,6 +312,10 @@ function App() {
       maxDrawdown3y: etf.risk.maxDrawdown3y,
       sharpe3y: etf.risk.sharpe3y,
       quoteAsOf: etf.dataQuality.quoteAsOf,
+      quoteCollectedAt: etf.dataQuality.quoteCollectedAt,
+      aumUsd: etf.aumUsd,
+      aumFxAsOf: etf.aumFxAsOf,
+      scoreModelVersion: etf.scoreModelVersion,
     }));
     const csv = buildCsv(rows);
     if (!csv) return;
@@ -304,6 +350,7 @@ function App() {
       params.set('view', 'list');
     } else if (isRankingView) {
       params.set('view', 'ranking');
+      writeRankingFilters(params, rankingFilters);
     } else {
       if (selectedIds.length) params.set('compare', selectedIds.join(','));
       if (activeId) params.set('active', activeId);
@@ -364,10 +411,11 @@ function App() {
         recentEtfs={recentEtfs}
         generatedAt={data.generatedAt}
         viewMode={viewMode}
-        onShowCompare={showCompare}
-        onShowAnalysis={showActiveAnalysis}
+        onShowCompare={() => navigateSection('dashboard')}
+        onShowAnalysis={() => navigateSection('model')}
         onOpenEtf={openAnalysis}
         onFocusSearch={() => searchRef.current?.focus()}
+        onNavigateSection={navigateSection}
       />
       <div className="main-shell">
         <TopBar
@@ -418,12 +466,29 @@ function App() {
                 onSelect={openAnalysis}
               />
             )}
+            {!details.ready && (isAnalysisView || isCompareView) && (
+              <div className="detail-status" role={details.error ? 'alert' : 'status'}>
+                <p>{details.error ?? '선택한 ETF의 상세 데이터를 불러오는 중입니다.'}</p>
+                {details.error && (
+                  <>
+                    <button className="ghost-button" onClick={details.retry}>
+                      상세 다시 시도
+                    </button>
+                    <button className="ghost-button" onClick={reload}>
+                      목록 새로 불러오기
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
             {isAnalysisView ? (
-              <EtfAnalysisDashboard
-                selectedEtf={selectedEtf}
-                favorites={favorites}
-                toggleFavorite={toggleFavorite}
-              />
+              details.ready && (
+                <EtfAnalysisDashboard
+                  selectedEtf={selectedEtf}
+                  favorites={favorites}
+                  toggleFavorite={toggleFavorite}
+                />
+              )
             ) : isListView ? (
               <EtfTable
                 etfs={filteredEtfs}
@@ -435,7 +500,12 @@ function App() {
                 searchActive={Boolean(query.trim())}
               />
             ) : isRankingView ? (
-              <AiynRankingView etfs={etfs} onOpenEtf={openAnalysis} />
+              <AiynRankingView
+                etfs={etfs}
+                onOpenEtf={openAnalysis}
+                filters={rankingFilters}
+                onFiltersChange={setRankingFilters}
+              />
             ) : (
               <ComparisonGrid
                 selectedEtfs={selectedEtfs}
@@ -447,7 +517,7 @@ function App() {
                 onAddNext={addNext}
               />
             )}
-            {isCompareView && (
+            {isCompareView && details.ready && (
               <div className="compare-tools">
                 <PerformanceOverlay selectedEtfs={selectedEtfs} />
                 <CostCalculator selectedEtfs={selectedEtfs} />
@@ -472,16 +542,18 @@ function App() {
                   emptyText="아직 조회한 ETF가 없습니다."
                   onOpenEtf={openAnalysis}
                 />
-                <SimpleListPanel
-                  title="관심상품"
-                  items={favoriteEtfs}
-                  emptyText="별 버튼으로 관심상품을 추가하세요."
-                  onOpenEtf={openAnalysis}
-                />
+                <div id="favorite-list" tabIndex={-1}>
+                  <SimpleListPanel
+                    title="관심상품"
+                    items={favoriteEtfs}
+                    emptyText="별 버튼으로 관심상품을 추가하세요."
+                    onOpenEtf={openAnalysis}
+                  />
+                </div>
               </div>
             )}
           </div>
-          {isCompareView && (
+          {isCompareView && details.ready && (
             <AnalysisPanel
               selectedEtf={selectedEtf}
               favorites={favorites}
@@ -492,7 +564,15 @@ function App() {
         <footer className="site-footer">
           <span>마지막 업데이트: {formatDateTime(data.generatedAt)} KST</span>
           <span>데이터 출처: 네이버 금융, Yahoo Finance, StockAnalysis</span>
-          <a href="#risk">투자 유의 고지</a>
+          <a
+            href="#risk"
+            onClick={(event) => {
+              event.preventDefault();
+              navigateSection('risk');
+            }}
+          >
+            투자 유의 고지
+          </a>
         </footer>
       </div>
       {showGuide && <GuideModal onClose={() => setShowGuide(false)} />}
@@ -526,9 +606,9 @@ function writeListUrl(query, filters) {
   );
 }
 
-function writeRankingUrl(query, filters) {
+function writeRankingUrl(query, filters, rankingFilters) {
   pushUrl(
-    `${window.location.pathname}?${writeSearchParams(new URLSearchParams({ view: 'ranking' }), query, filters)}`,
+    `${window.location.pathname}?${writeRankingFilters(writeSearchParams(new URLSearchParams({ view: 'ranking' }), query, filters), rankingFilters)}`,
   );
 }
 

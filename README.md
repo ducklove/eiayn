@@ -6,7 +6,7 @@ Live page: https://ducklove.github.io/eiayn/
 
 ## What It Does
 
-- Loads `/data/etfs.json`, generated during build, instead of bundling production ETF data in React source.
+- 빌드 시 원천 `/data/etfs.json`에서 가벼운 `/runtime-data/catalog.json`과 ETF별 상세 JSON을 생성합니다. 검색은 목록만 사용하고, 분석·비교 시 선택한 ETF의 상세 자료를 읽습니다. 기존 `/data/etfs.json` API는 유지합니다.
 - Covers all listed Korean ETFs from Naver Finance, high-volume US ETFs from Yahoo Finance, and representative ETFs from Hong Kong, Germany, France, Japan, Australia, and Vietnam.
 - Supports integrated search across ETF metadata and top holdings where holdings are available.
 - Supports market/theme/provider/risk filters, comparison basket, ranking, detail panel, favorites, recent views, CSV export, and shareable URLs.
@@ -65,7 +65,7 @@ https://ducklove.github.io/eiayn/data/rankings.json
 ```
 
 It lists the top 100 ETFs by AIYN score (descending; ETFs without a score are
-excluded, ties break by score coverage, then AUM, then id) with identity
+excluded, ties break by score coverage, then AUM converted to USD on a shared FX date, then id) with identity
 fields, score/coverage, headline metrics, and an analysis-view deep link per
 entry. It is regenerated on every deploy by `scripts/build-rankings.mjs` from
 the committed snapshot, sharing the exact ordering logic with the in-app
@@ -99,3 +99,12 @@ Deployment and data refresh are split into separate workflows:
 ## Investment Notice
 
 EIAYN is an information tool based on public data snapshots. It is not investment advice. Prices, holdings, FX rates, and derived metrics can differ from current market data depending on source availability and update timing. Final investment responsibility belongs to the investor.
+
+## 데이터 비교 기준과 후속 개선
+
+- AIYN 산식 `2.0.0`: 규모 점수와 동점 순위는 동일 기준일 환율로 환산한 USD 순자산을 사용합니다. 환율 정보는 `exchangeRates.aumFx`, ETF별 값은 `aumUsd`와 `aumFxAsOf`입니다.
+- 성과 차트는 `performance1y.dates`의 공통 관측일만 비교하며, 날짜가 없는 과거 데이터는 제외합니다. 각 시장 현지 통화 기준으로 환율 수익은 포함하지 않습니다.
+- 시세의 실제 거래 시각 `quoteAsOf`와 수집 시각 `quoteCollectedAt`을 별도로 표시합니다.
+- 랭킹의 시장·자산군·최소 충족도 조건은 URL 공유·새로고침·CSV에 반영됩니다. 점수 이력은 같은 산식 버전끼리만 연결합니다.
+- 개발 서버도 `npm run dev`로 시작하면 탐색 자료를 먼저 생성합니다. 원천 갱신 후 개발 중이라면 `npm run data:catalog`를 실행합니다.
+- [후속 개선 결과와 검증](docs/followup-review-2026-09-11.md)

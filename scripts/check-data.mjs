@@ -1,5 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { datedPerformance } from '../src/lib/overlay.js';
+import { SCORE_MODEL_VERSION } from '../src/lib/scoring.js';
 
 const DATA_DIR = path.join(process.cwd(), 'public', 'data');
 const DATA_FILE = path.join(DATA_DIR, 'etfs.json');
@@ -63,6 +65,34 @@ sourceCatalog.forEach((entry, index) => {
 });
 
 const etfs = payload.etfs ?? [];
+const versioned = payload.scoreModelVersion === SCORE_MODEL_VERSION;
+if (versioned) {
+  const fx = payload.exchangeRates?.aumFx;
+  if (fx?.base !== 'USD' || !DATE_PATTERN.test(fx?.asOf ?? '') || !fx?.collectedAt)
+    errors.push('공통 기준일 환율 정보가 필요합니다.');
+  for (const etf of etfs) {
+    const rate = fx?.ratesToUsd?.[etf.currency];
+    if (!isFiniteNumber(rate) || rate <= 0)
+      errors.push(`${etf.id}: 공통 기준일의 ${etf.currency} 환율 누락`);
+    const expected = isFiniteNumber(etf.aum) && etf.aum > 0 ? etf.aum * rate : null;
+    if (
+      expected !== null &&
+      (!isFiniteNumber(etf.aumUsd) ||
+        Math.abs(etf.aumUsd - expected) > Math.max(0.01, expected * 1e-12))
+    )
+      errors.push(`${etf.id}: USD 환산 순자산 불일치`);
+    if (etf.scoreModelVersion !== SCORE_MODEL_VERSION)
+      errors.push(`${etf.id}: 점수 산식 버전 불일치`);
+    if (etf.performance1y && !datedPerformance(etf.performance1y))
+      errors.push(`${etf.id}: 실제 관측일과 성과값이 일치하지 않습니다.`);
+    if (!etf.dataQuality?.quoteCollectedAt) errors.push(`${etf.id}: 시세 수집 시각 누락`);
+    if (
+      etf.dataQuality?.quoteAsOf != null &&
+      !Number.isFinite(Date.parse(etf.dataQuality.quoteAsOf))
+    )
+      errors.push(`${etf.id}: 잘못된 거래 시각`);
+  }
+}
 const byId = new Map(etfs.map((etf) => [etf.id, etf]));
 const marketCounts = countBy(etfs, 'market');
 const excluded = Array.isArray(payload.coverage?.excluded) ? payload.coverage.excluded : [];

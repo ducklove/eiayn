@@ -1,15 +1,10 @@
 import { AlertTriangle, ChevronDown, Star } from 'lucide-react';
-import {
-  formatDateTime,
-  formatPercent,
-  formatPlainPercent,
-  formatPrice,
-  scoreLabel,
-} from '../../lib/format.js';
+import { formatPercent, formatPlainPercent, formatPrice, scoreLabel } from '../../lib/format.js';
 import { buildHoldingChart, HOLDING_COLORS, OTHER_HOLDING_COLOR } from '../../lib/holdings.js';
 import { getRiskBand } from '../../lib/search.js';
 import { Radar } from '../charts/Radar.jsx';
 import { ScoreCoverageBadge } from '../common/ScoreCoverageBadge.jsx';
+import { QuoteTime } from '../common/QuoteTime.jsx';
 import { RiskRow, riskMetricRows } from './riskRows.jsx';
 
 export function AnalysisPanel({ selectedEtf, favorites, toggleFavorite }) {
@@ -60,7 +55,7 @@ export function AnalysisPanel({ selectedEtf, favorites, toggleFavorite }) {
           </em>
         </div>
         <p className="asof-note">
-          시세 기준: {formatDateTime(selectedEtf.dataQuality.quoteAsOf)} KST
+          <QuoteTime quality={selectedEtf.dataQuality} />
         </p>
       </section>
 

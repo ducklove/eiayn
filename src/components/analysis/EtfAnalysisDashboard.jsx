@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { AlertTriangle, Star } from 'lucide-react';
 import {
   formatAum,
-  formatDateTime,
   formatPercent,
   formatPlainPercent,
   formatPrice,
@@ -16,6 +15,7 @@ import { DetailedSparkline } from '../charts/DetailedSparkline.jsx';
 import { MetricTile } from '../common/MetricTile.jsx';
 import { InfoPopover } from '../common/InfoPopover.jsx';
 import { ScoreCoverageBadge } from '../common/ScoreCoverageBadge.jsx';
+import { QuoteTime } from '../common/QuoteTime.jsx';
 import { RiskRow, riskMetricRows } from './riskRows.jsx';
 import { ScoreTrend } from './ScoreTrend.jsx';
 
@@ -24,7 +24,7 @@ const FACTOR_DESCRIPTIONS = {
     '최근 30일 가격 변화와 3개월 수익률을 ETF 유니버스 안의 백분위로 비교합니다. 두 기간을 같은 비중으로 반영합니다.',
   '장기 수익':
     '1년, 3년·5년 연환산 수익률을 ETF 유니버스 안의 백분위로 비교합니다. 1년 수익률 비중이 가장 큽니다.',
-  가치: '총보수 점수와 순자산(AUM) 규모 점수를 합친 항목입니다. 비용이 낮고 규모가 클수록 높게 잡힙니다.',
+  가치: '총보수 점수와 순자산(AUM) 규모 점수를 합친 항목입니다. 비용이 낮고 같은 기준일 환율로 USD 환산한 규모가 클수록 높게 잡힙니다.',
   안정성:
     '3년 샤프지수, 3년 연환산 변동성, 3년 최대낙폭을 함께 봅니다. 변동성과 낙폭은 낮을수록 유리합니다.',
   분산: '상위 10개 보유종목의 집중도가 낮을수록 높은 점수를 받습니다. 보유종목 데이터가 없으면 이 팩터는 점수 계산에서 제외됩니다.',
@@ -65,7 +65,9 @@ export function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite })
               {formatPercent(selectedEtf.changePercent)}{' '}
               {selectedEtf.changePercent >= 0 ? '▲' : '▼'}
             </em>
-            <small>시세 기준: {formatDateTime(selectedEtf.dataQuality.quoteAsOf)} KST</small>
+            <small>
+              <QuoteTime quality={selectedEtf.dataQuality} />
+            </small>
           </div>
         </div>
 
@@ -90,6 +92,10 @@ export function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite })
           tone="cost"
         />
         <MetricTile label="순자산 (AUM)" value={formatAum(selectedEtf.aum, selectedEtf.currency)} />
+        <MetricTile
+          label={`비교용 순자산 (USD · ${selectedEtf.aumFxAsOf ?? '환율 미확인'})`}
+          value={formatAum(selectedEtf.aumUsd, 'USD')}
+        />
         {selectedEtf.market === '국내' ? (
           <>
             <MetricTile
@@ -146,7 +152,7 @@ export function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite })
           </div>
         </section>
 
-        <section className="analysis-card factor-card">
+        <section className="analysis-card factor-card" id="score-model" tabIndex={-1}>
           <div className="section-heading">
             <div className="heading-title">
               <h3>AIYN 팩터</h3>
@@ -161,7 +167,7 @@ export function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite })
                 </p>
               </InfoPopover>
             </div>
-            <span>0-100 정규화</span>
+            <span>0-100 정규화 · 산식 {selectedEtf.scoreModelVersion ?? '1.0.0'}</span>
           </div>
           <div className="factor-list">
             {factorEntries.map(([label, value]) => (
@@ -196,11 +202,11 @@ export function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite })
           </section>
         ) : null}
 
-        <ScoreTrend etfId={selectedEtf.id} />
+        <ScoreTrend etfId={selectedEtf.id} scoreModelVersion={selectedEtf.scoreModelVersion} />
 
         <HoldingsCard key={selectedEtf.id} holdings={selectedEtf.holdings ?? []} />
 
-        <section className="analysis-card risk-note single-risk-note" id="risk">
+        <section className="analysis-card risk-note single-risk-note" id="risk" tabIndex={-1}>
           <AlertTriangle size={18} />
           <div>
             <h3>투자 유의 고지</h3>

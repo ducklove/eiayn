@@ -3146,3 +3146,57 @@ a {
   color: var(--quiet);
   font-size: 12px;
 }
+
+.quote-time {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+.ranking-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0;
+}
+.aiyn-ranking-block > .section-heading {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.aiyn-ranking-block > .section-heading h3 {
+  flex-shrink: 0;
+}
+@media (max-width: 600px) {
+  .aiyn-ranking-block > .section-heading {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+.ranking-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+.ranking-controls select {
+  min-width: 150px;
+  padding: 8px;
+  color: inherit;
+  background: var(--surface, white);
+  border: 1px solid var(--border, #ccd5df);
+  border-radius: 6px;
+}
+.detail-status {
+  padding: 16px;
+  border: 1px solid var(--border, #ccd5df);
+  border-radius: 8px;
+}
+.detail-status button {
+  margin-right: 8px;
+}
+#score-model,
+#risk,
+#basket,
+#ranking,
+#favorite-list {
+  scroll-margin-top: 20px;
+}

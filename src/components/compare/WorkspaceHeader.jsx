@@ -154,8 +154,8 @@ export function WorkspaceHeader({
 
       {isRankingView ? (
         <p className="filter-scope-note">
-          AIYN 랭킹은 전체 ETF 기준입니다. 상단 검색창으로 상품을 찾거나 전체 목록에서 검색·필터를
-          적용하세요.
+          AIYN 점수는 전체 ETF 기준으로 계산합니다. 아래 랭킹 조건으로 시장·자산군·데이터 충족도를
+          좁힐 수 있습니다.
         </p>
       ) : (
         <div className="filters" id="search">

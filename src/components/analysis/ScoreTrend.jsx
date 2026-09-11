@@ -3,9 +3,9 @@ import { useDataFile } from '../../hooks/useDataFile.js';
 import { extractScoreSeries } from '../../lib/history.js';
 import { returnTone } from '../../lib/format.js';
 
-export function ScoreTrend({ etfId }) {
+export function ScoreTrend({ etfId, scoreModelVersion }) {
   const { data: history, loading } = useDataFile('history.json');
-  const series = extractScoreSeries(history, etfId);
+  const series = extractScoreSeries(history, etfId, scoreModelVersion ?? '1.0.0');
 
   return (
     <section className="analysis-card score-trend" aria-labelledby="score-trend-title">
@@ -14,7 +14,7 @@ export function ScoreTrend({ etfId }) {
           <TrendingUp size={16} />
           <h3 id="score-trend-title">AIYN 점수 추이</h3>
         </div>
-        <span>일별 스냅샷 기준</span>
+        <span>산식 {scoreModelVersion ?? '1.0.0'} · 같은 산식의 일별 점수만 비교</span>
       </div>
       {loading ? (
         <p className="empty-state">점수 이력을 불러오는 중입니다.</p>

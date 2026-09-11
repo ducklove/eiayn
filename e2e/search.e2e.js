@@ -105,7 +105,7 @@ test.describe('오류 복구', () => {
   test('첫 데이터 요청 실패를 표시하고 재시도로 복구한다', async ({ page }) => {
     const snapshot = readFileSync(new URL('../public/data/etfs.json', import.meta.url), 'utf8');
     let fail = true;
-    await page.route('**/data/etfs.json', (route) =>
+    await page.route('**/runtime-data/catalog.json', (route) =>
       fail
         ? route.fulfill({ status: 503, body: 'unavailable' })
         : route.fulfill({ status: 200, contentType: 'application/json', body: snapshot }),
@@ -123,7 +123,9 @@ test.describe('오류 복구', () => {
       globalThis.localStorage.setItem('eiayn:recent:v1', '{}');
     });
     await gotoCompareHome(page);
-    await page.route('**/data/etfs.json', (route) => route.fulfill({ json: { etfs: [] } }));
+    await page.route('**/runtime-data/catalog.json', (route) =>
+      route.fulfill({ json: { etfs: [] } }),
+    );
     await page.reload();
     await expect(page.getByRole('heading', { name: '데이터를 불러오지 못했습니다' })).toBeVisible();
     await expect(page.getByText(/데이터가 비어 있거나/)).toBeVisible();

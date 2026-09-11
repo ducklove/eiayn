@@ -1,4 +1,7 @@
 import { isFiniteNumber } from './metrics.js';
+import { comparableAum } from './currency.js';
+
+export const SCORE_MODEL_VERSION = '2.0.0';
 
 const COMPONENT_WEIGHTS = {
   cost: 0.18,
@@ -25,6 +28,10 @@ export function scoreEtfs(etfs) {
 
     return {
       ...etf,
+      scoreModelVersion: SCORE_MODEL_VERSION,
+      scoreComponents: Object.fromEntries(
+        Object.entries(components).map(([key, value]) => [key, roundScore(value)]),
+      ),
       aiynScore: isFiniteNumber(aiynScore) ? Math.round(aiynScore) : null,
       scoreCoverage: Number(availableWeight.toFixed(2)),
       scoreBreakdown: {
@@ -44,7 +51,7 @@ export function scoreComponents(etf, context) {
 
   return {
     cost: normalizeLow(etf.expenseRatio, context.expenseRatio),
-    scale: normalizeHigh(logOrNull(etf.aum), context.logAum),
+    scale: normalizeHigh(logOrNull(comparableAum(etf)), context.logAum),
     shortReturn: weightedAverage(
       [
         percentileHigh(sparklineReturn(etf.sparkline), context.return30d),
@@ -79,7 +86,7 @@ export function scoreComponents(etf, context) {
 export function buildScoringContext(etfs) {
   return {
     expenseRatio: extent(etfs.map((etf) => etf.expenseRatio)),
-    logAum: extent(etfs.map((etf) => logOrNull(etf.aum))),
+    logAum: extent(etfs.map((etf) => logOrNull(comparableAum(etf)))),
     return30d: distribution(etfs.map((etf) => sparklineReturn(etf.sparkline))),
     m3Returns: distribution(etfs.map((etf) => etf.returns?.m3)),
     y1Returns: distribution(etfs.map((etf) => etf.returns?.y1)),

@@ -51,6 +51,17 @@ const SAMPLING_FIXTURE = [
 const SAMPLING_EXPECTED = {
   start: '2025-06-08',
   freq: 'weekly',
+  dates: [
+    '2025-06-08',
+    '2025-06-13',
+    '2025-06-20',
+    '2025-06-27',
+    '2025-07-04',
+    '2025-07-11',
+    '2025-07-18',
+    '2025-07-25',
+    '2025-07-30',
+  ],
   values: [100, 105, 95, 100, 108, 50, 150, 99, 101],
 };
 
@@ -183,6 +194,6 @@ describe('estimatePerformance1ySize', () => {
     expect(payload.values).toHaveLength(53);
     const { bytes } = estimatePerformance1ySize([{ performance1y: payload }]);
     expect(bytes).toBeGreaterThan(300);
-    expect(bytes).toBeLessThan(600);
+    expect(bytes).toBeLessThan(1400);
   });
 });

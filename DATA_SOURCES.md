@@ -85,7 +85,7 @@ Regional holdings are still unavailable from these public profile sources and re
 
 ## 1-Year Performance Series (`performance1y`)
 
-Each ETF carries an optional `performance1y` object — `{ start: 'YYYY-MM-DD', freq: 'weekly', values: [100, ...] }` — that the comparison overlay chart uses to draw normalized 1-year performance lines. `scripts/data/performance.mjs` derives it from the same price history as the other metrics: the Yahoo Finance 5-year chart series for US and regional ETFs, and the Yahoo KRX `.KS` chart for Korean ETFs (Naver supplies no usable history, so the field stays `null` for Korean ETFs Yahoo does not cover). Sampling rule: take the trailing one year from the latest available point (inclusive boundary), keep the last available trading point of each ISO week (Monday-Sunday) ending at the most recent point, then normalize so `values[0]` is exactly `100` and later values are `(price / start price) × 100` rounded to 2 decimals. ETFs with fewer than 8 weekly points get `performance1y: null`. At roughly 53 numbers plus one date per ETF the field adds about 0.5 MB raw across ~1,348 ETFs; each run logs the serialized byte total. The field is optional in `npm run check:data` (shape is validated only when present and non-null), because the committed snapshot predates it: `performance1y` appears from the first data refresh after this change.
+`performance1y`는 `{ start, freq: 'weekly', dates: ['YYYY-MM-DD', ...], values: [100, ...] }` 형태입니다. Yahoo 가격 이력의 실제 거래소 현지 날짜를 사용해 주별 마지막 관측치를 보존합니다. 날짜와 값의 길이는 같고 날짜는 오름차순입니다. 최근 1년 중 관측치가 8주 미만이면 `null`입니다. 서로 다른 ETF는 날짜 교집합에서 시작값을 다시 100으로 맞춥니다. 휴장일을 보간하거나 날짜 없는 과거 값을 임의 정렬하지 않습니다. 산식 2.0.0 스냅샷부터 실제 날짜가 필수입니다.
 
 ## History & Changes Artifacts
 
@@ -144,3 +144,12 @@ Channel `ETF is All You Need — 데이터 업데이트` at `https://ducklove.gi
 - Yahoo Finance endpoints are public web endpoints, not guaranteed official APIs, and may be rate-limited or temporarily unavailable.
 - StockAnalysis is an accessible public web source, not an official issuer API. Field names or table structure may change.
 - Data is a build-time snapshot and may lag live market conditions.
+
+## 2026-09-11 비교 정확도·전송 구조 변경
+
+- 국내 시세는 `https://m.stock.naver.com/api/stock/{code}/basic`의 `closePrice`, `fluctuationsRatio`, `localTradedAt`을 함께 사용합니다. 값과 시각은 동일 응답에서 가져오며 `localTradedAt`이 없으면 거래 시각을 `null`로 둡니다. 이 요청이 실패하면 전체 목록의 가격을 사용하되 거래 시각을 추정하지 않습니다. `quoteCollectedAt`은 해당 요청을 읽은 시각입니다.
+- `exchangeRates.aumFx`는 Yahoo의 `USD{currency}=X` 일별 종가 중 모든 사용 통화에 공통으로 존재하는 최근 날짜의 환율입니다. 7일 이내 공통 날짜나 필수 통화를 확보하지 못하면 갱신이 실패합니다. USD는 1로 두고 외화 금액 × `ratesToUsd[currency]`로 환산합니다. 환율 기준일과 수집 시각, 통화별 출처를 함께 보존합니다. 원금액은 별도 `aum`에 유지합니다.
+- 스냅샷과 ETF 및 점수 이력에는 `scoreModelVersion`을 저장합니다. 버전 없는 과거 이력은 1.0.0으로 해석합니다. 2.0.0은 규모의 USD 환산을 도입한 버전이며 기존 점수 이력을 다시 계산하지 않습니다. 산식 전환일의 점수 차이는 `scoreMoves`에서 제외하고 `scoreModelChange`에 기록합니다.
+- 기존 `newListings`, `delisted` API 필드명은 유지하지만 이 값은 수집 대상 목록의 편입·제외입니다. 미국 고거래량 목록의 교체를 실제 상장·상장폐지로 해석하면 안 됩니다. 화면과 RSS 문구를 이 의미에 맞췄습니다.
+- `scripts/build-catalog.mjs`는 원천 파일을 읽어 `public/runtime-data/catalog.json`과 내용별 해시가 붙은 ETF 상세 파일을 생성합니다. 생성물은 Git에 저장하지 않고 매 빌드 재생성합니다. 검색용 보유종목 이름·코드는 목록에 남기고, 비중·시계열·상세 출처는 선택 시 읽습니다.
+- 목록과 상세의 `snapshotVersion`이 다르면 표시하지 않습니다. 네트워크 오류는 재시도하거나 목록을 갱신할 수 있습니다. 오프라인에서는 이미 캐시한 목록과 상세만 열 수 있으며, 미조회 상세는 오류 상태를 표시합니다. 기존 전체 스냅샷 API는 유지됩니다.

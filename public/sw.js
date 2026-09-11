@@ -93,13 +93,15 @@ self.addEventListener('fetch', (event) => {
   }
   if (
     request.mode === 'navigate' ||
-    (url.pathname.includes('/data/') && url.pathname.endsWith('.json'))
+    ((url.pathname.includes('/data/') || url.pathname.endsWith('/runtime-data/catalog.json')) &&
+      url.pathname.endsWith('.json'))
   ) {
     event.respondWith(networkFirst(request));
     return;
   }
   if (
     url.pathname.includes('/assets/') ||
+    /\/runtime-data\/[a-f0-9]{24}\.json$/.test(url.pathname) ||
     url.pathname.endsWith('/icon.svg') ||
     url.pathname.endsWith('/manifest.webmanifest')
   ) {

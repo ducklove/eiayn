@@ -17,12 +17,21 @@ export function ChangesPanel({ onOpenEtf }) {
           <Sparkles size={16} />
           <h3 id="changes-title">오늘의 변화</h3>
         </div>
-        <span>{formatDateTime(changes.generatedAt)} KST 갱신 기준</span>
+        <span>
+          {formatDateTime(changes.generatedAt)} KST 갱신 기준 · 목록 편입·제외는 수집 대상의
+          변화입니다.
+        </span>
       </div>
+      {changes.scoreModelChange && (
+        <p className="empty-state">
+          점수 산식이 {changes.scoreModelChange.from}에서 {changes.scoreModelChange.to}으로
+          변경되었습니다. 산식 변경 전후 점수 차이는 급변 알림에서 제외합니다.
+        </p>
+      )}
       <div className="changes-grid">
         <ChangeGroup
-          title={`신규 상장 (${changes.newListings?.length ?? 0})`}
-          empty="신규 상장 없음"
+          title={`목록 편입 (${changes.newListings?.length ?? 0})`}
+          empty="목록 편입 없음"
           items={changes.newListings}
           onOpenEtf={onOpenEtf}
           render={(item) => <em>{item.market}</em>}

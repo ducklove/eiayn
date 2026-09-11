@@ -41,9 +41,41 @@ export function naverAnalysisUrl(code) {
 
 export async function fetchKoreanEtfBaseData() {
   const lineup = await fetchNaverEtfLineup();
+  const collectedAt = new Date().toISOString();
   const codes = lineup.map((item) => item.itemcode);
-  const analyses = await fetchNaverEtfAnalyses(codes);
-  return { lineup, analyses };
+  const [analyses, quoteEntries] = await Promise.all([
+    fetchNaverEtfAnalyses(codes),
+    mapLimit(codes, 5, async (code) => {
+      const url = `https://m.stock.naver.com/api/stock/${code}/basic`;
+      const quote = await optionalJson(url, { timeoutMs: 15_000 });
+      return [code, parseNaverQuote(quote, new Date().toISOString(), url)];
+    }),
+  ]);
+  return { lineup, analyses, quotes: new Map(quoteEntries), collectedAt };
+}
+
+export function parseNaverQuote(quote, collectedAt, url) {
+  const price = nullableNumber(String(quote?.closePrice ?? '').replaceAll(',', ''));
+  if (price === null || price <= 0) return null;
+  const rawTime = quote?.localTradedAt;
+  const time =
+    typeof rawTime === 'string' && /(?:Z|[+-]\d{2}:\d{2})$/.test(rawTime)
+      ? Date.parse(rawTime)
+      : NaN;
+  return {
+    price,
+    changePercent: nullableNumber(String(quote?.fluctuationsRatio ?? '').replaceAll(',', '')),
+    quoteAsOf:
+      Number.isFinite(time) && time <= Date.parse(collectedAt) + 60_000
+        ? new Date(time).toISOString()
+        : null,
+    collectedAt,
+    source: {
+      name: 'Naver Finance 종목 시세',
+      url,
+      fields: ['price', 'changePercent', 'quoteAsOf'],
+    },
+  };
 }
 
 /**

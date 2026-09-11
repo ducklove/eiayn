@@ -13,7 +13,7 @@ export const FEED_MAX_ITEMS = 20;
 export const FEED_TITLE = 'ETF is All You Need — 데이터 업데이트';
 export const FEED_LINK = 'https://ducklove.github.io/eiayn/';
 export const FEED_DESCRIPTION =
-  'EIAYN 데이터 갱신마다 신규 상장, 상장 폐지, 보수 변동, AIYN 점수 급변을 요약합니다.';
+  'EIAYN 데이터 갱신마다 목록 편입, 목록 제외, 보수 변동, AIYN 점수 급변을 요약합니다.';
 
 const ITEM_PATTERN = /<item>[\s\S]*?<\/item>/g;
 
@@ -59,11 +59,11 @@ export function buildFeedXml(previousXml, changes) {
   ].join('\n');
 }
 
-/** Counts summary, e.g. '신규 상장 3종, 보수 변동 2종, 점수 급변 5종'. */
+/** Counts summary, e.g. '목록 편입 3종, 보수 변동 2종, 점수 급변 5종'. */
 export function changeSummaryLabel(changes) {
   const parts = [
-    [changes?.newListings, '신규 상장'],
-    [changes?.delisted, '상장 폐지'],
+    [changes?.newListings, '목록 편입'],
+    [changes?.delisted, '목록 제외'],
     [changes?.feeChanges, '보수 변동'],
     [changes?.scoreMoves, '점수 급변'],
   ]
@@ -89,8 +89,12 @@ function itemTitle(changes, generatedAt) {
 function itemDescriptionHtml(changes) {
   const sections = [
     `<p>${escapeXml(changeSummaryLabel(changes))}</p>`,
-    sectionHtml('신규 상장', changes?.newListings, (etf) => marketSuffix(etf)),
-    sectionHtml('상장 폐지', changes?.delisted, (etf) => marketSuffix(etf)),
+    '<p>목록 편입·제외는 수집 대상의 변화이며, 실제 상장·상장폐지 여부를 뜻하지 않습니다.</p>',
+    changes.scoreModelChange
+      ? `<p>점수 산식 ${escapeXml(changes.scoreModelChange.from)} → ${escapeXml(changes.scoreModelChange.to)}. 산식 변경 전후 점수 차이는 급변 알림에서 제외합니다.</p>`
+      : '',
+    sectionHtml('목록 편입', changes?.newListings, (etf) => marketSuffix(etf)),
+    sectionHtml('목록 제외', changes?.delisted, (etf) => marketSuffix(etf)),
     sectionHtml('보수 변동', changes?.feeChanges, (etf) => ` 보수 ${etf.from}% → ${etf.to}%`),
     sectionHtml('점수 급변', changes?.scoreMoves, (etf) => ` 점수 ${etf.from} → ${etf.to}`),
   ];

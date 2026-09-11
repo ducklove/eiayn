@@ -10,6 +10,7 @@ import {
   parseDeviation,
   parseNaverListedDate,
   parseNaverReferenceDate,
+  parseNaverQuote,
   periodReturn,
 } from './naver.mjs';
 
@@ -180,4 +181,24 @@ describe('koreanCategory', () => {
     expect(koreanCategory({ assetClass: '주식', theme: '시장대표' })).toBe('주식-시장대표');
     expect(koreanCategory({ assetClass: '채권', theme: '채권' })).toBe('채권');
   });
+});
+
+it('시세값과 실제 거래 시각을 같은 응답에서 읽고 수집 시각을 분리한다', () => {
+  const quote = parseNaverQuote(
+    {
+      closePrice: '108,195',
+      fluctuationsRatio: '-3.28',
+      localTradedAt: '2026-09-11T09:43:16+09:00',
+    },
+    '2026-09-11T00:44:00.000Z',
+    'https://m.stock.naver.com/api/stock/069500/basic',
+  );
+  expect(quote.price).toBe(108195);
+  expect(quote.changePercent).toBe(-3.28);
+  expect(quote.quoteAsOf).toBe('2026-09-11T00:43:16.000Z');
+  expect(quote.collectedAt).toBe('2026-09-11T00:44:00.000Z');
+  expect(
+    parseNaverQuote({ closePrice: '100' }, '2026-09-11T00:44:00Z', 'url').quoteAsOf,
+  ).toBeNull();
+  expect(parseNaverQuote({ closePrice: '-' }, '2026-09-11T00:44:00Z', 'url')).toBeNull();
 });

@@ -19,7 +19,7 @@ export function useEtfData() {
     }, 20_000);
     setState((current) => ({ ...current, loading: true, error: null }));
     try {
-      const response = await fetch(`${import.meta.env.BASE_URL}data/etfs.json`, {
+      const response = await fetch(`${import.meta.env.BASE_URL}runtime-data/catalog.json`, {
         // no-cache still revalidates with the server (ETag/304) instead of
         // re-downloading the full snapshot on every visit like no-store did.
         cache: 'no-cache',
@@ -29,6 +29,14 @@ export function useEtfData() {
         throw new Error(`데이터 스냅샷을 불러오지 못했습니다. (${response.status})`);
       }
       const data = await response.json();
+      if (data?.snapshotVersion && Array.isArray(data.etfs)) {
+        data.etfs = data.etfs.map((etf) => ({
+          ...etf,
+          holdings: Array.isArray(etf?.searchHoldings)
+            ? etf.searchHoldings.map(([name, ticker]) => ({ name, ticker }))
+            : null,
+        }));
+      }
       if (
         !Array.isArray(data?.etfs) ||
         !data.etfs.length ||

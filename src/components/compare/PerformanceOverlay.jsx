@@ -15,7 +15,11 @@ export function PerformanceOverlay({ selectedEtfs }) {
     <section className="performance-overlay" aria-labelledby="overlay-title">
       <div className="section-heading">
         <h3 id="overlay-title">성과 비교 (시작점 100 기준)</h3>
-        <span>{overlay ? `최근 ${overlay.window}주 · 주간 조정가격` : '1년 주간 성과 데이터'}</span>
+        <span>
+          {overlay
+            ? `${overlay.start} ~ ${overlay.end} · 공통 관측일 ${overlay.window}개`
+            : '실제 관측일 기준 성과 비교'}
+        </span>
       </div>
       {overlay ? (
         <>
@@ -51,11 +55,17 @@ export function PerformanceOverlay({ selectedEtfs }) {
               </span>
             ))}
           </div>
+          <p className="empty-state">
+            각 시장 현지 통화의 조정가격 기준입니다. 환율 수익은 포함하지 않습니다.
+            {overlay.excluded.length > 0
+              ? ` 관측일 자료가 없어 제외: ${overlay.excluded.join(', ')}`
+              : ''}
+          </p>
         </>
       ) : (
         <p className="empty-state">
-          성과 비교 차트는 1년 주간 성과 데이터가 포함된 다음 데이터 갱신부터 제공됩니다. 비교
-          바구니에 데이터가 있는 ETF가 2개 이상일 때 표시됩니다.
+          실제 관측일이 겹치는 데이터가 2개 이상인 ETF를 선택해 주세요. 날짜가 없는 과거 자료나 공통
+          관측일이 부족한 자료로는 비교 수익률을 계산하지 않습니다.
         </p>
       )}
     </section>
@@ -72,7 +82,9 @@ function pointsFor(values, overlay) {
   const innerWidth = WIDTH - PAD_X * 2;
   return values
     .map((value, index) => {
-      const x = PAD_X + (index / (values.length - 1)) * innerWidth;
+      const elapsed = Date.parse(overlay.dates[index]) - Date.parse(overlay.start);
+      const duration = Date.parse(overlay.end) - Date.parse(overlay.start);
+      const x = PAD_X + (elapsed / duration) * innerWidth;
       return `${x.toFixed(2)},${yFor(value, overlay)}`;
     })
     .join(' ');

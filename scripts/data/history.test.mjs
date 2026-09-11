@@ -8,7 +8,7 @@ import {
 } from './history.mjs';
 
 function entryFor(date, scores = { QQQ: 84 }) {
-  return { date, generatedAt: `${date}T00:30:00.000Z`, scores };
+  return { date, generatedAt: `${date}T00:30:00.000Z`, scores, scoreModelVersion: '1.0.0' };
 }
 
 describe('seoulDateOf', () => {
@@ -45,6 +45,7 @@ describe('historyFromSnapshot', () => {
       date: '2026-06-10', // 21:40 UTC -> 06:40 KST next day
       generatedAt: '2026-06-09T21:40:00.000Z',
       scores: { '069500': 71, QQQ: 84 },
+      scoreModelVersion: '1.0.0',
     });
   });
 
@@ -198,6 +199,7 @@ describe('appendHistoryEntry', () => {
       date: '2026-06-10',
       generatedAt: '2026-06-10T06:30:00.000+09:00',
       scores: { '069500': 71, QQQ: 84 },
+      scoreModelVersion: '1.0.0',
     });
     expect(history).toEqual({
       schemaVersion: 1,
@@ -207,6 +209,7 @@ describe('appendHistoryEntry', () => {
           date: '2026-06-10',
           generatedAt: '2026-06-10T06:30:00.000+09:00',
           scores: { '069500': 71, QQQ: 84 },
+          scoreModelVersion: '1.0.0',
         },
       ],
     });

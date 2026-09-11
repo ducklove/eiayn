@@ -64,13 +64,25 @@ export async function fetchYahooChart(symbol, range = '5y', options = {}) {
   const timestamps = result.timestamp ?? [];
   const quote = result.indicators?.quote?.[0] ?? {};
   const adjusted = result.indicators?.adjclose?.[0]?.adjclose ?? [];
+  const exchangeTimeZone = result.meta?.exchangeTimezoneName ?? 'UTC';
+  const dateFormatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: exchangeTimeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
   const series = [];
   const quotes = [];
 
   for (let index = 0; index < timestamps.length; index += 1) {
     const close = asNumber(quote.close?.[index]);
     const adjustedClose = asNumber(adjusted[index]) ?? close;
-    const date = new Date(timestamps[index] * 1000).toISOString().slice(0, 10);
+    const parts = Object.fromEntries(
+      dateFormatter
+        .formatToParts(new Date(timestamps[index] * 1000))
+        .map((part) => [part.type, part.value]),
+    );
+    const date = `${parts.year}-${parts.month}-${parts.day}`;
     if (close !== null || adjustedClose !== null) {
       const point = {
         date,
@@ -86,6 +98,7 @@ export async function fetchYahooChart(symbol, range = '5y', options = {}) {
   const meta = result.meta ?? {};
   return {
     url,
+    collectedAt: new Date().toISOString(),
     meta,
     series,
     quotes,

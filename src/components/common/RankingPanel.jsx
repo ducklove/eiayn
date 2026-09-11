@@ -24,7 +24,7 @@ export function RankingPanel({ filteredEtfs, onOpenEtf }) {
   );
 
   return (
-    <section className="bottom-panel" id="ranking">
+    <section className="bottom-panel" id="ranking" tabIndex={-1}>
       <div className="section-heading">
         <h3>수익률 랭킹 (1년)</h3>
         <select aria-label="랭킹 기준" disabled title="현재는 TOP 5만 제공합니다.">

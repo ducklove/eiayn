@@ -74,13 +74,13 @@ describe('ScoreCoverageBadge', () => {
   it('uses the all-factors title when nothing is missing', () => {
     render(<ScoreCoverageBadge etf={makeEtf()} />);
     const badge = screen.getByText('데이터 충족도 100%');
-    expect(badge.title).toBe('모든 팩터가 실제 데이터로 계산되었습니다.');
+    expect(badge.title).toContain('모든 팩터가 실제 데이터로 계산되었습니다.');
   });
 
   it('handles a missing scoreBreakdown object', () => {
     render(<ScoreCoverageBadge etf={makeEtf({ scoreCoverage: 0.5, scoreBreakdown: undefined })} />);
     const badge = screen.getByText('데이터 충족도 50%');
-    expect(badge.title).toBe('모든 팩터가 실제 데이터로 계산되었습니다.');
+    expect(badge.title).toContain('일부 데이터가 없습니다');
   });
 
   it.each([null, undefined, '0.9', Number.NaN])(

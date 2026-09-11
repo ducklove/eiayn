@@ -38,3 +38,15 @@ describe('hasAnyChanges', () => {
     expect(hasAnyChanges({ scoreMoves: [{ id: 'B', from: 60, to: 70 }] })).toBe(true);
   });
 });
+
+it('같은 산식의 이력만 비교한다', () => {
+  const history = {
+    entries: [
+      { date: '2026-09-09', scores: { A: 90 } },
+      { date: '2026-09-10', scoreModelVersion: '1.0.0', scores: { A: 85 } },
+      { date: '2026-09-11', scoreModelVersion: '2.0.0', scores: { A: 70 } },
+    ],
+  };
+  expect(extractScoreSeries(history, 'A', '2.0.0')).toEqual([{ date: '2026-09-11', score: 70 }]);
+  expect(extractScoreSeries(history, 'A', '1.0.0')).toHaveLength(2);
+});

@@ -10,7 +10,9 @@ import {
   sliceSeriesFrom,
 } from '../src/lib/metrics.js';
 import { collectMissingFields } from '../src/lib/normalize.js';
-import { scoreEtfs } from '../src/lib/scoring.js';
+import { scoreEtfs, SCORE_MODEL_VERSION } from '../src/lib/scoring.js';
+import { applyAumExchangeRates } from '../src/lib/currency.js';
+import { fetchAumExchangeRates } from './data/exchange-rates.mjs';
 import { diffSnapshots } from './data/changes.mjs';
 import { buildFeedXml, changeSummaryLabel } from './data/feed.mjs';
 import { appendHistoryEntry, historyFromSnapshot } from './data/history.mjs';
@@ -132,7 +134,8 @@ async function main() {
     new Map(),
   );
 
-  const scoredEtfs = scoreEtfs(etfs).map((etf) => ({
+  const aumFx = await fetchAumExchangeRates(etfs.map((etf) => etf.currency));
+  const scoredEtfs = scoreEtfs(applyAumExchangeRates(etfs, aumFx)).map((etf) => ({
     ...etf,
     dataQuality: {
       ...etf.dataQuality,
@@ -153,6 +156,7 @@ async function main() {
   const { catalog: sourceCatalog, etfsWithRefs } = buildSourceCatalog(scoredEtfs);
   const payload = {
     schemaVersion: 2,
+    scoreModelVersion: SCORE_MODEL_VERSION,
     generatedAt: GENERATED_AT,
     timezone: 'Asia/Seoul',
     universe: scoredEtfs.map((etf) => etf.id),
@@ -160,7 +164,8 @@ async function main() {
       korea: {
         sourceTotal: koreanBase.lineup.length,
         included: koreaEtfs.length,
-        quoteAsOf: GENERATED_AT,
+        quoteAsOf: null,
+        collectedAt: koreanBase.collectedAt,
       },
       us: {
         mostActiveRequested: US_MOST_ACTIVE_COUNT,
@@ -252,6 +257,7 @@ async function main() {
     sourceCatalog,
     exchangeRates: {
       usdKrw,
+      aumFx,
     },
     etfs: etfsWithRefs,
   };
@@ -368,7 +374,8 @@ function buildKoreanEtfs(base, excluded = []) {
     const code = item.itemcode;
     const analysis = base.analyses.get(code) ?? null;
     const analysisUrl = naverAnalysisUrl(code);
-    const price = nullableNumber(item.nowVal);
+    const quote = base.quotes?.get(code);
+    const price = quote?.price ?? nullableNumber(item.nowVal);
     if (price === null || price <= 0) {
       const reason = 'missing price from Naver ETF lineup';
       excluded.push({ ticker: code, market: '국내', reason });
@@ -413,7 +420,7 @@ function buildKoreanEtfs(base, excluded = []) {
         benchmarkIndex,
         currency: 'KRW',
         price: roundNullable(price, 0),
-        changePercent: roundNullable(nullableNumber(item.changeRate)),
+        changePercent: roundNullable(quote ? quote.changePercent : nullableNumber(item.changeRate)),
         expenseRatio: roundNullable(nullableNumber(analysis?.totalFee), 4),
         aum: marketCap,
         dividendYield: roundNullable(nullableNumber(analysis?.dividend?.dividendYieldTtm)),
@@ -446,11 +453,13 @@ function buildKoreanEtfs(base, excluded = []) {
           sourceRank: rankByCode.get(code) ?? null,
         },
         dataQuality: {
-          quoteAsOf: GENERATED_AT,
+          quoteAsOf: quote?.quoteAsOf ?? null,
+          quoteCollectedAt: quote?.collectedAt ?? base.collectedAt,
           profileAsOf: GENERATED_AT,
           holdingsAsOf: null,
           ...(nav !== null && nav > 0 && navAsOf ? { navAsOf } : {}),
           sources: compactSources([
+            quote?.source,
             {
               ...NAVER_SOURCES.lineup,
               fields: ['lineup', 'price', 'changePercent', 'volume', 'tradingValue', 'marketCap'],
@@ -705,7 +714,8 @@ async function fetchYahooBackedEtf(record, options) {
         sourceRank: null,
       },
       dataQuality: {
-        quoteAsOf: chart.quoteAsOf ?? GENERATED_AT,
+        quoteAsOf: chart.quoteAsOf,
+        quoteCollectedAt: chart.collectedAt,
         profileAsOf: GENERATED_AT,
         holdingsAsOf: holdings.holdings?.length ? GENERATED_AT : null,
         sources: compactSources([

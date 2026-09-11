@@ -22,6 +22,7 @@ export function Sidebar({
   onShowAnalysis,
   onOpenEtf,
   onFocusSearch,
+  onNavigateSection,
 }) {
   return (
     <aside className="sidebar">
@@ -56,11 +57,23 @@ export function Sidebar({
           <WalletCards size={18} />
           ETF 분석
         </a>
-        <a href="#model">
+        <a
+          href="#score-model"
+          onClick={(event) => {
+            event.preventDefault();
+            onNavigateSection('score-model');
+          }}
+        >
           <ShieldCheck size={18} />
           평가 모델
         </a>
-        <a href="#ranking">
+        <a
+          href="#ranking"
+          onClick={(event) => {
+            event.preventDefault();
+            onNavigateSection('ranking');
+          }}
+        >
           <TrendingUp size={18} />
           수익률 랭킹
         </a>
@@ -84,15 +97,33 @@ export function Sidebar({
           <SlidersHorizontal size={18} />
           구성종목 검색
         </a>
-        <a href="#favorites">
+        <a
+          href="#favorite-list"
+          onClick={(event) => {
+            event.preventDefault();
+            onNavigateSection('favorite-list');
+          }}
+        >
           <Star size={18} />
           관심상품
         </a>
-        <a href="#model">
+        <a
+          href="#basket"
+          onClick={(event) => {
+            event.preventDefault();
+            onNavigateSection('basket');
+          }}
+        >
           <BriefcaseBusiness size={18} />
           선택 ETF <strong>{selectedIds.length}</strong>
         </a>
-        <a href="#risk">
+        <a
+          href="#risk"
+          onClick={(event) => {
+            event.preventDefault();
+            onNavigateSection('risk');
+          }}
+        >
           <Settings size={18} />
           투자 유의
         </a>

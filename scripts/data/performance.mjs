@@ -38,6 +38,7 @@ export function buildPerformance1y(series) {
   return {
     start: isoDate(weekly[0].time),
     freq: PERFORMANCE_1Y_FREQ,
+    dates: weekly.map((point) => isoDate(point.time)),
     values: weekly.map((point, index) =>
       index === 0 ? 100 : round2((point.value / startValue) * 100),
     ),

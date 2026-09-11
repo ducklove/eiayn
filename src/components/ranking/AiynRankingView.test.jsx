@@ -43,7 +43,7 @@ describe('AiynRankingView', () => {
       <AiynRankingView etfs={[makeEtf('Alpha', 60), makeEtf('Bravo', 95)]} onOpenEtf={() => {}} />,
     );
 
-    const headerLabels = ['AIYN', '충족도', '총보수', '배당 (연)', '1년', 'AUM'];
+    const headerLabels = ['AIYN', '충족도', '총보수', '배당 (연)', '1년', 'AUM (USD)'];
     for (const label of headerLabels) {
       expect(screen.getByRole('columnheader', { name: label }).classList).toContain(
         'ranking-center-cell',

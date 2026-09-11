@@ -42,8 +42,10 @@ export function buildRankingsPayload(
 
   return {
     generatedAt: snapshot.generatedAt,
+    scoreModelVersion: snapshot.scoreModelVersion ?? '1.0.0',
+    aumFxAsOf: snapshot.exchangeRates?.aumFx?.asOf ?? null,
     criteria:
-      'aiynScore descending; ETFs without a score are excluded; ties break by scoreCoverage, then AUM, then id',
+      'aiynScore descending; ETFs without a score are excluded; ties break by scoreCoverage, then AUM in USD, then id',
     universeSize: snapshot.etfs.length,
     count: ranked.length,
     etfs: ranked.map((etf, index) => ({
@@ -61,6 +63,8 @@ export function buildRankingsPayload(
       dividendYield: etf.dividendYield ?? null,
       return1y: etf.returns?.y1 ?? null,
       aum: etf.aum ?? null,
+      aumUsd: etf.aumUsd ?? null,
+      assetClass: etf.assetClass ?? null,
       link: `${baseUrl}?code=${encodeURIComponent(etf.id)}`,
     })),
   };
