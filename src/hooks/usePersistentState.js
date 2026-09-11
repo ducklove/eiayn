@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 
-export function usePersistentState(key, initialValue) {
+export function usePersistentState(key, initialValue, validate = () => true) {
   const [value, setValue] = useState(() => {
     try {
       const raw = window.localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : initialValue;
+      const parsed = raw ? JSON.parse(raw) : initialValue;
+      return validate(parsed) ? parsed : initialValue;
     } catch {
       return initialValue;
     }

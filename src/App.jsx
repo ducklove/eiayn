@@ -7,7 +7,14 @@ import { buildCsv, downloadFile } from './lib/csv.js';
 import { resolveInitialSelection } from './lib/deepLink.js';
 import { formatDateTime } from './lib/format.js';
 import { rankEtfsByScore } from './lib/ranking.js';
-import { buildSearchIndex, filterEtfs, uniqueOptions } from './lib/search.js';
+import {
+  buildSearchIndex,
+  DEFAULT_FILTERS,
+  filterEtfs,
+  searchMatchLabel,
+  uniqueOptions,
+} from './lib/search.js';
+import { readSearchState, writeSearchParams } from './lib/searchState.js';
 import { AnalysisPanel } from './components/analysis/AnalysisPanel.jsx';
 import { EtfAnalysisDashboard } from './components/analysis/EtfAnalysisDashboard.jsx';
 import { ComparisonGrid } from './components/compare/ComparisonGrid.jsx';
@@ -27,12 +34,7 @@ import { Sidebar } from './components/layout/Sidebar.jsx';
 import { StatusScreen } from './components/layout/StatusScreen.jsx';
 import { TopBar } from './components/layout/TopBar.jsx';
 
-const DEFAULT_FILTERS = {
-  market: '시장 전체',
-  theme: '테마 전체',
-  provider: '운용사 전체',
-  risk: '리스크 전체',
-};
+const isIdList = (value) => Array.isArray(value) && value.every((id) => typeof id === 'string');
 
 function App() {
   const { data, loading, error, reload } = useEtfData();
@@ -43,8 +45,8 @@ function App() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [activeId, setActiveId] = useState(null);
   const [viewMode, setViewMode] = useState('compare');
-  const [favorites, setFavorites] = usePersistentState('eiayn:favorites:v1', []);
-  const [recentIds, setRecentIds] = usePersistentState('eiayn:recent:v1', []);
+  const [favorites, setFavorites] = usePersistentState('eiayn:favorites:v1', [], isIdList);
+  const [recentIds, setRecentIds] = usePersistentState('eiayn:recent:v1', [], isIdList);
   const [actionNote, setActionNote] = useState('');
   const [showGuide, setShowGuide] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -59,13 +61,9 @@ function App() {
     setSelectedIds(initialSelection.selectedIds);
     setActiveId(initialSelection.activeId);
     setViewMode(initialSelection.viewMode);
-    setQuery(params.get('q') ?? '');
-    setFilters({
-      market: params.get('market') ?? DEFAULT_FILTERS.market,
-      theme: params.get('theme') ?? DEFAULT_FILTERS.theme,
-      provider: params.get('provider') ?? DEFAULT_FILTERS.provider,
-      risk: params.get('risk') ?? DEFAULT_FILTERS.risk,
-    });
+    const searchState = readSearchState(params, etfs);
+    setQuery(searchState.query);
+    setFilters(searchState.filters);
     if (initialSelection.requestedCode && !initialSelection.matchedCodeId) {
       setActionNote(`${initialSelection.requestedCode} 코드를 찾지 못해 기본 ETF를 표시합니다.`);
     }
@@ -83,6 +81,9 @@ function App() {
     const onPopState = () => {
       const params = new URLSearchParams(window.location.search);
       const selection = resolveInitialSelection(etfs, params);
+      const searchState = readSearchState(params, etfs);
+      setQuery(searchState.query);
+      setFilters(searchState.filters);
       if (params.get('code') || params.get('compare') || params.get('active')) {
         setSelectedIds(selection.selectedIds);
         setActiveId(selection.activeId);
@@ -98,12 +99,25 @@ function App() {
     return () => window.removeEventListener('popstate', onPopState);
   }, [etfs]);
 
+  useEffect(() => {
+    if (!initialized) return;
+    const params = writeSearchParams(new URLSearchParams(window.location.search), query, filters);
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}?${params.toString()}${window.location.hash}`,
+    );
+  }, [query, filters, initialized]);
+
   // Focus search with "/" unless the user is already typing in a field.
   useEffect(() => {
     const onKeyDown = (event) => {
       if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) return;
       const target = event.target;
-      if (target instanceof HTMLElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
+      )
         return;
       event.preventDefault();
       searchRef.current?.focus();
@@ -113,11 +127,22 @@ function App() {
   }, []);
 
   const searchIndex = useMemo(() => buildSearchIndex(etfs), [etfs]);
-  const filteredEtfs = useMemo(
-    () => filterEtfs(etfs, deferredQuery, filters, searchIndex),
-    [etfs, deferredQuery, filters, searchIndex],
+  const allSearchResults = useMemo(
+    () => filterEtfs(etfs, deferredQuery, DEFAULT_FILTERS, searchIndex),
+    [etfs, deferredQuery, searchIndex],
   );
-  const searchResults = useMemo(() => filteredEtfs.slice(0, 8), [filteredEtfs]);
+  const filteredEtfs = useMemo(
+    () => filterEtfs(allSearchResults, '', filters),
+    [allSearchResults, filters],
+  );
+  const searchResults = useMemo(
+    () =>
+      allSearchResults.slice(0, 8).map((etf) => ({
+        ...etf,
+        matchLabel: searchMatchLabel(etf, deferredQuery, searchIndex),
+      })),
+    [allSearchResults, deferredQuery, searchIndex],
+  );
   const selectedEtfs = useMemo(
     () => selectedIds.map((id) => etfs.find((etf) => etf.id === id)).filter(Boolean),
     [selectedIds, etfs],
@@ -159,12 +184,12 @@ function App() {
     if (!next) return;
     setActiveId(id);
     setViewMode('analysis');
-    writeAnalysisUrl(id);
+    writeAnalysisUrl(id, query, filters);
   };
 
   const showCompare = () => {
     setViewMode('compare');
-    writeCompareUrl(selectedIds, activeId);
+    writeCompareUrl(selectedIds, activeId, query, filters);
   };
 
   const showActiveAnalysis = () => {
@@ -173,12 +198,18 @@ function App() {
 
   const showList = () => {
     setViewMode('list');
-    writeListUrl();
+    writeListUrl(query, filters);
+  };
+
+  const showSearchResults = () => {
+    setFilters(DEFAULT_FILTERS);
+    setViewMode('list');
+    writeListUrl(query, DEFAULT_FILTERS);
   };
 
   const showRanking = () => {
     setViewMode('ranking');
-    writeRankingUrl();
+    writeRankingUrl(query, filters);
   };
 
   const addCompareFromList = (id) => {
@@ -190,7 +221,7 @@ function App() {
     setQuery('');
     setFilters({ ...DEFAULT_FILTERS, ...preset.filters });
     setViewMode('list');
-    writeListUrl();
+    writeListUrl('', { ...DEFAULT_FILTERS, ...preset.filters });
   };
 
   const removeEtf = (id) => {
@@ -302,7 +333,7 @@ function App() {
     }
   };
 
-  if (loading || !initialized) {
+  if (!error && (loading || !initialized)) {
     return (
       <StatusScreen
         title="ETF 데이터를 불러오는 중입니다"
@@ -336,6 +367,7 @@ function App() {
         onShowCompare={showCompare}
         onShowAnalysis={showActiveAnalysis}
         onOpenEtf={openAnalysis}
+        onFocusSearch={() => searchRef.current?.focus()}
       />
       <div className="main-shell">
         <TopBar
@@ -346,8 +378,10 @@ function App() {
           theme={theme}
           onToggleTheme={toggleTheme}
           searchResults={searchResults}
-          searchResultCount={filteredEtfs.length}
+          searchResultCount={allSearchResults.length}
+          searchPending={query !== deferredQuery}
           onOpenSearchResult={openAnalysis}
+          onShowSearchResults={showSearchResults}
         />
         <main className={`content-grid ${isCompareView ? '' : 'single-analysis'}`}>
           <div className={`workspace ${isAnalysisView ? 'analysis-workspace' : ''}`}>
@@ -365,6 +399,9 @@ function App() {
               filters={filters}
               setFilters={setFilters}
               filterOptions={filterOptions}
+              query={query}
+              onClearQuery={() => setQuery('')}
+              onResetFilters={() => setFilters(DEFAULT_FILTERS)}
               resultCount={filteredEtfs.length}
               actionNote={actionNote}
               setActionNote={setActionNote}
@@ -395,6 +432,7 @@ function App() {
                 onOpenEtf={openAnalysis}
                 onAddCompare={addCompareFromList}
                 selectedIds={selectedIds}
+                searchActive={Boolean(query.trim())}
               />
             ) : isRankingView ? (
               <AiynRankingView etfs={etfs} onOpenEtf={openAnalysis} />
@@ -427,10 +465,7 @@ function App() {
             {!isListView && !isRankingView && <ChangesPanel onOpenEtf={openAnalysis} />}
             {!isListView && !isRankingView && (
               <div className="bottom-grid">
-                <RankingPanel
-                  filteredEtfs={filteredEtfs.length ? filteredEtfs : etfs}
-                  onOpenEtf={openAnalysis}
-                />
+                <RankingPanel filteredEtfs={filteredEtfs} onOpenEtf={openAnalysis} />
                 <SimpleListPanel
                   title="최근 조회"
                   items={recentEtfs}
@@ -471,26 +506,30 @@ function pushUrl(url) {
   window.history.pushState(null, '', url);
 }
 
-function writeAnalysisUrl(id) {
+function writeAnalysisUrl(id, query, filters) {
   const params = new URLSearchParams();
   params.set('code', id);
-  pushUrl(`${window.location.pathname}?${params.toString()}`);
+  pushUrl(`${window.location.pathname}?${writeSearchParams(params, query, filters)}`);
 }
 
-function writeCompareUrl(selectedIds, activeId) {
+function writeCompareUrl(selectedIds, activeId, searchQuery, filters) {
   const params = new URLSearchParams();
   if (selectedIds.length) params.set('compare', selectedIds.join(','));
   if (activeId) params.set('active', activeId);
-  const query = params.toString();
+  const query = writeSearchParams(params, searchQuery, filters).toString();
   pushUrl(`${window.location.pathname}${query ? `?${query}` : ''}`);
 }
 
-function writeListUrl() {
-  pushUrl(`${window.location.pathname}?view=list`);
+function writeListUrl(query, filters) {
+  pushUrl(
+    `${window.location.pathname}?${writeSearchParams(new URLSearchParams({ view: 'list' }), query, filters)}`,
+  );
 }
 
-function writeRankingUrl() {
-  pushUrl(`${window.location.pathname}?view=ranking`);
+function writeRankingUrl(query, filters) {
+  pushUrl(
+    `${window.location.pathname}?${writeSearchParams(new URLSearchParams({ view: 'ranking' }), query, filters)}`,
+  );
 }
 
 export default App;

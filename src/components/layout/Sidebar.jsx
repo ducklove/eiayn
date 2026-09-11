@@ -21,6 +21,7 @@ export function Sidebar({
   onShowCompare,
   onShowAnalysis,
   onOpenEtf,
+  onFocusSearch,
 }) {
   return (
     <aside className="sidebar">
@@ -63,11 +64,23 @@ export function Sidebar({
           <TrendingUp size={18} />
           수익률 랭킹
         </a>
-        <a href="#search">
+        <a
+          href="#global-search-input"
+          onClick={(event) => {
+            event.preventDefault();
+            onFocusSearch();
+          }}
+        >
           <Search size={18} />
           ETF 검색
         </a>
-        <a href="#holdings">
+        <a
+          href="#global-search-input"
+          onClick={(event) => {
+            event.preventDefault();
+            onFocusSearch();
+          }}
+        >
           <SlidersHorizontal size={18} />
           구성종목 검색
         </a>

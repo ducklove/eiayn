@@ -10,7 +10,9 @@
  * Bump CACHE_NAME to invalidate everything previously cached.
  */
 
-const CACHE_NAME = 'eiayn-static-v1';
+const CACHE_PREFIX = 'eiayn-static-';
+const CACHE_NAME = `${CACHE_PREFIX}v2`;
+const APP_PATH = new URL(self.registration.scope).pathname;
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -28,7 +30,11 @@ self.addEventListener('activate', (event) => {
     caches
       .keys()
       .then((keys) =>
-        Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))),
+        Promise.all(
+          keys
+            .filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
+            .map((key) => caches.delete(key)),
+        ),
       )
       .then(() => self.clients.claim()),
   );
@@ -56,7 +62,7 @@ async function networkFirst(request) {
     }
     return response;
   } catch (error) {
-    const cached = await caches.match(request);
+    const cached = await (await caches.open(CACHE_NAME)).match(request);
     if (cached) {
       return cached;
     }
@@ -65,7 +71,7 @@ async function networkFirst(request) {
 }
 
 async function cacheFirst(request) {
-  const cached = await caches.match(request);
+  const cached = await (await caches.open(CACHE_NAME)).match(request);
   if (cached) {
     return cached;
   }
@@ -82,7 +88,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin) {
+  if (url.origin !== self.location.origin || !url.pathname.startsWith(APP_PATH)) {
     return;
   }
   if (

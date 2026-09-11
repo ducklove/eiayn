@@ -8,7 +8,7 @@ import {
 
 // QQQ is guaranteed to exist in the committed snapshot by scripts/check-data.mjs,
 // so the specs can rely on it as a stable fixture. The full short name matches a
-// single ETF, which keeps it inside the 8-button universe strip.
+// exact ETF first, ahead of products matched via holdings.
 const QQQ_SHORT_NAME = 'Invesco QQQ Trust, Series 1';
 const QQQ_NAME = 'Invesco QQQ Trust';
 
@@ -19,20 +19,21 @@ test.describe('search, deep links, and history', () => {
     await page.getByPlaceholder(SEARCH_PLACEHOLDER).fill(QQQ_SHORT_NAME);
     // Both the global-search dropdown and the workspace header render the
     // count; scope to the workspace header so the locator stays unambiguous.
-    await expect(page.locator('#search').getByText('1개 검색됨')).toBeVisible();
+    await expect(page.locator('#search .result-count')).toHaveText(/[1-9]\d*개 검색됨/);
+    await expect(page.getByRole('option').first()).toContainText('QQQ · 미국');
 
     await universeStrip(page).getByRole('button', { name: QQQ_SHORT_NAME }).click();
 
     await expect(page.getByRole('heading', { name: 'ETF 개별 분석', exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: QQQ_NAME, exact: true })).toBeVisible();
-    await expect(page).toHaveURL(/\?code=QQQ$/);
+    await expect(page).toHaveURL(/\?code=QQQ(?:&|$)/);
   });
 
   test('deep link with ?code=QQQ opens the analysis view directly', async ({ page }) => {
     await gotoAnalysisDeepLink(page, 'QQQ');
 
     await expect(page.getByRole('heading', { name: QQQ_NAME, exact: true })).toBeVisible();
-    await expect(page).toHaveURL(/\?code=QQQ$/);
+    await expect(page).toHaveURL(/\?code=QQQ(?:&|$)/);
   });
 
   test('browser back returns from analysis to the compare view', async ({ page }) => {
@@ -41,7 +42,7 @@ test.describe('search, deep links, and history', () => {
     await page.getByPlaceholder(SEARCH_PLACEHOLDER).fill(QQQ_SHORT_NAME);
     await universeStrip(page).getByRole('button', { name: QQQ_SHORT_NAME }).click();
     await expect(page.getByRole('heading', { name: 'ETF 개별 분석', exact: true })).toBeVisible();
-    await expect(page).toHaveURL(/\?code=QQQ$/);
+    await expect(page).toHaveURL(/\?code=QQQ(?:&|$)/);
 
     await page.goBack();
 

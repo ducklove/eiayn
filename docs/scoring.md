@@ -4,7 +4,7 @@ AIYN scores are deterministic and computed from the generated ETF snapshot. Scor
 
 ## Return Metrics
 
-Price history uses adjusted close when Yahoo Finance chart provides it, otherwise close. Korean ETF 3-month and 1-year returns use K-ETF return rankings when available, with K-ETF 1-year history as fallback. Korean 3-year and 5-year annualized returns come from a best-effort Yahoo Finance chart enrichment of the KRX symbol (`${code}.KS`); K-ETF values always keep priority and the Yahoo values fill only fields K-ETF left `null`.
+가격 이력은 Yahoo Finance의 조정종가가 있으면 사용하고, 없으면 종가를 사용합니다. 현재 국내 ETF의 3개월·1년 수익률은 네이버 금융 ETF 분석 자료를 우선 사용하며, 3개월 값은 ETF 전체 목록의 수익률도 보조 출처로 사용합니다. 비어 있는 수익률과 3년·5년 연환산 수익률은 Yahoo Finance의 KRX 종목 (`${code}.KS`) 이력으로 보완합니다. 네이버 금융에서 확보한 값은 유지하며, 장기 가격 이력이 부족하면 해당 값은 `null`입니다. 과거 K-ETF 수집 방식은 현재 갱신 경로에 사용되지 않습니다.
 
 - 30-day return: period return from the first to the latest point in the generated recent-30-calendar-day sparkline.
 - 3-month return: period return from the first trading point on or after the date 3 months before the latest point.
@@ -74,4 +74,4 @@ When a field is unavailable, the UI displays `-` or `데이터 없음` rather th
 - Tracking error (3y) = sample standard deviation of daily active returns × `sqrt(252)` × 100, in percent, rounded to 2 decimals.
 - Information ratio (3y) = (mean daily active return × 252 × 100) ÷ tracking error, rounded to 2 decimals. It is `null` when the tracking error is zero (or rounds to zero) or is not finite.
 
-Benchmark series are price indices while ETF series are dividend-adjusted, so a small steady positive active drift (roughly distribution yield minus fees) is expected and shows up in the information ratio; tracking error is barely affected. The metrics are emitted only for ETFs whose `benchmarkIndex` resolves to a known index symbol (about 155 of 1,348 in the current snapshot). Bespoke theme, futures, leveraged/inverse, FX, and bond benchmarks have no public Yahoo index series, so those ETFs keep `null` — consistent with the project principle that missing data is reported as missing, never estimated.
+벤치마크가 가격지수이고 ETF 이력이 분배금을 반영한 조정가격이면 분배금 처리 차이가 정보비율에 영향을 줄 수 있습니다. 추적오차와 정보비율은 `benchmarkIndex`를 공개된 Yahoo 지수로 연결하고 필요한 관측치를 확보한 경우에만 계산합니다. 연결되지 않은 테마·선물·레버리지·인버스·통화·채권 지수는 추정하지 않고 `null`로 유지합니다. 데이터 충족 수치는 갱신마다 달라지므로 최신 스냅샷의 해당 필드를 기준으로 확인합니다.

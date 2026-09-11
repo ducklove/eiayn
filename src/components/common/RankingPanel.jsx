@@ -44,6 +44,7 @@ export function RankingPanel({ filteredEtfs, onOpenEtf }) {
         ))}
       </div>
       <div className="ranking-list">
+        {!ranked.length && <p className="empty-state">검색·필터 조건에 맞는 ETF가 없습니다.</p>}
         {ranked.map((item, index) => (
           <a
             className="ranking-row"

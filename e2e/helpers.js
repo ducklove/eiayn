@@ -1,6 +1,6 @@
 import { expect } from 'playwright/test';
 
-export const SEARCH_PLACEHOLDER = 'ETF, 지수, 테마, 종목, 운용사 검색';
+export const SEARCH_PLACEHOLDER = '이름 일부·코드·보유종목 검색';
 
 // The app fetches data/etfs.json before rendering, so navigation helpers wait
 // for a stable landmark heading of the requested view.

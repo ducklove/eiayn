@@ -35,12 +35,18 @@ export function EtfTable({
   onOpenEtf,
   onAddCompare,
   selectedIds,
+  searchActive = false,
 }) {
   const [sortKey, setSortKey] = useState('aiynScore');
   const [sortDir, setSortDir] = useState('desc');
   const [page, setPage] = useState(0);
 
-  const sorted = useMemo(() => sortEtfs(etfs, sortKey, sortDir), [etfs, sortKey, sortDir]);
+  const [useRelevance, setUseRelevance] = useState(true);
+  const relevanceOrder = searchActive && useRelevance;
+  const sorted = useMemo(
+    () => (relevanceOrder ? etfs : sortEtfs(etfs, sortKey, sortDir)),
+    [etfs, sortKey, sortDir, relevanceOrder],
+  );
   const pageCount = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
 
   useEffect(() => {
@@ -52,6 +58,7 @@ export function EtfTable({
 
   const handleSort = (column) => {
     if (!column.sortable) return;
+    setUseRelevance(false);
     if (column.key === sortKey) {
       setSortDir((current) => (current === 'desc' ? 'asc' : 'desc'));
       return;
@@ -65,17 +72,34 @@ export function EtfTable({
       <div className="section-heading">
         <h3 id="etf-table-title">전체 목록 ({sorted.length})</h3>
         <span>검색·필터 결과 전체를 정렬해 탐색합니다. 행을 누르면 개별 분석이 열립니다.</span>
+        {searchActive && (
+          <button
+            className="ghost-button slim"
+            type="button"
+            aria-pressed={relevanceOrder}
+            onClick={() => setUseRelevance(true)}
+          >
+            검색 관련도순
+          </button>
+        )}
       </div>
       <div className="table-scroll">
         <table className="etf-table">
           <thead>
             <tr>
               {COLUMNS.map((column) => (
-                <th key={column.key} aria-sort={ariaSort(column, sortKey, sortDir)}>
+                <th
+                  key={column.key}
+                  aria-sort={ariaSort(column, relevanceOrder ? null : sortKey, sortDir)}
+                >
                   {column.sortable ? (
                     <button type="button" onClick={() => handleSort(column)}>
                       {column.label}
-                      <SortIcon column={column} sortKey={sortKey} sortDir={sortDir} />
+                      <SortIcon
+                        column={column}
+                        sortKey={relevanceOrder ? null : sortKey}
+                        sortDir={sortDir}
+                      />
                     </button>
                   ) : (
                     column.label
