@@ -5,7 +5,14 @@
     <link>https://ducklove.github.io/eiayn/</link>
     <description>EIAYN 데이터 갱신마다 목록 편입, 목록 제외, 보수 변동, AIYN 점수 급변을 요약합니다.</description>
     <language>ko</language>
-    <lastBuildDate>Fri, 11 Sep 2026 00:44:34 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 11 Sep 2026 11:42:02 GMT</lastBuildDate>
+    <item>
+      <title>[2026-09-11] 점수 급변 3종</title>
+      <link>https://ducklove.github.io/eiayn/</link>
+      <guid isPermaLink="false">eiayn-data-update-2026-09-11T11:42:02.719Z</guid>
+      <pubDate>Fri, 11 Sep 2026 11:42:02 GMT</pubDate>
+      <description>&lt;p&gt;점수 급변 3종&lt;/p&gt;&lt;p&gt;목록 편입·제외는 수집 대상의 변화이며, 실제 상장·상장폐지 여부를 뜻하지 않습니다.&lt;/p&gt;&lt;h4&gt;점수 급변&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;a href=&quot;https://ducklove.github.io/eiayn/?code=CORD&quot;&gt;T-REX 2X Inverse CRWV Daily Target ETF (CORD)&lt;/a&gt; 점수 26 → 31&lt;/li&gt;&lt;li&gt;&lt;a href=&quot;https://ducklove.github.io/eiayn/?code=NVDL&quot;&gt;GraniteShares 2x Long NVDA Daily ETF (NVDL)&lt;/a&gt; 점수 68 → 63&lt;/li&gt;&lt;li&gt;&lt;a href=&quot;https://ducklove.github.io/eiayn/?code=ZSL&quot;&gt;ProShares UltraShort Silver (ZSL)&lt;/a&gt; 점수 30 → 35&lt;/li&gt;&lt;/ul&gt;</description>
+    </item>
     <item>
       <title>[2026-09-11] 목록 편입 29종, 목록 제외 30종, 보수 변동 1종</title>
       <link>https://ducklove.github.io/eiayn/</link>
@@ -138,13 +145,6 @@
       <guid isPermaLink="false">eiayn-data-update-2026-07-22T09:09:45.286Z</guid>
       <pubDate>Wed, 22 Jul 2026 09:09:45 GMT</pubDate>
       <description>&lt;p&gt;상장 폐지 1종&lt;/p&gt;&lt;h4&gt;상장 폐지&lt;/h4&gt;&lt;ul&gt;&lt;li&gt;&lt;a href=&quot;https://ducklove.github.io/eiayn/?code=BMNU&quot;&gt;T-REX 2X Long BMNR Daily Target ETF (BMNU)&lt;/a&gt; — 미국&lt;/li&gt;&lt;/ul&gt;</description>
-    </item>
-    <item>
-      <title>[2026-07-22] 변동 없음</title>
-      <link>https://ducklove.github.io/eiayn/</link>
-      <guid isPermaLink="false">eiayn-data-update-2026-07-22T03:52:38.033Z</guid>
-      <pubDate>Wed, 22 Jul 2026 03:52:38 GMT</pubDate>
-      <description>&lt;p&gt;변동 없음&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>
