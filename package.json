@@ -9,7 +9,7 @@
   "scripts": {
     "data:update": "node scripts/fetch-etf-data.mjs",
     "check:data": "node scripts/check-data.mjs",
-    "data:catalog": "node scripts/build-catalog.mjs",
+    "data:catalog": "node scripts/build-catalog.mjs && node scripts/build-research.mjs",
     "predev": "npm run data:catalog",
     "prebuild": "npm run data:catalog",
     "dev": "vite --host 127.0.0.1",

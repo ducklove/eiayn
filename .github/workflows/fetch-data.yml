@@ -44,6 +44,9 @@ jobs:
       - name: Validate data snapshot
         run: npm run check:data
 
+      - name: Preserve research API snapshot
+        run: node scripts/build-research.mjs
+
       - name: Run tests
         run: npm test
 
@@ -54,6 +57,7 @@ jobs:
       - name: Commit refreshed snapshot
         id: commit
         run: |
+          git add -- public/data/research
           for file in public/data/etfs.json public/data/history.json public/data/changes.json public/data/feed.xml; do
             if [ -f "$file" ]; then
               git add -- "$file"

@@ -1,0 +1,23 @@
+[
+  {
+    "id": "kospi200-kodex-tiger",
+    "common": "069500",
+    "preferred": "102110",
+    "name": "KODEX 200 / TIGER 200",
+    "strategy": "etf_switch",
+    "benchmark": "KOSPI 200",
+    "expectedBenchmark": "코스피 200",
+    "classification": "same_index_research_candidate",
+    "reviewed_at": "2026-09-16",
+    "point_in_time_verified": false,
+    "execution_eligible": false,
+    "currency_hedged": null,
+    "replication_method": null,
+    "distribution_policy": null,
+    "sources": [
+      "https://www.samsungfund.com/etf/product/view.do?id=2ETF01",
+      "https://kind.krx.co.kr/disclosure/etfisudetail.do?method=searchEtfIsuSummary&strIsurCd=10211"
+    ],
+    "limitations": "과거 분배·환헤지·복제·비용 정책의 일치와 iNAV는 검증 전입니다."
+  }
+]
