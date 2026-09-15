@@ -1,6 +1,15 @@
 import { emptyProfile } from './shared.mjs';
 
 export const PROFILE_OVERRIDES = {
+  // 2026-09-16 운용사 공식 자료 확인. 수집원 누락 시에도 검증된 보수를 유지한다.
+  'NDQ.AX': {
+    expenseRatio: 0.48,
+    source: {
+      name: 'Betashares NDQ fund profile (2026-09-16 확인)',
+      url: 'https://www.betashares.com.au/fund/nasdaq-100-etf/',
+      fields: ['expenseRatio'],
+    },
+  },
   'STW.AX': {
     expenseRatio: 0.05,
     source: {
