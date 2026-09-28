@@ -1,3 +1,4 @@
+import { PortfolioHeldBadge } from '../common/PortfolioHeldBadge.jsx';
 import { useState } from 'react';
 import { Calculator } from 'lucide-react';
 import { estimateHoldingCost } from '../../lib/cost.js';
@@ -52,7 +53,10 @@ export function CostCalculator({ selectedEtfs }) {
       <div className="cost-rows">
         {rows.map(({ etf, cost }) => (
           <div className="cost-row" key={etf.id}>
-            <strong>{etf.shortName}</strong>
+            <strong>
+              {etf.shortName}
+              <PortfolioHeldBadge etf={etf} />
+            </strong>
             <span>총보수 {formatPlainPercent(etf.expenseRatio)}</span>
             {cost ? (
               <>

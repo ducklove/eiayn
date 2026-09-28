@@ -1,3 +1,4 @@
+import { PortfolioHeldBadge } from '../common/PortfolioHeldBadge.jsx';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowDown, ArrowUp, ArrowUpDown, Plus, Star } from 'lucide-react';
 import {
@@ -120,7 +121,10 @@ export function EtfTable({
                       handleEtfLinkClick(event, etf.id, onOpenEtf);
                     }}
                   >
-                    <strong>{etf.shortName}</strong>
+                    <strong>
+                      {etf.shortName}
+                      <PortfolioHeldBadge etf={etf} />
+                    </strong>
                     <small>
                       {etf.id} · {etf.provider ?? '-'}
                     </small>

@@ -1,3 +1,4 @@
+import { PortfolioHeldBadge } from '../common/PortfolioHeldBadge.jsx';
 import { formatPercent } from '../../lib/format.js';
 
 export function UniverseStrip({ filteredEtfs, activeEtf, activeId, onSelect }) {
@@ -24,7 +25,10 @@ export function UniverseStrip({ filteredEtfs, activeEtf, activeId, onSelect }) {
                 type="button"
                 onClick={() => onSelect(item.id)}
               >
-                <span>{item.shortName}</span>
+                <span>
+                  {item.shortName}
+                  <PortfolioHeldBadge etf={item} />
+                </span>
                 <em>{item.category}</em>
                 <b className={item.changePercent >= 0 ? 'positive' : 'negative'}>
                   {formatPercent(item.changePercent)}

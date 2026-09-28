@@ -1,3 +1,4 @@
+import { PortfolioHeldBadge } from '../common/PortfolioHeldBadge.jsx';
 import { Plus, Star, X } from 'lucide-react';
 import {
   formatAum,
@@ -67,7 +68,10 @@ export function ComparisonGrid({
                   checked={activeId === etf.id}
                   onChange={() => onSelect(etf.id)}
                 />
-                <span>{etf.name}</span>
+                <span>
+                  {etf.name}
+                  <PortfolioHeldBadge etf={etf} />
+                </span>
               </label>
               <button
                 className="icon-button small"

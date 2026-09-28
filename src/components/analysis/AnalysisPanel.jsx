@@ -1,3 +1,4 @@
+import { PortfolioHeldBadge } from '../common/PortfolioHeldBadge.jsx';
 import { AlertTriangle, ChevronDown, Star } from 'lucide-react';
 import { formatPercent, formatPlainPercent, formatPrice, scoreLabel } from '../../lib/format.js';
 import { buildHoldingChart, HOLDING_COLORS, OTHER_HOLDING_COLOR } from '../../lib/holdings.js';
@@ -29,7 +30,10 @@ export function AnalysisPanel({ selectedEtf, favorites, toggleFavorite }) {
       <section className="selected-summary">
         <div className="summary-title">
           <div>
-            <h2>{selectedEtf.name}</h2>
+            <h2>
+              {selectedEtf.name}
+              <PortfolioHeldBadge etf={selectedEtf} />
+            </h2>
             <p>
               {selectedEtf.id} · {selectedEtf.market} · {selectedEtf.assetClass} ·{' '}
               {selectedEtf.category}

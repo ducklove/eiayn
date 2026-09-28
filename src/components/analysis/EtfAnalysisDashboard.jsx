@@ -1,3 +1,4 @@
+import { PortfolioHeldBadge } from '../common/PortfolioHeldBadge.jsx';
 import { useState } from 'react';
 import { AlertTriangle, Star } from 'lucide-react';
 import {
@@ -51,7 +52,10 @@ export function EtfAnalysisDashboard({ selectedEtf, favorites, toggleFavorite })
             <span>{selectedEtf.assetClass}</span>
             <span>{selectedEtf.category}</span>
           </div>
-          <h2 id="single-analysis-title">{selectedEtf.name}</h2>
+          <h2 id="single-analysis-title">
+            {selectedEtf.name}
+            <PortfolioHeldBadge etf={selectedEtf} />
+          </h2>
           <p>
             {selectedEtf.id} · {selectedEtf.provider ?? '운용사 데이터 없음'} ·{' '}
             {selectedEtf.benchmarkIndex ?? '기초지수 데이터 없음'}

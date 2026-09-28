@@ -1,3 +1,4 @@
+import { PortfolioHeldBadge } from '../common/PortfolioHeldBadge.jsx';
 import { useMemo, useState } from 'react';
 import { ScoreCoverageBadge } from '../common/ScoreCoverageBadge.jsx';
 import { formatAum, formatPercent, formatPlainPercent, returnTone } from '../../lib/format.js';
@@ -101,7 +102,10 @@ export function AiynRankingView({ etfs, onOpenEtf, filters, onFiltersChange }) {
                       handleEtfLinkClick(event, etf.id, onOpenEtf);
                     }}
                   >
-                    <strong>{etf.shortName}</strong>
+                    <strong>
+                      {etf.shortName}
+                      <PortfolioHeldBadge etf={etf} />
+                    </strong>
                     <small>
                       {etf.id} · {etf.provider ?? '-'}
                     </small>

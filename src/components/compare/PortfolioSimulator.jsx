@@ -1,3 +1,4 @@
+import { PortfolioHeldBadge } from '../common/PortfolioHeldBadge.jsx';
 import { useEffect, useState } from 'react';
 import { PieChart } from 'lucide-react';
 import { buildPortfolioSummary } from '../../lib/portfolio.js';
@@ -83,6 +84,7 @@ export function PortfolioSimulator({ selectedEtfs }) {
           <label className="portfolio-weight-row" key={etf.id}>
             <span className="portfolio-weight-name" title={etf.name}>
               {etf.shortName}
+              <PortfolioHeldBadge etf={etf} />
             </span>
             <span className="portfolio-weight-input">
               <input
