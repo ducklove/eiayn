@@ -6,6 +6,7 @@ import { usePersistentState } from './hooks/usePersistentState.js';
 import { useTheme } from './hooks/useTheme.js';
 import { buildCsv, downloadFile } from './lib/csv.js';
 import { resolveInitialSelection } from './lib/deepLink.js';
+import { sectionFromHash, syncShellStock } from './lib/ecosystem.js';
 import { formatDateTime } from './lib/format.js';
 import { rankEtfsByScore, readRankingFilters, writeRankingFilters } from './lib/ranking.js';
 import {
@@ -15,7 +16,7 @@ import {
   searchMatchLabel,
   uniqueOptions,
 } from './lib/search.js';
-import { readSearchState, writeSearchParams } from './lib/searchState.js';
+import { carryShellParams, readSearchState, writeSearchParams } from './lib/searchState.js';
 import { AnalysisPanel } from './components/analysis/AnalysisPanel.jsx';
 import { EtfAnalysisDashboard } from './components/analysis/EtfAnalysisDashboard.jsx';
 import { ComparisonGrid } from './components/compare/ComparisonGrid.jsx';
@@ -56,7 +57,7 @@ function App() {
   const [actionNote, setActionNote] = useState('');
   const [showGuide, setShowGuide] = useState(false);
   const [initialized, setInitialized] = useState(false);
-  const [pendingSection, setPendingSection] = useState(() => window.location.hash.slice(1));
+  const [pendingSection, setPendingSection] = useState(() => sectionFromHash(window.location.hash));
   const searchRef = useRef(null);
   const deferredQuery = useDeferredValue(query);
 
@@ -93,7 +94,7 @@ function App() {
       setQuery(searchState.query);
       setFilters(searchState.filters);
       setRankingFilters(readRankingFilters(params, etfs));
-      setPendingSection(window.location.hash.slice(1));
+      setPendingSection(sectionFromHash(window.location.hash));
       if (params.get('code') || params.get('compare') || params.get('active')) {
         setSelectedIds(selection.selectedIds);
         setActiveId(selection.activeId);
@@ -177,6 +178,13 @@ function App() {
   const isCompareView = !isAnalysisView && !isListView && !isRankingView;
 
   useDocumentTitle(viewMode, selectedEtf);
+
+  // Ecosystem bar: offer '허브에서 분석' for the single ETF in focus (analysis
+  // view or the compare view's side panel); clear it on list/ranking views.
+  const focusedEtf = initialized && (isAnalysisView || isCompareView) ? selectedEtf : null;
+  useEffect(() => {
+    syncShellStock(focusedEtf);
+  }, [focusedEtf]);
 
   useEffect(() => {
     if (!pendingSection || !initialized) return;
@@ -355,10 +363,7 @@ function App() {
       if (selectedIds.length) params.set('compare', selectedIds.join(','));
       if (activeId) params.set('active', activeId);
     }
-    if (query) params.set('q', query);
-    for (const [key, value] of Object.entries(filters)) {
-      if (value && value !== DEFAULT_FILTERS[key]) params.set(key, value);
-    }
+    writeSearchParams(params, query, filters);
     const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
 
     try {
@@ -580,7 +585,12 @@ function App() {
   );
 }
 
-function pushUrl(url) {
+// Pushes a view URL. The visual theme and embed parameters of the current URL
+// are carried over so in-app navigation keeps the hub-provided context.
+function pushParams(params) {
+  carryShellParams(params, new URLSearchParams(window.location.search));
+  const query = params.toString();
+  const url = `${window.location.pathname}${query ? `?${query}` : ''}`;
   const current = `${window.location.pathname}${window.location.search}`;
   if (url === current) return;
   window.history.pushState(null, '', url);
@@ -589,26 +599,26 @@ function pushUrl(url) {
 function writeAnalysisUrl(id, query, filters) {
   const params = new URLSearchParams();
   params.set('code', id);
-  pushUrl(`${window.location.pathname}?${writeSearchParams(params, query, filters)}`);
+  pushParams(writeSearchParams(params, query, filters));
 }
 
 function writeCompareUrl(selectedIds, activeId, searchQuery, filters) {
   const params = new URLSearchParams();
   if (selectedIds.length) params.set('compare', selectedIds.join(','));
   if (activeId) params.set('active', activeId);
-  const query = writeSearchParams(params, searchQuery, filters).toString();
-  pushUrl(`${window.location.pathname}${query ? `?${query}` : ''}`);
+  pushParams(writeSearchParams(params, searchQuery, filters));
 }
 
 function writeListUrl(query, filters) {
-  pushUrl(
-    `${window.location.pathname}?${writeSearchParams(new URLSearchParams({ view: 'list' }), query, filters)}`,
-  );
+  pushParams(writeSearchParams(new URLSearchParams({ view: 'list' }), query, filters));
 }
 
 function writeRankingUrl(query, filters, rankingFilters) {
-  pushUrl(
-    `${window.location.pathname}?${writeRankingFilters(writeSearchParams(new URLSearchParams({ view: 'ranking' }), query, filters), rankingFilters)}`,
+  pushParams(
+    writeRankingFilters(
+      writeSearchParams(new URLSearchParams({ view: 'ranking' }), query, filters),
+      rankingFilters,
+    ),
   );
 }
 

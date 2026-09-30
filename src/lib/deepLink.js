@@ -1,3 +1,5 @@
+import { readEmbed } from './searchState.js';
+
 export function findEtfByCode(etfs, code) {
   const normalized = normalizeCode(code);
   if (!normalized) return null;
@@ -25,7 +27,8 @@ export function resolveInitialSelection(etfs, params, maxSelected = 4) {
     codeEtf?.id ??
     (activeEtf && selectedIds.includes(activeEtf.id) ? activeEtf.id : selectedIds[0]) ??
     null;
-  const requestedView = params.get('view')?.trim().toLowerCase();
+  // `?embed=<view>` names the view for chrome-less embeds when `view` is absent.
+  const requestedView = (params.get('view') ?? readEmbed(params)?.view)?.trim().toLowerCase();
   const viewMode =
     params.get('code') || requestedView === 'analysis'
       ? 'analysis'

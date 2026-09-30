@@ -1,5 +1,4 @@
-import { expect, test } from 'playwright/test';
-import { gotoCompareHome, SEARCH_PLACEHOLDER } from './helpers.js';
+import { expect, gotoCompareHome, SEARCH_PLACEHOLDER, test } from './helpers.js';
 
 test.describe('dashboard smoke', () => {
   test('loads the comparison dashboard with three default ETFs', async ({ page }) => {

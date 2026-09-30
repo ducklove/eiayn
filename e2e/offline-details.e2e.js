@@ -1,4 +1,4 @@
-import { expect, test } from 'playwright/test';
+import { expect, test } from './helpers.js';
 
 test('캐시된 목록과 상세는 오프라인에서 열리고 미조회 상세는 오류를 알린다', async ({
   page,

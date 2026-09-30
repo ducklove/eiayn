@@ -56,4 +56,15 @@ describe('deep link utilities', () => {
       'compare',
     );
   });
+
+  it('reads the view from ?embed=<view> when no view parameter is given', () => {
+    expect(resolveInitialSelection(etfs, new URLSearchParams('embed=ranking')).viewMode).toBe(
+      'ranking',
+    );
+    expect(resolveInitialSelection(etfs, new URLSearchParams('embed=1')).viewMode).toBe('compare');
+    expect(
+      resolveInitialSelection(etfs, new URLSearchParams('embed=ranking&view=list')).viewMode,
+    ).toBe('list');
+    expect(resolveInitialSelection(etfs, new URLSearchParams('embed=0')).viewMode).toBe('compare');
+  });
 });

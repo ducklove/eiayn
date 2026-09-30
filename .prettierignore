@@ -9,6 +9,16 @@ public/runtime-data
 # Lockfile (npm-managed)
 package-lock.json
 
+# Vendored from value-invest (scripts/sync-ecosystem.mjs / sync-analytics.mjs).
+# Copies must stay byte-identical to the hub; never reformat them.
+public/value-analytics.js
+public/vc-shell.js
+public/vc-tokens.css
+scripts/vc-publish.mjs
+# index.html carries the synced <!-- vc:theme-boot --> block, which the hub's
+# sync script verifies byte-for-byte.
+index.html
+
 # Vendored/static docs pages and prose
 docs/*.html
 CHANGELOG.md

@@ -1,5 +1,5 @@
-import { expect, test } from 'playwright/test';
 import { Buffer } from 'node:buffer';
+import { expect, test } from './helpers.js';
 test.use({ serviceWorkers: 'block' });
 
 test('목록은 상세 자료 없이 검색하고 선택한 ETF만 상세를 요청한다', async ({ page }) => {

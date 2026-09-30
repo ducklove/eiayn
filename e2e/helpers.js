@@ -1,4 +1,20 @@
-import { expect } from 'playwright/test';
+import { test as base, expect } from 'playwright/test';
+
+// The hub (home server) hosts portfolio-held-badges.js. E2E runs must never
+// depend on it, so every page gets a stub that answers instantly with an
+// empty script. Specs import `test` from here instead of 'playwright/test'.
+export const HUB_ORIGIN = 'https://ducklove.duckdns.org:3691';
+
+export const test = base.extend({
+  page: async ({ page }, provide) => {
+    await page.route(`${HUB_ORIGIN}/**`, (route) =>
+      route.fulfill({ status: 200, contentType: 'text/javascript', body: '' }),
+    );
+    await provide(page);
+  },
+});
+
+export { expect };
 
 export const SEARCH_PLACEHOLDER = '이름 일부·코드·보유종목 검색';
 

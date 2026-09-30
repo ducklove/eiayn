@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-30
+
+- Joined the Value Compass ecosystem: the shared `<vc-shell>` bar sits above the app (a sibling of `#root`, outside React), with vendored `public/vc-shell.js` / `public/vc-tokens.css` and the hub's pre-paint theme-boot block in `index.html` (synced from value-invest `scripts/sync-ecosystem.mjs`; never edit the copies). A domestic 6-character ETF in focus shows the '허브에서 분석' chip.
+- Theme: the preference now lives in the ecosystem-wide `theme` localStorage key (plain `light`/`dark`); the old `eiayn:theme:v1` value is migrated by the boot block. The toggle goes through `VCShell.setTheme` and the app follows `vc:themechange`.
+- `?theme=light|dark` is the visual theme. The ETF theme filter moved to `?etf_theme=`; legacy `?theme=<category>` links still filter and are rewritten. New `?embed` mode hides the sidebar and top bar.
+- Market direction colours follow the Korean convention used across the ecosystem: `.positive` (up) is red, `.negative` (down) is blue, in tables, tiles, the sidebar and the FX chip.
+- The hub's `portfolio-held-badges.js` loads `async` so a slow or offline home server no longer delays the first render; an unconsumed `#vc-held` fragment is cleared after 5 s.
+- Each build publishes `summary.json` / `version.json` (published data contract v1) for the hub.
+
 ## 2026-07-22
 
 - Restored the daily data refresh after a 27-day outage (last successful refresh 2026-06-25). Both Korean sources died upstream in late June: the K-ETF anchor API was privatized behind its own backend (403 Forbidden for all external callers, including browsers on k-etf.com itself) and the KRX 정보데이터시스템 relaunched as the login-only "KRX Data Marketplace", killing the anonymous NAV batch endpoint.

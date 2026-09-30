@@ -71,6 +71,29 @@ entry. It is regenerated on every deploy by `scripts/build-rankings.mjs` from
 the committed snapshot, sharing the exact ordering logic with the in-app
 AIYN 랭킹 view (`?view=ranking`). Missing metrics are `null`, never estimated.
 
+For the Value Compass hub, the build also writes a small envelope summary
+(published data contract v1, value-invest `docs/ecosystem/data-contract.md`):
+
+```text
+https://ducklove.github.io/eiayn/summary.json   # covered code universe + AIYN TOP 100
+https://ducklove.github.io/eiayn/version.json   # {files: {"summary.json": contentHash}}
+```
+
+`scripts/build-summary.mjs` runs after `build-rankings.mjs` and writes both into
+`dist/` (build output, never committed) with the vendored `scripts/vc-publish.mjs`
+helper. `asOf` and `generatedAt` are the snapshot's `generatedAt`, so the same
+snapshot always produces the same bytes.
+
+### URL parameters
+
+- `?code=` · `?compare=` · `?active=` · `?view=list|ranking|analysis` · `?q=`
+- Filters: `?market=` · `?etf_theme=` · `?provider=` · `?risk=`. Old links with
+  `?theme=<ETF 테마>` still apply the filter and are rewritten to `etf_theme`.
+- `?theme=light|dark` is the Value Compass visual theme: applied before first
+  paint, never stored, and carried across in-app navigation.
+- `?embed` (any value except `0`/`false`) hides the sidebar and top bar
+  (`html[data-embed]`); `?embed=<view>` also selects the view when `?view` is absent.
+
 See [DATA_SOURCES.md](./DATA_SOURCES.md) and [docs/scoring.md](./docs/scoring.md).
 
 ## Deployment
