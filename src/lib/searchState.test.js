@@ -63,6 +63,17 @@ describe('search URL state', () => {
     const legacy = carryShellParams(new URLSearchParams(), new URLSearchParams('theme=배당'));
     expect(legacy.toString()).toBe('');
   });
+  it('carries ?embed=<view> as a bare flag so the rebuilt URL keeps its own view', () => {
+    const next = carryShellParams(
+      new URLSearchParams('compare=069500&active=069500'),
+      new URLSearchParams('embed=ranking&view=ranking'),
+    );
+    expect(next.get('embed')).toBe('1');
+    expect(readEmbed(next)).toEqual({ view: null });
+    expect(
+      carryShellParams(new URLSearchParams(), new URLSearchParams('embed=true')).get('embed'),
+    ).toBe('true');
+  });
   it('parses ?embed like the ecosystem shell (0/false disable, value may name a view)', () => {
     expect(readEmbed(new URLSearchParams(''))).toBeNull();
     expect(readEmbed(new URLSearchParams('embed=0'))).toBeNull();

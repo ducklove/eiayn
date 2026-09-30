@@ -58,6 +58,9 @@ describe('index.html ecosystem structure', () => {
     expect(tags[0]).toMatch(/^<script async /);
     expect(tags[0]).not.toContain('defer');
     expect(tags[0]).toContain('portfolio-held-badges.js?v=20260930-vc');
+    // The script observes document.body the moment it runs; an async script in
+    // <head> could run before <body> exists.
+    expect(html.indexOf(tags[0])).toBeGreaterThan(html.indexOf('<body>'));
   });
 
   it('ships the vendored assets from public/ (copied to the Pages root by Vite)', () => {

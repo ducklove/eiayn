@@ -58,10 +58,14 @@ export function writeSearchParams(params, query = '', filters = DEFAULT_FILTERS)
 export function carryShellParams(params, current) {
   const theme = current.get('theme');
   if (isVisualTheme(theme)) params.set('theme', theme);
-  for (const key of ['embed', 'vc-shell']) {
-    const value = current.get(key);
-    if (value !== null) params.set(key, value);
-  }
+  // `?embed=<view>` only picks the entry view. Rebuilt URLs encode their own
+  // view (code / view / compare), so the embed flag is carried as a bare `1`;
+  // otherwise `?compare=…&embed=ranking` would reopen the ranking view on
+  // reload or back/forward.
+  const embed = current.get('embed');
+  if (embed !== null) params.set('embed', readEmbed(current)?.view ? '1' : embed);
+  const shellFlag = current.get('vc-shell');
+  if (shellFlag !== null) params.set('vc-shell', shellFlag);
   return params;
 }
 

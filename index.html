@@ -51,13 +51,14 @@
     <title>ETF is All You Need</title>
     <script defer src="%BASE_URL%vc-shell.js"></script>
     <script defer src="%BASE_URL%value-analytics.js" data-project="eiayn"></script>
-    <!-- The hub script is async so a slow or offline home server never delays the first render. -->
-    <script async src="https://ducklove.duckdns.org:3691/js/portfolio-held-badges.js?v=20260930-vc"></script>
   </head>
   <body>
     <!-- Ecosystem bar: a sibling of #root, outside React's tree. -->
     <vc-shell tool="eiayn"><a href="https://ducklove.duckdns.org:3691" rel="noopener">Value Compass ↗</a></vc-shell>
     <div id="root"></div>
+    <!-- The hub script is async so a slow or offline home server never delays the first render.
+         It sits in <body> because it observes document.body as soon as it runs. -->
+    <script async src="https://ducklove.duckdns.org:3691/js/portfolio-held-badges.js?v=20260930-vc"></script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
