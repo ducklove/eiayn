@@ -13,7 +13,7 @@
     "predev": "npm run data:catalog",
     "prebuild": "npm run data:catalog",
     "dev": "vite --host 127.0.0.1",
-    "build": "npm run check:data && vite build && node scripts/build-sitemap.mjs && node scripts/build-rankings.mjs",
+    "build": "npm run check:data && vite build && node scripts/build-sitemap.mjs && node scripts/build-rankings.mjs && node scripts/build-summary.mjs",
     "preview": "vite preview --host 127.0.0.1",
     "lint": "eslint .",
     "format": "prettier --write .",

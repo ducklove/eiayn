@@ -1,8 +1,9 @@
-import { expect, test } from 'playwright/test';
 import {
+  expect,
   gotoAnalysisDeepLink,
   gotoCompareHome,
   SEARCH_PLACEHOLDER,
+  test,
   universeStrip,
 } from './helpers.js';
 

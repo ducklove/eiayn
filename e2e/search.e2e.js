@@ -1,7 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { URL } from 'node:url';
-import { expect, test } from 'playwright/test';
-import { gotoCompareHome } from './helpers.js';
+import { expect, gotoCompareHome, test } from './helpers.js';
 
 test.use({ serviceWorkers: 'block' });
 

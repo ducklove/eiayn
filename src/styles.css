@@ -1,7 +1,15 @@
 :root {
   color-scheme: light;
-  font-family:
-    Inter, Pretendard, 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  font-family: var(
+    --vc-font-sans,
+    Inter,
+    Pretendard,
+    'Noto Sans KR',
+    'Apple SD Gothic Neo',
+    'Malgun Gothic',
+    system-ui,
+    sans-serif
+  );
   --bg: #f5f8fb;
   --surface: #ffffff;
   --surface-soft: #f9fbfd;
@@ -19,6 +27,10 @@
   --amber: #e7a10d;
   --red: #d44949;
   --green: #00866b;
+  /* Market direction follows the Korean convention shared by the Value Compass
+     ecosystem (public/vc-tokens.css): up = red, down = blue. */
+  --up: var(--vc-up, #b91c1c);
+  --down: var(--vc-down, #1d4ed8);
   --surface-tint: #fbfdff;
   --surface-tint-deep: #f3f8fa;
   --line-soft: #edf1f4;
@@ -55,6 +67,8 @@
   --amber: #e7a10d;
   --red: #ef7070;
   --green: #2fbf9a;
+  --up: var(--vc-up, #fca5a5);
+  --down: var(--vc-down, #93c5fd);
   --surface-tint: #0f1d2c;
   --surface-tint-deep: #0d1a27;
   --line-soft: #1d2c3d;
@@ -292,19 +306,20 @@ a {
 }
 
 .positive {
-  color: var(--green);
+  color: var(--up);
 }
 
 .negative {
-  color: var(--red);
+  color: var(--down);
 }
 
+/* The sidebar is always navy, so it uses the dark-theme direction colours. */
 .sidebar .positive {
-  color: #56d5a9;
+  color: #fca5a5;
 }
 
 .sidebar .negative {
-  color: #ff8c8c;
+  color: #93c5fd;
 }
 
 .recent-mini {
@@ -636,6 +651,14 @@ a {
   color: var(--green);
   font-style: normal;
   font-weight: 800;
+}
+
+.market-status em.positive {
+  color: var(--up);
+}
+
+.market-status em.negative {
+  color: var(--down);
 }
 
 .top-actions {
@@ -1018,11 +1041,11 @@ a {
 }
 
 .metric-tile.tone-positive strong {
-  color: var(--green);
+  color: var(--up);
 }
 
 .metric-tile.tone-negative strong {
-  color: var(--red);
+  color: var(--down);
 }
 
 .metric-tile.tone-cost strong {
@@ -3199,4 +3222,15 @@ a {
 #ranking,
 #favorite-list {
   scroll-margin-top: 20px;
+}
+
+/* Value Compass embed mode (?embed, set as html[data-embed] by the boot block in
+   index.html): hide the app chrome; the footer keeps the data attribution. */
+html[data-embed] .app-shell {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+html[data-embed] .sidebar,
+html[data-embed] .topbar {
+  display: none;
 }

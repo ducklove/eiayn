@@ -71,7 +71,54 @@ entry. It is regenerated on every deploy by `scripts/build-rankings.mjs` from
 the committed snapshot, sharing the exact ordering logic with the in-app
 AIYN 랭킹 view (`?view=ranking`). Missing metrics are `null`, never estimated.
 
+The build also publishes a small Value Compass hub summary (`summary.json` / `version.json`),
+described in [Value Compass ecosystem integration](#value-compass-ecosystem-integration-생태계-연동).
+
+### URL parameters
+
+- `?code=` · `?compare=` · `?active=` · `?view=list|ranking|analysis` · `?q=`
+- Filters: `?market=` · `?etf_theme=` · `?provider=` · `?risk=`. Old links with
+  `?theme=<ETF 테마>` still apply the filter and are rewritten to `etf_theme`.
+- `?theme=light|dark` is the Value Compass visual theme: applied before first
+  paint, never stored, and carried across in-app navigation.
+- `?embed` (any value except `0`/`false`) hides the sidebar and top bar
+  (`html[data-embed]`); `?embed=<view>` also selects the view when `?view` is absent.
+
 See [DATA_SOURCES.md](./DATA_SOURCES.md) and [docs/scoring.md](./docs/scoring.md).
+
+## Value Compass ecosystem integration (생태계 연동)
+
+Tool id in the hub registry (value-invest `config/ecosystem.json`): **`eiayn`** (integrationKey `eiayn`,
+handoff and held-badge enabled).
+
+- **Vendored files (never edit here)**: `public/vc-shell.js`, `public/vc-tokens.css`, the pre-paint theme boot between
+  the `<!-- vc:theme-boot -->` markers in `index.html`, the held-badges `?v=` tag and `scripts/vc-publish.mjs` are
+  owned by the hub. Change them there, then from this repo root run
+  `node ../value-invest/scripts/sync-ecosystem.mjs --write --only eiayn` (without `--write` it only verifies).
+- **Ecosystem bar and theme**: `<vc-shell tool="eiayn">` is a sibling of `#root` with the hub link as fallback.
+  `src/lib/ecosystem.js` passes domestic 6-character ETF codes to `VCShell.setStock` (overseas tickers get no
+  "허브에서 분석" chip). `useTheme` follows `vc:themechange` and falls back to the same storage contract when the
+  shell is missing. `--up`/`--down` alias `--vc-up`/`--vc-down`; the body font is `--vc-font-sans`.
+- **Inbound deep links** (`src/lib/deepLink.js`, `searchState.js`, `ranking.js`; list in [URL parameters](#url-parameters)):
+  - `?code=<ticker>` opens the analysis view (matches any listed alias); `?compare=a,b` (max 4) and `?active=`;
+    `?view=list|ranking|analysis|compare`; `?q=`, `?market=`, `?etf_theme=`, `?provider=`, `?risk=`;
+    ranking filters `?rankMarket=`, `?rankAssetClass=`, `?rankCoverage=`.
+  - `?theme=light|dark` applies before first paint without being stored; `?embed` (not `0`/`false`, or `=<view>`) and
+    `?headless=1` hide the app chrome and the bar, `?vc-shell=0` or an iframe hides the bar only. `theme`, `embed`
+    and `vc-shell` are carried across in-app navigation.
+  - `#vc-held=code:qty,...` is the holdings snapshot from the hub's `/go/eiayn` handoff; it is never read as a
+    section anchor and is stripped if the badge script does not arrive within 5 s.
+- **Published summary**: `npm run build` ends with `node scripts/build-summary.mjs` (after `build-rankings.mjs`),
+  writing `dist/summary.json` + `dist/version.json` (envelope v1, build output, never committed) with the vendored
+  helper. `asOf` and `generatedAt` are the snapshot's `generatedAt`, so the same snapshot yields the same bytes.
+  Served at `https://ducklove.github.io/eiayn/summary.json`: covered code `universe` + AIYN top 100 (~22 KB instead of
+  the 9.3 MB `etfs.json`). The hub reads it first and falls back to `data/etfs.json` / `data/rankings.json`. Contract:
+  [data-contract.md](https://github.com/ducklove/value-invest/blob/master/docs/ecosystem/data-contract.md) §6.5.
+- **Hub services used**
+  - Held badges: the hub's `/js/portfolio-held-badges.js` (loaded `async` from `<body>`) adds **보유** badges to
+    `data-portfolio-code` labels, using `data-portfolio-currency` and `data-portfolio-aliases`.
+  - finance-pi reads the research API (`data/research/v1/`, see [docs/research-api.md](./docs/research-api.md)).
+  - `/api/internal/notify`, `/api/asset-quotes` and kis-proxy are not used.
 
 ## Deployment
 

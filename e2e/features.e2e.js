@@ -1,5 +1,4 @@
-import { expect, test } from 'playwright/test';
-import { gotoCompareHome } from './helpers.js';
+import { expect, gotoCompareHome, test } from './helpers.js';
 
 test.describe('dark mode and list view', () => {
   test('theme toggle switches to dark mode and persists across reload', async ({ page }) => {
