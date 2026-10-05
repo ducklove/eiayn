@@ -1,21 +1,178 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-02T13:01:05.885Z",
-  "previousGeneratedAt": "2026-10-01T13:45:53.621Z",
+  "generatedAt": "2026-10-05T15:09:41.182Z",
+  "previousGeneratedAt": "2026-10-02T13:01:05.885Z",
   "newListings": [
     {
-      "id": "XLI",
-      "name": "State Street Industrial Select Sector SPDR ETF",
+      "id": "IQMM",
+      "name": "ProShares GENIUS Money Market E",
       "market": "미국"
     },
     {
-      "id": "AGG",
-      "name": "iShares Core U.S. Aggregate Bond ETF",
+      "id": "GLD",
+      "name": "SPDR Gold Shares",
       "market": "미국"
     },
     {
-      "id": "VCIT",
-      "name": "Vanguard Intermediate-Term Corporate Bond Index Fund ETF Shares",
+      "id": "USO",
+      "name": "United States Oil Fund, LP",
+      "market": "미국"
+    },
+    {
+      "id": "JEPQ",
+      "name": "JPMorgan Nasdaq Equity Premium Income ETF",
+      "market": "미국"
+    },
+    {
+      "id": "WDCX",
+      "name": "Tradr 2X Long WDC Daily ETF",
+      "market": "미국"
+    },
+    {
+      "id": "QQQI",
+      "name": "NEOS Nasdaq 100 High Income ETF",
+      "market": "미국"
+    },
+    {
+      "id": "JEPI",
+      "name": "JPMorgan Equity Premium Income ETF",
+      "market": "미국"
+    },
+    {
+      "id": "VTIP",
+      "name": "Vanguard Short-Term Inflation-Protected Securities Index Fund ETF Shares",
+      "market": "미국"
+    },
+    {
+      "id": "TZA",
+      "name": "Direxion Daily Small Cap Bear 3X Shares",
+      "market": "미국"
+    },
+    {
+      "id": "MSFU",
+      "name": "Direxion Daily MSFT Bull 2X Shares",
+      "market": "미국"
+    },
+    {
+      "id": "INTW",
+      "name": "GraniteShares 2x Long INTC Daily ETF",
+      "market": "미국"
+    },
+    {
+      "id": "ETHU",
+      "name": "2x Ether ETF",
+      "market": "미국"
+    },
+    {
+      "id": "XRP",
+      "name": "Bitwise XRP ETF",
+      "market": "미국"
+    },
+    {
+      "id": "BMNU",
+      "name": "T-REX 2X Long BMNR Daily Target ETF",
+      "market": "미국"
+    },
+    {
+      "id": "SPSB",
+      "name": "State Street SPDR Portfolio Short Term Corporate Bond ETF",
+      "market": "미국"
+    },
+    {
+      "id": "SDOW",
+      "name": "ProShares UltraPro Short Dow30",
+      "market": "미국"
+    },
+    {
+      "id": "NBIL",
+      "name": "GraniteShares 2x Long NBIS Dail",
+      "market": "미국"
+    },
+    {
+      "id": "SILJ",
+      "name": "Amplify Junior Silver Miners ETF",
+      "market": "미국"
+    },
+    {
+      "id": "TSLQ",
+      "name": "Tradr 2X Short TSLA Daily ETF",
+      "market": "미국"
+    },
+    {
+      "id": "QYLD",
+      "name": "Global X NASDAQ 100 Covered Call ETF",
+      "market": "미국"
+    },
+    {
+      "id": "BITU",
+      "name": "Proshares Ultra Bitcoin ETF",
+      "market": "미국"
+    },
+    {
+      "id": "EWZS",
+      "name": "iShares MSCI Brazil Small-Cap ETF",
+      "market": "미국"
+    },
+    {
+      "id": "CRCG",
+      "name": "Leverage Shares 2X Long CRCL Da",
+      "market": "미국"
+    },
+    {
+      "id": "SNDG",
+      "name": "Leverage Shares 2X Long SNDK Da",
+      "market": "미국"
+    },
+    {
+      "id": "APLX",
+      "name": "Tradr 2X Long APLD Daily ETF",
+      "market": "미국"
+    },
+    {
+      "id": "APPX",
+      "name": "Tradr 2X Long APP Daily ETF",
+      "market": "미국"
+    },
+    {
+      "id": "ORCU",
+      "name": "Direxion Daily ORCL Bull 2X ETF",
+      "market": "미국"
+    },
+    {
+      "id": "CIFU",
+      "name": "T-REX 2X LONG CIFR DAILY TARGET ETF",
+      "market": "미국"
+    },
+    {
+      "id": "SKDD",
+      "name": "GraniteShares 2x Short SK Hynix Daily ETF",
+      "market": "미국"
+    },
+    {
+      "id": "ONDG",
+      "name": "Leverage Shares 2X Long ONDS Daily ETF",
+      "market": "미국"
+    },
+    {
+      "id": "BEZ",
+      "name": "Tradr 2X Short Be Daily ETF",
+      "market": "미국"
+    },
+    {
+      "id": "AAOG",
+      "name": "Leverage Shares 2X Long AAOI Da",
+      "market": "미국"
+    }
+  ],
+  "delisted": [
+    {
+      "id": "IEFA",
+      "name": "iShares Core MSCI EAFE ETF",
+      "market": "미국"
+    },
+    {
+      "id": "IEMG",
+      "name": "iShares Core MSCI Emerging Markets ETF",
       "market": "미국"
     },
     {
@@ -29,8 +186,8 @@
       "market": "미국"
     },
     {
-      "id": "XLY",
-      "name": "State Street Consumer Discretionary Select Sector SPDR ETF",
+      "id": "JNK",
+      "name": "State Street SPDR Bloomberg High Yield Bond ETF",
       "market": "미국"
     },
     {
@@ -44,18 +201,8 @@
       "market": "미국"
     },
     {
-      "id": "USFR",
-      "name": "WisdomTree Floating Rate Treasury Fund",
-      "market": "미국"
-    },
-    {
-      "id": "VNQ",
-      "name": "Vanguard Real Estate Index Fund ETF Shares",
-      "market": "미국"
-    },
-    {
-      "id": "VUG",
-      "name": "Vanguard Morningstar Growth ETF",
+      "id": "SHV",
+      "name": "iShares 0–1 Year Treasury Bond ETF",
       "market": "미국"
     },
     {
@@ -64,33 +211,13 @@
       "market": "미국"
     },
     {
-      "id": "VWO",
-      "name": "Vanguard FTSE Emerging Markets Index Fund ETF Shares",
+      "id": "VCLT",
+      "name": "Vanguard Long-Term Corporate Bond Index Fund ETF Shares",
       "market": "미국"
     },
     {
       "id": "SHY",
       "name": "iShares 1-3 Year Treasury Bond ETF",
-      "market": "미국"
-    },
-    {
-      "id": "SCHX",
-      "name": "Schwab U.S. Large-Cap ETF",
-      "market": "미국"
-    },
-    {
-      "id": "VGSH",
-      "name": "Vanguard Short-Term Treasury Index Fund ETF Shares",
-      "market": "미국"
-    },
-    {
-      "id": "JPST",
-      "name": "JPMorgan Ultra-Short Income ETF",
-      "market": "미국"
-    },
-    {
-      "id": "SPHY",
-      "name": "State Street SPDR Portfolio High Yield Bond ETF",
       "market": "미국"
     },
     {
@@ -104,18 +231,13 @@
       "market": "미국"
     },
     {
-      "id": "IUSB",
-      "name": "iShares Core Universal USD Bond ETF",
-      "market": "미국"
-    },
-    {
-      "id": "ILF",
-      "name": "iShares Latin America 40 ETF",
-      "market": "미국"
-    },
-    {
       "id": "SRLN",
       "name": "State Street Blackstone Senior Loan ETF",
+      "market": "미국"
+    },
+    {
+      "id": "BKLN",
+      "name": "Invesco Senior Loan ETF",
       "market": "미국"
     },
     {
@@ -124,8 +246,8 @@
       "market": "미국"
     },
     {
-      "id": "DOG",
-      "name": "ProShares Short Dow30",
+      "id": "VGLT",
+      "name": "Vanguard Long-Term Treasury Index Fund ETF Shares",
       "market": "미국"
     },
     {
@@ -134,13 +256,13 @@
       "market": "미국"
     },
     {
-      "id": "BNDX",
-      "name": "Vanguard Total International Bond Index Fund ETF Shares",
+      "id": "BROL",
+      "name": "Baron Risk Optimized Large Cap ",
       "market": "미국"
     },
     {
-      "id": "BROL",
-      "name": "Baron Risk Optimized Large Cap ",
+      "id": "MULL",
+      "name": "GraniteShares 2x Long MU Daily ",
       "market": "미국"
     },
     {
@@ -151,11 +273,6 @@
     {
       "id": "JCPB",
       "name": "JPMorgan Core Plus Bond ETF",
-      "market": "미국"
-    },
-    {
-      "id": "SPIB",
-      "name": "State Street SPDR Portfolio Intermediate Term Corporate Bond ETF",
       "market": "미국"
     },
     {
@@ -171,11 +288,6 @@
     {
       "id": "SJNK",
       "name": "State Street SPDR Bloomberg Short Term High Yield Bond ETF",
-      "market": "미국"
-    },
-    {
-      "id": "PYLD",
-      "name": "PIMCO ETF Trust - PIMCO Multisector Bond Active Exchange-Traded Fund",
       "market": "미국"
     },
     {
@@ -199,267 +311,42 @@
       "market": "미국"
     },
     {
-      "id": "AAPD",
-      "name": "Direxion Daily AAPL Bear 1X Shares",
+      "id": "ASTX",
+      "name": "Tradr 2X Long ASTS Daily ETF",
       "market": "미국"
     }
   ],
-  "delisted": [
-    {
-      "id": "SMH",
-      "name": "VanEck Semiconductor ETF",
-      "market": "미국"
-    },
-    {
-      "id": "GLD",
-      "name": "SPDR Gold Shares",
-      "market": "미국"
-    },
-    {
-      "id": "AVDE",
-      "name": "Avantis International Equity ETF",
-      "market": "미국"
-    },
-    {
-      "id": "USO",
-      "name": "United States Oil Fund, LP",
-      "market": "미국"
-    },
-    {
-      "id": "VT",
-      "name": "Vanguard Total World Stock Index Fund ETF Shares",
-      "market": "미국"
-    },
-    {
-      "id": "QLD",
-      "name": "ProShares Ultra QQQ",
-      "market": "미국"
-    },
-    {
-      "id": "IJR",
-      "name": "iShares Core S&P Small-Cap ETF",
-      "market": "미국"
-    },
-    {
-      "id": "BOXX",
-      "name": "Alpha Architect 1-3 Month Box ETF",
-      "market": "미국"
-    },
-    {
-      "id": "IEI",
-      "name": "iShares 3-7 Year Treasury Bond ETF",
-      "market": "미국"
-    },
-    {
-      "id": "JEPQ",
-      "name": "JPMorgan Nasdaq Equity Premium Income ETF",
-      "market": "미국"
-    },
-    {
-      "id": "SPLV",
-      "name": "Invesco S&P 500 Low Volatility ETF",
-      "market": "미국"
-    },
-    {
-      "id": "SSO",
-      "name": "ProShares Ultra S&P500",
-      "market": "미국"
-    },
-    {
-      "id": "GGLL",
-      "name": "Direxion Daily GOOGL Bull 2X Shares",
-      "market": "미국"
-    },
-    {
-      "id": "ETHU",
-      "name": "2x Ether ETF",
-      "market": "미국"
-    },
-    {
-      "id": "VBIL",
-      "name": "Vanguard 0-3 Month Treasury Bill ETF",
-      "market": "미국"
-    },
-    {
-      "id": "TZA",
-      "name": "Direxion Daily Small Cap Bear 3X Shares",
-      "market": "미국"
-    },
-    {
-      "id": "MSFU",
-      "name": "Direxion Daily MSFT Bull 2X Shares",
-      "market": "미국"
-    },
-    {
-      "id": "AGQ",
-      "name": "ProShares Ultra Silver",
-      "market": "미국"
-    },
-    {
-      "id": "SDS",
-      "name": "ProShares UltraShort S&P500",
-      "market": "미국"
-    },
-    {
-      "id": "INTW",
-      "name": "GraniteShares 2x Long INTC Daily ETF",
-      "market": "미국"
-    },
-    {
-      "id": "BMNU",
-      "name": "T-REX 2X Long BMNR Daily Target ETF",
-      "market": "미국"
-    },
-    {
-      "id": "SNDU",
-      "name": "T-REX 2X Long SNDK Daily Target",
-      "market": "미국"
-    },
-    {
-      "id": "METU",
-      "name": "Direxion Daily META Bull 2X ETF",
-      "market": "미국"
-    },
-    {
-      "id": "NAIL",
-      "name": "Direxion Daily Homebuilders & Supplies Bull 3X Shares",
-      "market": "미국"
-    },
-    {
-      "id": "RKLX",
-      "name": "Defiance Daily Target 2X Long RKLB ETF",
-      "market": "미국"
-    },
-    {
-      "id": "NVDX",
-      "name": "T-Rex 2X Long NVIDIA Daily Targ",
-      "market": "미국"
-    },
-    {
-      "id": "SDOW",
-      "name": "ProShares UltraPro Short Dow30",
-      "market": "미국"
-    },
-    {
-      "id": "ETH",
-      "name": "Grayscale Ethereum Mini Trust ETF",
-      "market": "미국"
-    },
-    {
-      "id": "UCON",
-      "name": "First Trust Smith Unconstrained Plus Bond ETF",
-      "market": "미국"
-    },
-    {
-      "id": "SNDG",
-      "name": "Leverage Shares 2X Long SNDK Da",
-      "market": "미국"
-    },
-    {
-      "id": "ETHE",
-      "name": "Grayscale Ethereum Staking ETF",
-      "market": "미국"
-    },
-    {
-      "id": "WCMI",
-      "name": "First Trust WCM International Equity ETF",
-      "market": "미국"
-    },
-    {
-      "id": "NOWL",
-      "name": "GraniteShares 2x Long NOW Daily",
-      "market": "미국"
-    },
-    {
-      "id": "BITU",
-      "name": "Proshares Ultra Bitcoin ETF",
-      "market": "미국"
-    },
-    {
-      "id": "SKDD",
-      "name": "GraniteShares 2x Short SK Hynix Daily ETF",
-      "market": "미국"
-    },
-    {
-      "id": "ORCU",
-      "name": "Direxion Daily ORCL Bull 2X ETF",
-      "market": "미국"
-    },
-    {
-      "id": "BEZ",
-      "name": "Tradr 2X Short Be Daily ETF",
-      "market": "미국"
-    },
-    {
-      "id": "DAMD",
-      "name": "Defiance Daily Target 2X Short ",
-      "market": "미국"
-    },
-    {
-      "id": "NVDQ",
-      "name": "T-Rex 2X Inverse NVIDIA Daily T",
-      "market": "미국"
-    },
-    {
-      "id": "APLX",
-      "name": "Tradr 2X Long APLD Daily ETF",
-      "market": "미국"
-    },
-    {
-      "id": "BMNZ",
-      "name": "Defiance Daily Target 2X Short BMNR ETF",
-      "market": "미국"
-    },
-    {
-      "id": "CRCD",
-      "name": "T-REX 2X Inverse CRCL Daily Target ETF",
-      "market": "미국"
-    }
-  ],
-  "feeChanges": [
-    {
-      "id": "BIL",
-      "name": "State Street SPDR Bloomberg 1-3 Month T-Bill ETF",
-      "from": 0.14,
-      "to": 0.1353
-    },
-    {
-      "id": "FXI",
-      "name": "iShares China Large-Cap ETF",
-      "from": 0.74,
-      "to": 0.73
-    },
-    {
-      "id": "SH",
-      "name": "ProShares Short S&P500",
-      "from": 0.89,
-      "to": 0.88
-    },
-    {
-      "id": "UNG",
-      "name": "United States Natural Gas Fund, LP",
-      "from": 1.17,
-      "to": 1.24
-    }
-  ],
+  "feeChanges": [],
   "scoreMoves": [
     {
-      "id": "KORU",
-      "name": "Direxion Daily South Korea Bull 3X Shares",
-      "from": 49,
-      "to": 57
+      "id": "1321.T",
+      "name": "NEXT FUNDS Nikkei 225 Exchange Traded Fund",
+      "from": 76,
+      "to": 47
     },
     {
-      "id": "BIL",
-      "name": "State Street SPDR Bloomberg 1-3 Month T-Bill ETF",
-      "from": 71,
-      "to": 78
+      "id": "CONL",
+      "name": "GraniteShares 2x Long COIN Daily ETF",
+      "from": 42,
+      "to": 36
     },
     {
-      "id": "SPXS",
-      "name": "Direxion Daily S&P 500 Bear 3X Shares",
+      "id": "SSPC",
+      "name": "Leverage Shares 2X Short SPCX D",
       "from": 43,
-      "to": 38
+      "to": 37
+    },
+    {
+      "id": "CORD",
+      "name": "T-REX 2X Inverse CRWV Daily Target ETF",
+      "from": 25,
+      "to": 30
+    },
+    {
+      "id": "ILF",
+      "name": "iShares Latin America 40 ETF",
+      "from": 66,
+      "to": 71
     }
   ]
 }
