@@ -41,7 +41,8 @@ jobs:
   # Playwright E2E suite. Runs in parallel with the ci job; the Playwright
   # webServer builds hermetically and serves the dist at the /eiayn/ base path.
   e2e:
-    runs-on: ubuntu-latest
+    # ubuntu-latest now selects 26.04, where `playwright install --with-deps` fails.
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4

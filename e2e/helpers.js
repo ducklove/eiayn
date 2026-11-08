@@ -36,3 +36,12 @@ export function universeStrip(page) {
     .locator('section')
     .filter({ has: page.getByRole('heading', { name: 'ETF 탐색', exact: true }) });
 }
+
+// The open search popover floats over the page and covers the strip once holdings
+// matches make it tall, which depends on the daily data snapshot. Escape closes
+// it and keeps the query, so the strip stays filtered and clickable.
+export async function closeSearchPopover(page) {
+  const input = page.getByPlaceholder(SEARCH_PLACEHOLDER);
+  await input.press('Escape');
+  await expect(input).toHaveAttribute('aria-expanded', 'false');
+}

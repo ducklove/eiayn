@@ -1,4 +1,4 @@
-import { expect, HUB_ORIGIN, test, universeStrip } from './helpers.js';
+import { closeSearchPopover, expect, HUB_ORIGIN, test, universeStrip } from './helpers.js';
 
 // Value Compass ecosystem integration: shared theme parameter and key, the
 // <vc-shell> bar, embed mode, the ETF theme filter's etf_theme key, and a
@@ -14,6 +14,7 @@ test.describe('Value Compass ecosystem', () => {
     expect(await page.evaluate(() => globalThis.localStorage.getItem('theme'))).toBeNull();
 
     await page.getByPlaceholder('이름 일부·코드·보유종목 검색').fill(QQQ_SHORT_NAME);
+    await closeSearchPopover(page);
     await universeStrip(page).getByRole('button', { name: QQQ_SHORT_NAME }).click();
     await expect(page).toHaveURL(/code=QQQ/);
     await expect(page).toHaveURL(/theme=dark/);

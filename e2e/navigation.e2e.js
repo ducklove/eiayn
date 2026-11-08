@@ -1,4 +1,5 @@
 import {
+  closeSearchPopover,
   expect,
   gotoAnalysisDeepLink,
   gotoCompareHome,
@@ -23,6 +24,7 @@ test.describe('search, deep links, and history', () => {
     await expect(page.locator('#search .result-count')).toHaveText(/[1-9]\d*개 검색됨/);
     await expect(page.getByRole('option').first()).toContainText('QQQ · 미국');
 
+    await closeSearchPopover(page);
     await universeStrip(page).getByRole('button', { name: QQQ_SHORT_NAME }).click();
 
     await expect(page.getByRole('heading', { name: 'ETF 개별 분석', exact: true })).toBeVisible();
@@ -41,6 +43,7 @@ test.describe('search, deep links, and history', () => {
     await gotoCompareHome(page);
 
     await page.getByPlaceholder(SEARCH_PLACEHOLDER).fill(QQQ_SHORT_NAME);
+    await closeSearchPopover(page);
     await universeStrip(page).getByRole('button', { name: QQQ_SHORT_NAME }).click();
     await expect(page.getByRole('heading', { name: 'ETF 개별 분석', exact: true })).toBeVisible();
     await expect(page).toHaveURL(/\?code=QQQ(?:&|$)/);
